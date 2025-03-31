@@ -9,8 +9,8 @@ let userData = useUserData();
 const router = useRouter();
 
 onMounted(async () => {
-    // const user = window.location.href.split('#').pop();
-    const authInfo:UserInfo = await fetch(`http://localhost:3000/user/getAuthData/${false}`)
+    const user = window.location.href.split('#').pop();
+    const authInfo:UserInfo = await fetch(`http://localhost:3000/user/getAuthData/${user}`)
     .then(data => data.json());
     const months = await fetch('http://localhost:3000/getData/month/en').then(res => res.json());
 
@@ -22,14 +22,6 @@ onMounted(async () => {
       router.push('/auth');
       return;
     }
-
-    await fetch('http://localhost:3000/user/update-status',{
-        method:'PUT',
-        headers: {
-          'Content-Type':'application/json',
-        },
-        body: JSON.stringify({ip:userData.ip,status:true})
-    });
 
     const userInfo = await fetch(`http://localhost:3000/user/infoByIp/${authInfo.ip}`)
     .then(data => data.json());

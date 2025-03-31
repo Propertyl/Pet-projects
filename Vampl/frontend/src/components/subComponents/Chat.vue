@@ -42,6 +42,10 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
        console.log('message from room:',msg);
     });
 
+    socket.on('user-updates',(info:any) => {
+      console.log('user update:',info);
+    })
+
     socket.on('updateChat',async (currentChat:any) => {
       chatData.value = parseToDeleteGroup(currentChat);
       const newChats = userData.allChats.map(chat => {

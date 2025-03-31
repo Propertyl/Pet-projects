@@ -162,4 +162,18 @@ export class UserService {
      })
   }
 
+  async getAllUserRooms(ip:string) {
+    return this.prisma.chats.findMany({
+      where: {
+        chatUsers: {
+          path:"$.users",
+          array_contains:[ip]
+        }
+      }, 
+      select: {
+        chatId:true
+      }
+    })
+  }
+
 }

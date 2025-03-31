@@ -25,4 +25,9 @@ export class DataController {
    getUserStatus(@Param('ip') ip:string) {
       return this.user.getStatus(ip);
    }
+
+   @Get('user/rooms/:ip')
+   getUserRooms(@Param('ip') ip:string) {
+      return this.user.getAllUserRooms(ip);
+   }
 }
