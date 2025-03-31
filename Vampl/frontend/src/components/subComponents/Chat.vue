@@ -22,10 +22,9 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
 
   const searchScroll = () => {
      const chatScroll = messagesRef.value;
-     const {height} = chatScroll.getBoundingClientRect();
      const currentHeight = chatScroll.scrollTop;
 
-     if((height - currentHeight) > height / 2) {
+     if((chatScroll.scrollHeight - currentHeight) > 1080) {
         downButton.value = true;
      } else {
        if(downButton.value === true) {
@@ -58,7 +57,6 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
        
     });
 
-    messagesRef.value.addEventListener('scroll',searchScroll);
   });
 
   onUnmounted(() => {
@@ -82,6 +80,7 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
 
   const scrollDown = () => {
     if(messagesRef.value) {
+      messagesRef.value.addEventListener('scroll',searchScroll);
       messagesRef.value.scrollTo({top:messagesRef.value.scrollHeight});
      }
   }
@@ -130,7 +129,7 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
 
 <template>
   <div class="chat">
-    <div class="messages-container">
+    <div v-if="chatData" class="messages-container">
        <button class="classic-button down-button" @click="scrollDown" v-if="downButton === true">
         <i class="arrow-icon icon"></i>
        </button>

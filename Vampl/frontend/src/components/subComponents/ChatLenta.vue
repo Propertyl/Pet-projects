@@ -74,6 +74,7 @@ const openChat = ({name,image,chat,id}:Chat) => {
     transition: all .2s;
     cursor: pointer;
     display: flex;
+    padding-top: .5rem;
   }
 
   .status-picture-container {
@@ -199,6 +200,7 @@ const openChat = ({name,image,chat,id}:Chat) => {
   .contact-info-container {
     height: 100%;
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
     padding-top: 1rem;
     font-size: 1rem;

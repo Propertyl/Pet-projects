@@ -30,7 +30,7 @@ async function getCryptedIP() {
   .then(res => res.json())
   .then(data => cryptoIp(data.ip));
 
-  return cryptoIp(currentUser);
+  return currentUser;
 }
 
 export default getCryptedIP;

@@ -15,6 +15,7 @@
 
   --black-default:rgb(0,0,0);
   --bg-main: rgb(37, 37, 37);
+  --nav-bg:rgb(63, 62, 62);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(125,125,125,.5);
@@ -92,11 +93,17 @@ button {
   overflow: hidden;
 }
 
+.flex-center {
+  align-items: center;
+  justify-content: center;
+}
+
 .icon {
   width: 100%;
   height: 100%;
   background-size: contain;
   background-position: center center;
+  background-repeat: no-repeat;
 }
 
 
@@ -137,7 +144,7 @@ button:focus-visible {
   height: 3rem;
   display: flex;
   border-radius: 50%;
-  background-color:rgb(0, 0, 0);
+  background-color:var(--bubble-color);
   opacity: .5;
   z-index: 0;
   animation: bubble-pop .6s ease-out;
@@ -201,18 +208,39 @@ p {
   }
 }
 
+.night {
+  --light-grey-half:rgb(0,0,0,.5);
+}
+
+.light {
+  --black-default:rgb(0,0,0);
+  --bg-main:rgb(255,255,255);
+  --nav-bg:rgb(43, 40, 40);
+  --chat-bg-color:#6d696986;
+  --secondary-color:rgb(255,255,255);
+  --bubble-color:rgba(255,255,255,.5);
+  --light-grey:rgb(37, 37, 37);
+  --light-grey-half:rgb(155,155,155,.5);
+  --main-grey:#787474;
+  --night-tilelight:hsla(276, 59%, 61%, 0.4); 
+  --night-color:#ae7dd6;
+  --input-color:rgb(255, 255, 255);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --black-default:rgb(0,0,0);
     --bg-main:rgb(255,255,255);
-    --chat-bg-color:#4d4d4d86;
+    --nav-bg:rgb(43, 40, 40);
+    --chat-bg-color:#6d696986;
     --secondary-color:rgb(255,255,255);
-    --bubble-color:rgba(125,125,125,.5);
+    --bubble-color:rgba(255,255,255,.5);
     --light-grey:rgb(37, 37, 37);
     --light-grey-half:rgb(155,155,155,.5);
-    --main-grey:#787474; 
-    --something:#6a6161;
-    --input-color:rgb(102, 102, 102);
+    --main-grey:#787474;
+    --night-tilelight:hsla(276, 59%, 61%, 0.4); 
+    --night-color:#ae7dd6;
+    --input-color:rgb(255, 255, 255);
   }
 
   body {
@@ -220,12 +248,12 @@ p {
   }
 
   input {
-    color:var(--bg-main);
+    color:var(--black-default);
   }
 
 
   input::placeholder {
-    color:var(--bg-main);
+    color:var(--main-grey);
   }
 }
 
