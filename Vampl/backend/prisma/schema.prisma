@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  ip    String @unique
+  name  String
+  phone String @unique
+  password String @unique
+  birthData String?
+  image String? @default("http://localhost:3000/images/icon.png")
+}
+
+model Auth {
+  ip String @unique
+  authorized Boolean @default(false)
+}
+
+model Chats {
+  id Int @id @default(autoincrement())
+  chatId String @unique 
+  chatUsers Json
+  messages Json
+}
+
+model MonthUA {
+  id Int @id @default(autoincrement())
+  numberM Int @unique
+  month String
+}
+
+model MonthEN {
+  id Int @id @default(autoincrement())
+  numberM Int @unique
+  month String
+}
+
+model OnlineStatuses {
+  id Int @id @default(autoincrement())
+  ip String @unique
+  status Boolean
+}

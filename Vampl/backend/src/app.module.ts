@@ -1,0 +1,25 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './controllers/app.controller';
+import { AppService } from './services/app.service';
+import { ChatGetAway } from './app.gateway';
+import { UserService } from './services/user.service';
+import { PrismaService } from './services/prisma.service';
+import { UserController } from './controllers/user.controller';
+import {ServeStaticModule} from '@nestjs/serve-static';
+import { join } from 'path';
+import { ChatController } from './controllers/chat.controller';
+import {HttpModule} from '@nestjs/axios';
+import { DataController } from './controllers/data.controller';
+
+@Module({
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath:join(__dirname,'..','/src/uploads'),
+      serveRoot:'/images'
+    })
+  ,HttpModule],
+  controllers: [AppController,UserController,ChatController,DataController],
+  providers: [AppService,ChatGetAway,UserService,PrismaService],
+  exports: [UserService]
+})
+export class AppModule {}

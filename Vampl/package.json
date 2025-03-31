@@ -1,0 +1,20 @@
+{
+  "name": "trynest",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "project": "concurrently \"npm run back\" \"npm run front\"",
+    "back": "cd backend && npm run start",
+    "front": "cd frontend && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.11"
+  }
+}
