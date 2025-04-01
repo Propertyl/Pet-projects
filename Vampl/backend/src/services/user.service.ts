@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
+import { chatData } from "src/stuff/types";
 
 @Injectable()
 export class UserService {
@@ -106,7 +107,7 @@ export class UserService {
     return `chat-${id}`;
   }
 
-  async createUserChats(userChats:{chatId:string,chatUsers:{users:string[]},messages:any}) {
+  async createUserChat(userChats:chatData) {
      return this.prisma.chats.create({data:userChats})
   }
 

@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Put,Body } from "@nestjs/common";
+import { Controller, Get, Param, Put,Body, Post } from "@nestjs/common";
 import { UserService } from "src/services/user.service";
-import { MessageGroup } from "src/stuff/types";
+import { chatData, MessageGroup, updateChatData } from "src/stuff/types";
 
 @Controller('chat')
 export class ChatController {
@@ -11,8 +11,13 @@ export class ChatController {
      return this.userServices.getChatById(id);
   }
 
+  @Post('create-chat')
+  createUserChat(@Body() data:chatData) {
+    return this.userServices.createUserChat(data);
+  }
+
   @Put('updateChat')
-  updateChatByID(@Body() {id,messages}:{id:string,messages:MessageGroup}) {
+  updateChatByID(@Body() {id,messages}:updateChatData) {
      return this.userServices.updateChat({id,messages});
   }
 }

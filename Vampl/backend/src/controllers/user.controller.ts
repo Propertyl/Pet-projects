@@ -37,10 +37,16 @@ export class UserController {
      const userChatData = await this.userServices.getChatData(ip);
 
      if(!userChatData.length) {
-        await this.userServices.createUserChats({
-          chatId:this.userServices.genChatID(),
-          chatUsers:{users:[ip,'host']},
-          messages:{}
+        await fetch('http://localhost:3000/chat/create-chat',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({
+            chatId:this.userServices.genChatID(),
+            chatUsers:{users:[ip,'host']},
+            messages:{"all":[]}
+          })
         });
         return this.userServices.getChatData(ip);
      }

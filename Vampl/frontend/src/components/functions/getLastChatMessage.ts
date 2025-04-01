@@ -1,13 +1,15 @@
-import { toRaw } from "vue";
 import type { lastMessage } from "../../types/global";
 
 const getLastMessage:lastMessage = (chat:any) => {
-  if(!Object.keys(chat).length) {
+  const currentChat = chat['all'];
+  if(!currentChat.length) {
     return {last:"Чат порожній",time:""};
-  } 
-  const currentDate:string = Object.keys(chat).pop() ?? "";
-  const {groups} = chat[currentDate]; 
-  console.log('oups:',toRaw(groups));
+  }
+  
+  const lastDateGroup = currentChat.pop();
+  const currentDate:string = Object.keys(lastDateGroup).pop() ?? "";
+  const {groups} = lastDateGroup[currentDate]; 
+
   if(groups.length) {
     const lastGroup = groups[groups.length - 1];
     let lastMessage = {body:"",time:""};

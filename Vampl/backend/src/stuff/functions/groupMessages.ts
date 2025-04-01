@@ -42,15 +42,25 @@ const groupMessages = (message:Message,chat:Chat | undefined) => {
   if(!chat) return
 
   const date:string = message.time.split(',')[0];
-  if(!Object.keys(chat).length) {
-    chat[date as any] = createDataGroup();
-  } 
+  const currentGroups = chat['all'];
+  if(!currentGroups.length) {
+    chat['all'].push({
+      [date]:createDataGroup(),
+    });
+  }
+  
+  const lastDateGroup:any = currentGroups.map(item => item).pop();
+  const lastDate = Object.keys(lastDateGroup).pop() ?? "";
 
-  if(date != Object.keys(chat).pop()) {
-    chat[date as any] = createDataGroup();
+  if(date != lastDate) {
+    chat['all'].push({
+      [date]:createDataGroup(),
+    });
   }
 
-  chat[date].groups = groupSubMessages(message,chat[date as any].groups);
+  const lastGroup = chat['all'][currentGroups.length - 1];
+
+  lastGroup[lastDate].groups = groupSubMessages(message,lastGroup[lastDate].groups);
 
   return chat;
 }

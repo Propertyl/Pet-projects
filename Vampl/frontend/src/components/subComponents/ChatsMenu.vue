@@ -52,8 +52,8 @@ const openChat = (contact:ParsedChat) => {
 <template>
   <section class="contact-tape" :class="{default:!contactDefatult}">
     <UserBurger v-if="usefulStuff.burgerOpen" :isOpen="usefulStuff.burgerOpen"/>
-    <div v-else style="justify-content: center;padding-top: .2rem;" class="container">
-        <a draggable="false" v-if="chats.length" :class="{shortContact:!contactDefatult,'chat-active':activeChat == contact.user.name}" class="contact-container" v-for="(contact,index) in chats" :href="`#@${contact.user.name}`" :key="`contact-${index}`">
+    <div v-else style="padding-top: .2rem;" class="container flex-start">
+        <a draggable="false" v-if="chats.length" :class="{shortContact:!contactDefatult,'contact-chat-active':activeChat == contact.user.name}" class="contact-container" v-for="(contact,index) in chats" :href="`#@${contact.user.name}`" :key="`contact-${index}`">
         <div @click="(event:any) => {
         triggerEffect(event);
         checkActiveChat(currentHref,contact.user.name) && openChat(contact);
@@ -69,16 +69,33 @@ const openChat = (contact:ParsedChat) => {
           </div>
         </div>
         </a>
-        <div v-else>
-          <span class="loading-dot">.</span>
-          <span class="loading-dot">.</span>
-          <span class="loading-dot">.</span>
-        </div>
+          <div v-else class="contact-loading-container flex-center">
+            <svg class="contact-line-loading" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none">
+            <path d="M20.0001 12C20.0001 13.3811 19.6425 14.7386 18.9623 15.9405C18.282 17.1424 17.3022 18.1477 16.1182 18.8587C14.9341 19.5696 13.5862 19.9619 12.2056 19.9974C10.825 20.0328 9.45873 19.7103 8.23975 19.0612"  stroke-width="3.55556" stroke-linecap="round"/>
+            </svg>
+          </div>
     </div>
   </section>
 </template>
 
 <style scoped>
+
+  .contact-line-loading {
+    position: relative;
+    width: 50%;
+    height: 50%;
+    stroke: var(--night-color);
+    animation: spinning 1s ease-in-out infinite;
+  }
+
+  .contact-loading-container {
+    position:absolute;
+    top:40%;
+    width: 100%;
+    height:10rem;
+    display: flex;
+  }
+
   .contact-tape {
     position: relative;
     width:30rem;
@@ -129,11 +146,11 @@ const openChat = (contact:ParsedChat) => {
     display: flex;
   }
 
-  .chat-active {
+  .contact-chat-active {
     background-color: var(--night-color) !important;
   }
 
-  .chat-active .online {
+  .contact-chat-active .online {
     background-color: var(--secondary-color);
     border-color: var(--night-color);
   }
@@ -141,11 +158,11 @@ const openChat = (contact:ParsedChat) => {
   .shortContact .with-padding {
     padding-left:0;
   }
-  .chat-active .contact-name {
+  .contact-chat-active .contact-name {
     color:var(--secondary-color);
   }
 
-  .chat-active .contact-chat-last-message {
+  .contact-chat-active .contact-chat-last-message {
     color:var(--secondary-color);
   }
 
@@ -256,5 +273,12 @@ const openChat = (contact:ParsedChat) => {
 
   .shortContact .contact-info-container {
     display: none;
+  }
+
+
+  @keyframes spinning {
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>

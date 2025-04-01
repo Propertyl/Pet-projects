@@ -1,17 +1,20 @@
 const parseToDeleteGroup = (chat:any) => {
-  for(let date of Object.keys(chat)) {
-    const {groups} = chat[date ?? ""];
+  for(let i = 0; i < chat.length; i++) {
+    const currentDate = Object.keys(chat[i]).pop() ?? "";
+    const {groups} = chat[i][currentDate];
+    console.log('currentDate:',currentDate,'groups:',groups);
     if(groups) {
       const clearedGroups = [];
       for(let i = 0; i < groups.length; i++) {
-        clearedGroups.push(Object.values(groups[i])[0]);
+        const groupName = Object.keys(groups[i]).pop() ?? "";
+        clearedGroups.push({name:groupName,body:Object.values(groups[i])[0]});
       }
 
-      chat[date as any].groups = clearedGroups;
+      chat[i][currentDate].groups = clearedGroups;
     }
   }
 
-  return chat;
+  return {...chat};
 }
 
-export default parseToDeleteGroup
+export default parseToDeleteGroup;

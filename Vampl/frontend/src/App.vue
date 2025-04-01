@@ -10,13 +10,15 @@ let userData = useUserData();
 const router = useRouter();
 
 onMounted(async () => {
+    
     const user = window.location.href.split('#').pop();
     const authInfo:UserInfo = await fetch(`http://localhost:3000/user/getAuthData/${user}`)
     .then(data => data.json());
-    const months = await fetch('http://localhost:3000/getData/month/en').then(res => res.json());
     const currentTheme = await fetch(`http://localhost:3000/user/get-theme/${authInfo.ip}`)
     .then(res => res.json());
     changeTheme(currentTheme.theme);
+    const months = await fetch('http://localhost:3000/getData/month/en').then(res => res.json());
+   
 
     userData.setMonth(months);
     userData.setIp(authInfo.ip);

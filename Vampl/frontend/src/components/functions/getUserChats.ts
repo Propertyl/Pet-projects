@@ -10,6 +10,8 @@ const getUserChats = async (userData:any) => {
     return parsingChats(data,userData)
   });
 
+  console.log('parsed chats:',userChats);
+
   userData.setAllChatsIp(userChats.map((chat:any) => {
     const currentLast = getLastMessage(chat.messages);
     return {id:chat.id,...currentLast};

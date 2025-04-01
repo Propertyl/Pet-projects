@@ -98,6 +98,11 @@ button {
   justify-content: center;
 }
 
+.flex-start {
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .icon {
   width: 100%;
   height: 100%;
@@ -196,11 +201,11 @@ p {
 @keyframes bubble-pop {
   0% {
       transform: scale(0);
-      opacity: 0.4;
+      opacity: 0.5;
   }
   70% {
       transform: scale(2);
-      opacity: 0.2;
+      opacity: 0.3;
   }
   100% {
       transform: scale(3);
@@ -215,7 +220,7 @@ p {
   --nav-bg:rgb(63, 62, 62);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
-  --bubble-color:rgba(125,125,125,.5);
+  --bubble-color:rgba(0,0,0,.5);
   --light-grey:rgb(155,155,155);
   --light-black:#4d4d4d;
   --main-grey:#787474;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch, type Ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, toRaw, watch, type Ref } from 'vue';
 import useUserData from '../../store/userData';
 import triggerEffect from '../functions/bubbleEffect';
 import { Socket,io } from 'socket.io-client';
@@ -9,9 +9,9 @@ import setObserver from '../functions/groupObserver';
 import parseDate from '../functions/parseDate';
 import parseToDeleteGroup from '../functions/parseChatGroups';
 import chatAfterRefresh from '../functions/getChatAfterRefresh';
-import type { DefaultRef, statusInfo } from '../../types/global';
+import type { DefaultRef, statusInfo, Suka } from '../../types/global';
 
-  const chatData:any = ref(null);
+  const chatData:Ref<Suka | null> = ref(null);
   const messagesRef:DefaultRef = ref(null);
   const userData = useUserData();
   const socket:Socket = io('http://localhost:3000/app');
@@ -42,14 +42,11 @@ import type { DefaultRef, statusInfo } from '../../types/global';
 
     socket.on('user-updates',(info:statusInfo) => {
       userData.setChangedUser(info);
-  });
-
-    socket.on('message',(msg:string) => {
-       console.log('message from room:',msg);
     });
 
-    socket.on('updateChat',async (currentChat:any) => {
-      chatData.value = parseToDeleteGroup(currentChat);
+    socket.on('updateChat',(currentChat:any) => {
+      console.log('after update:',currentChat['all']);
+      chatData.value = parseToDeleteGroup(currentChat['all']);
       const newChats = userData.allChats.map(chat => {
         if(chat.id === currentRoom.value) {
           const currentLast = getLastMessage(currentChat);
@@ -126,7 +123,8 @@ import type { DefaultRef, statusInfo } from '../../types/global';
 
   watch(() => userData.currentChat,() => {
      if(Object.keys(userData.currentChat).length && !chatData.value) {
-        chatData.value = parseToDeleteGroup(userData.currentChat.messages);
+        chatData.value = parseToDeleteGroup(userData.currentChat.messages['all']);
+        console.log('opened chat:',toRaw(chatData.value));
         currentRoom.value = userData.currentChat.id;
         nextTick(connectObserver);
      }
@@ -141,13 +139,13 @@ import type { DefaultRef, statusInfo } from '../../types/global';
        </button>
        <div ref="messagesRef" class="messages">
          <div class="messages-group-container">
-            <div class="container container-reverse group-container" v-for="(date,index) in chatData">
+            <div class="container container-reverse group-container" v-for="(date,_) in chatData">
               <span class="date-container">
-                <p class="group-date">{{ parseDate(index) }}</p>
+                <p class="group-date">{{ parseDate(Object.keys(date).pop())}}</p>
               </span>
-              <div class="message-group" v-for="(group,_) in date.groups" :class="{'group-right':group.sender === userName}">
-              <div class="message" :class="{'not-user-message':group.sender !== userName}" v-for="(message,index) in group.messages" :key="`message-${group}-${index}`">
-                <svg v-if="index === group.messages.length -1" viewBox="0 0 30 30" width="30" height="30" class="message-tail chat-message-tail" >
+              <div class="message-group" v-for="({body},_) in Object.values(date).pop()!.groups" :class="{'group-right':body.sender === userName}">
+              <div class="message" :class="{'not-user-message':body.sender !== userName}" v-for="(message,index) in body.messages" :key="`message-${body}-${index}`">
+                <svg v-if="index === body.messages.length -1" viewBox="0 0 30 30" width="30" height="30" class="message-tail chat-message-tail" >
                   <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31"  />
                 </svg>
                  <p class="message-body">{{ message.body }}</p>

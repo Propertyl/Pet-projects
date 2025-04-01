@@ -13,7 +13,9 @@ interface DBChat {
   messages:any
 };
 
-type Chat = Record<string,DateGroup>;
+type Chat = {"all":Record<string,DateGroup>[]};
+
+type updateChatData = {id:string,messages:MessageGroup};
 
 type messageChat = Record<string,MessageGroup>;
 
@@ -26,4 +28,10 @@ interface MessageGroup {
   messages:{body:string,time:string}[]
 };
 
-export {Message,MessageGroup,DBChat,Chat,DateGroup,messageChat};
+interface chatData {
+  chatId:string,
+  chatUsers:{users:string[]},
+  messages:any
+}
+
+export {Message,MessageGroup,DBChat,Chat,DateGroup,messageChat,updateChatData,chatData};

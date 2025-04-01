@@ -1,5 +1,5 @@
 const triggerEffect = (event:any) => {
-    if(event.target) {
+    if(event.target && event.target) {
     const ripple = document.createElement('span');
     const buttonRect = event.target.getBoundingClientRect();
     ripple.classList.add('ripple-btn');

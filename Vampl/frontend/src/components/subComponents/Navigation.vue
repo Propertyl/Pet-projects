@@ -100,6 +100,11 @@ const switcher = () => {
     background-color:rgba(155,155,155,.3);
     border-radius: 40px;
     cursor: pointer;
+    transition: all .2s;
+  }
+
+  .theme-changer:hover {
+    background-color:rgba(185,185,185,.3);
   }
 
   .theme-options {
