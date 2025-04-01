@@ -1,24 +1,37 @@
 <script setup lang="ts">
-import { ref, watch} from 'vue';
+import { ref, watch, type Ref} from 'vue';
 import useUserData from '../../store/userData';
 import triggerEffect from '../functions/bubbleEffect';
 import checkActiveChat from '../functions/checkActiveChat';
-import type { Chat} from '../../types/global';
+import type {ParsedChat} from '../../types/global';
 import parseMessageTime from '../functions/parseMessageTime';
 import getUserChats from '../functions/getUserChats';
 import UserBurger from './UserBurger.vue';
 import useUsefulStuff from '../../store/usefulStuff';
+import { convertStatus } from '../functions/convertStatus';
 
-const chats:any = ref([]);
+const chats:Ref<ParsedChat[]> = ref([]);
 const userData = useUserData();
-const contactDefatult = ref(true);
-const activeChat = ref("");
-const currentHref = ref("");
+const contactDefatult:Ref<Boolean> = ref(true);
+const activeChat:Ref<string> = ref("");
+const currentHref:Ref<string> = ref("");
 const usefulStuff = useUsefulStuff();
 
 watch(() => userData.currentChat,() => {
   currentHref.value = window.location.href;
   activeChat.value = userData.currentChat.user.name ;
+});
+
+watch(() => userData.changedUser,() => {
+   if(chats.value) {
+      const {ip,status} = userData.changedUser;
+
+      for(let chat of chats.value) {
+        if(chat.user.ip === ip) {
+          chat.user.status = convertStatus(status);
+        }
+      }
+   }
 });
 
 watch(userData,async () => {
@@ -31,8 +44,8 @@ const parseLast = (id:string) => {
   return userData.allChats.find(chat => chat.id === id);
 }
 
-const openChat = ({name,image,chat,id}:Chat) => {
-  userData.setChat({user:{name,image},messages:chat,id:id});
+const openChat = (contact:ParsedChat) => {
+  userData.setChat(contact);
 }
 </script>
 
@@ -43,7 +56,7 @@ const openChat = ({name,image,chat,id}:Chat) => {
         <a draggable="false" v-if="chats.length" :class="{shortContact:!contactDefatult,'chat-active':activeChat == contact.user.name}" class="contact-container" v-for="(contact,index) in chats" :href="`#@${contact.user.name}`" :key="`contact-${index}`">
         <div @click="(event:any) => {
         triggerEffect(event);
-        checkActiveChat(currentHref,contact.user.name) && openChat({name:contact.user.name,image:contact.user.image,chat:contact.messages,id:contact.id});
+        checkActiveChat(currentHref,contact.user.name) && openChat(contact);
       }" class="container with-padding hidden-container">
           <div class="status-picture-container">
             <img class="contact-image" :src="contact.user.image" alt="">
@@ -86,17 +99,17 @@ const openChat = ({name,image,chat,id}:Chat) => {
   .contact-status {
     position: absolute;
     bottom:15%;
-    right:12%;
-    width:.8rem;
-    height:.8rem;
+    right:10%;
+    width:1rem;
+    height:1rem;
     border-radius: 50%;
-    border:.1rem solid var(--black-default);
+    border:.2rem solid var(--light-black);
     clip-path: circle();
     z-index: 1;
   }
 
   .online {
-    background-color: greenyellow;
+    background-color:var(--night-color);
   }
 
   .offline {
@@ -118,6 +131,11 @@ const openChat = ({name,image,chat,id}:Chat) => {
 
   .chat-active {
     background-color: var(--night-color) !important;
+  }
+
+  .chat-active .online {
+    background-color: var(--secondary-color);
+    border-color: var(--night-color);
   }
 
   .shortContact .with-padding {
@@ -190,6 +208,11 @@ const openChat = ({name,image,chat,id}:Chat) => {
 
   .contact-container:hover {
     background-color: var(--night-color);
+  }
+
+  .contact-container:hover .online {
+    background-color: var(--secondary-color);
+    border-color: var(--night-color);
   }
 
   .contact-container:hover .contact-chat-last-message {

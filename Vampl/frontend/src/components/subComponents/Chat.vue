@@ -9,28 +9,30 @@ import setObserver from '../functions/groupObserver';
 import parseDate from '../functions/parseDate';
 import parseToDeleteGroup from '../functions/parseChatGroups';
 import chatAfterRefresh from '../functions/getChatAfterRefresh';
-
+import type { DefaultRef, statusInfo } from '../../types/global';
 
   const chatData:any = ref(null);
-  const messagesRef:any = ref(null);
+  const messagesRef:DefaultRef = ref(null);
   const userData = useUserData();
   const socket:Socket = io('http://localhost:3000/app');
   const currentMessage:Ref<string,string> = ref('');
   const currentRoom:Ref<string,string> = ref('');
-  const userName = ref('');
+  const userName:Ref<string> = ref('');
   const downButton:Ref<boolean> = ref(false);
 
   const searchScroll = () => {
-     const chatScroll = messagesRef.value;
-     const currentHeight = chatScroll.scrollTop;
+      if(messagesRef.value) {
+        const chatScroll = messagesRef.value;
+        const currentHeight = chatScroll.scrollTop;
 
-     if((chatScroll.scrollHeight - currentHeight) > 1080) {
-        downButton.value = true;
-     } else {
-       if(downButton.value === true) {
-          downButton.value = false;
-       }
-     }
+        if((chatScroll.scrollHeight - currentHeight) > 1080) {
+           downButton.value = true;
+        } else {
+          if(downButton.value === true) {
+             downButton.value = false;
+          }
+        }
+      }
   }
 
   onMounted(async () => {
@@ -38,13 +40,13 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
       console.log('changed ur status');
     });
 
+    socket.on('user-updates',(info:statusInfo) => {
+      userData.setChangedUser(info);
+  });
+
     socket.on('message',(msg:string) => {
        console.log('message from room:',msg);
     });
-
-    socket.on('user-updates',(info:any) => {
-      console.log('user update:',info);
-    })
 
     socket.on('updateChat',async (currentChat:any) => {
       chatData.value = parseToDeleteGroup(currentChat);
@@ -64,7 +66,7 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
   });
 
   onUnmounted(() => {
-    messagesRef.value.removeEventListener('scroll',searchScroll);
+    messagesRef.value!.removeEventListener('scroll',searchScroll);
   });
 
   watch(userData,async () => {
@@ -94,7 +96,7 @@ import chatAfterRefresh from '../functions/getChatAfterRefresh';
       const time = new Date();
       socket.emit('sendMessage',{room:currentRoom.value,message:{user:userName.value,body:currentMessage.value,time:time.toLocaleString()}});
       currentMessage.value = "";
-      messagesRef.value.scrollTo({top:messagesRef.value.scrollHeight,behavior:'smooth'});
+      messagesRef.value!.scrollTo({top:messagesRef.value!.scrollHeight,behavior:'smooth'});
     }
   }
 

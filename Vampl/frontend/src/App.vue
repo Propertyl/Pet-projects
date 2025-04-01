@@ -4,6 +4,7 @@ import { onMounted} from 'vue';
 import useUserData from './store/userData';
 import type { UserInfo } from './types/global';
 import { useRouter } from 'vue-router';
+import changeTheme from './components/functions/changeTheme';
 
 let userData = useUserData();
 const router = useRouter();
@@ -13,11 +14,13 @@ onMounted(async () => {
     const authInfo:UserInfo = await fetch(`http://localhost:3000/user/getAuthData/${user}`)
     .then(data => data.json());
     const months = await fetch('http://localhost:3000/getData/month/en').then(res => res.json());
+    const currentTheme = await fetch(`http://localhost:3000/user/get-theme/${authInfo.ip}`)
+    .then(res => res.json());
+    changeTheme(currentTheme.theme);
 
     userData.setMonth(months);
     userData.setIp(authInfo.ip);
-    console.log('auth:',authInfo);
-    
+        
     if(!authInfo.authorized) {
       router.push('/auth');
       return;
@@ -27,7 +30,6 @@ onMounted(async () => {
     .then(data => data.json());
 
     userData.setAdditionalData(userInfo);
-    
  })
 </script>
 

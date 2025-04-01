@@ -176,4 +176,34 @@ export class UserService {
     })
   }
 
+  async getUserTheme(ip:string) {
+    return this.prisma.userTheme.findFirst({
+      where:{
+        ip:ip
+      },
+      select:{
+        theme:true
+      }
+    })
+  }
+
+  async createUserTheme(ip:string) {
+    return this.prisma.userTheme.create({
+      data:{
+        ip:ip
+      }
+    })
+  }
+
+  async updateUserTheme({ip,theme}:{ip:string,theme:string}) {
+    return this.prisma.userTheme.update({
+      where:{
+        ip:ip
+      },
+      data:{
+        theme:theme
+      }
+    })
+  }
+
 }

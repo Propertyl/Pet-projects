@@ -1,24 +1,37 @@
 <script setup lang="ts" >
 import useUsefulStuff from '../../store/usefulStuff';
+import useUserData from '../../store/userData';
 import triggerEffect from '../functions/bubbleEffect';
-import {ref,watch} from 'vue';
+import {ref,watch, type Ref} from 'vue';
+import changeTheme from '../functions/changeTheme';
 
 const usefulStuff = useUsefulStuff();
 const themeOptions = ref(false);
-const themeSwitcher = ref(null);
+const themeSwitcher:Ref<HTMLDivElement | null> = ref(null);
+const userData = useUserData();
 
-const changeTheme = (theme:"night" | "light") => {
-  const html = document.getElementById('root');
-  if(html) {
-    html.className = theme;
-  }
+const switchTheme = async (theme:"night" | "light") => {
+  const updatedTheme = await fetch('http://localhost:3000/user/update-theme',{
+    method:'PUT',
+    headers:{
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({ip:userData.ip,theme:theme})
+  })
+  .then(res => res.json());
+
+  console.log('updated theme:',updatedTheme);
+
+  changeTheme(updatedTheme.theme);
 }
 
 watch(themeOptions, (newValue) => {
-  if (newValue) {
-    themeSwitcher.value.addEventListener("blur",switcher);
-  } else {
-    themeSwitcher.value.removeEventListener("blur",switcher);
+  if(themeSwitcher.value) {
+    if (newValue) {
+      themeSwitcher.value.addEventListener("blur",switcher);
+    } else {
+      themeSwitcher.value.removeEventListener("blur",switcher);
+    }
   }
 });
 
@@ -49,7 +62,7 @@ const switcher = () => {
         <div tabindex="0" ref="themeSwitcher" @click="switcher" class="theme-changer flex-center">
           Change theme
             <div v-if="themeOptions"  class="theme-options">
-              <div @click="() => changeTheme('light')" class="theme-option">
+              <div @click="() => switchTheme('light')" class="theme-option">
                 <svg class="theme-icons" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#fcfcfc"  viewBox="0 0 240 240" version="1.1" id="Layer_1" style="enable-background:new 0 0 240 240" xml:space="preserve" stroke="#fcfcfc">
                 <g id="SVGRepo_bgCarrier" stroke-width="0"/>
                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
@@ -57,7 +70,7 @@ const switcher = () => {
               </svg>
                 Light
               </div>
-              <div @click="() => changeTheme('night')" class="theme-option">
+              <div @click="() => switchTheme('night')" class="theme-option">
                 <svg class="theme-icons" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
                 <g id="SVGRepo_bgCarrier" stroke-width="0"/>
                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>

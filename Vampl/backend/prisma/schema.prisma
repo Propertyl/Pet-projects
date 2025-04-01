@@ -52,3 +52,9 @@ model OnlineStatuses {
   ip String @unique
   status Boolean
 }
+
+model UserTheme {
+  id Int @id @default(autoincrement())
+  ip String @unique
+  theme String @default("light")
+}

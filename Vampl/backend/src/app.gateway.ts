@@ -24,8 +24,6 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
         body: JSON.stringify({ip:ip,status:status})
       });
 
-      console.log('rooms:',rooms);
-      console.log('otpravlyaem!!!');
       this.server.to(rooms).emit('user-updates',{ip:ip,status:status});
     }
 
@@ -53,12 +51,6 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    async sendMessageToChat(client:Socket,data:{room:string,message:Message}) {
       this.server.to(data.room).emit('message',data.message.body);
       let currentChat:any = undefined;
-
-      // if(!this.chats.has(data.room)) {
-      //    const getChat = await fetch(`http://localhost:3000/chat/chatID/${data.room}`)
-      //    .then(res => res.json());
-      //    this.chats.set(data.room,getChat.messages);
-      // }
 
       const chat = await fetch(`http://localhost:3000/chat/chatID/${data.room}`)
       .then(res => res.json())

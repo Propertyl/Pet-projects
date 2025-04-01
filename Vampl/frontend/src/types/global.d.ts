@@ -1,3 +1,5 @@
+import type { Ref } from "vue";
+
 interface Chat {
   name:string,
   image:string,
@@ -10,8 +12,11 @@ interface UserData {
   currentChat:any,
   additionalData:any,
   allChats:{id:string,last:string,time:string}[],
-  allMonth:any
+  allMonth:any,
+  changedUser:any
 }
+
+type statusInfo = {ip:string,status:Boolean};
 
 type lastMessage = (chat:any) => {last:string,time:string};
 
@@ -27,7 +32,7 @@ interface UserInfo {
 }
 
 interface ParsedChat {
-  user:{name:string,image:string},
+  user:{name:string,image:string,ip:string,status:string},
   messages:{chat:any},
   id:string
 }
@@ -41,6 +46,7 @@ interface SignData {'phone':string,'name'?:string,'password:':string}
 
 type AuthInputs = 'phone' | 'name' | 'password';
 
+type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage};
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef};

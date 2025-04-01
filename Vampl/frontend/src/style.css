@@ -210,12 +210,32 @@ p {
 
 .night {
   --light-grey-half:rgb(0,0,0,.5);
+  --black-default:rgb(0,0,0);
+  --bg-main: rgb(37, 37, 37);
+  --nav-bg:rgb(63, 62, 62);
+  --chat-bg-color:rgb(29, 28, 28);
+  --secondary-color:rgb(255,255,255);
+  --bubble-color:rgba(125,125,125,.5);
+  --light-grey:rgb(155,155,155);
+  --light-black:#4d4d4d;
+  --main-grey:#787474;
+  --header-height:6rem;
+  --footer-height:10rem;
+  --foter-space:-10rem;
+  --default-border-radius:20px;
+  --error-color:rgb(205,0,0);
+  --menu-color:rgb(73,73,73);
+  --sub-color:#007BFF;
+  --night-color:#da5050;
+  --night-tilelight:hsla(0, 64%, 58%, 0.4);
+  --light-night:#ff6161;
 }
 
 .light {
   --black-default:rgb(0,0,0);
   --bg-main:rgb(255,255,255);
   --nav-bg:rgb(43, 40, 40);
+  --light-black:#4d4d4d;
   --chat-bg-color:#6d696986;
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(255,255,255,.5);
@@ -228,21 +248,7 @@ p {
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    --black-default:rgb(0,0,0);
-    --bg-main:rgb(255,255,255);
-    --nav-bg:rgb(43, 40, 40);
-    --chat-bg-color:#6d696986;
-    --secondary-color:rgb(255,255,255);
-    --bubble-color:rgba(255,255,255,.5);
-    --light-grey:rgb(37, 37, 37);
-    --light-grey-half:rgb(155,155,155,.5);
-    --main-grey:#787474;
-    --night-tilelight:hsla(276, 59%, 61%, 0.4); 
-    --night-color:#ae7dd6;
-    --input-color:rgb(255, 255, 255);
-  }
-
+  
   body {
     background-color: var(--black-default);
   }

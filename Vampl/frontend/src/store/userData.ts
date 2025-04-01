@@ -7,10 +7,15 @@ const useUserData = defineStore('user',{
     currentChat:{},
     additionalData:{},
     allChats:[],
-    allMonth:{}
+    allMonth:{},
+    changedUser:{}
   }),
 
   actions: {
+    setChangedUser(user:any) {
+       this.changedUser = user;
+    },
+
     setIp(value:string) {
       this.ip = value
     },

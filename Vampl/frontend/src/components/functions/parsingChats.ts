@@ -1,10 +1,12 @@
+import { convertStatus } from "./convertStatus";
+
 async function getUserInfo(id:string) {
   const data = await fetch(`http://localhost:3000/user/infoByIp/${id}`).then(user => user.json());
   const userStatus = await fetch(`http://localhost:3000/getData/status/${id}`)
   .then(data => data.json())
   .then(table => table.status);
 
-  return {name:data.name,image:data.image,status:userStatus ? "Online" : "Offline"};
+  return {name:data.name,image:data.image,ip:id,status:convertStatus(userStatus)};
 }
 
 const parsingChats = async (res:any,userData:any) => {

@@ -3,7 +3,7 @@ import { useHead } from '@vueuse/head';
 import useChangeTitle from '../store/changeTitle';
 import Navigation from './subComponents/Navigation.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
-import ChatLenta from './subComponents/ChatLenta.vue';
+import ChatLenta from './subComponents/ChatsMenu.vue';
 import Chat from './subComponents/Chat.vue';
 
 const title = useChangeTitle();

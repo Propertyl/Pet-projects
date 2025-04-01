@@ -111,6 +111,35 @@ export class UserController {
      return this.userServices.updateStatus(data.ip,data.status);
   }
 
+  @Post('create-theme')
+  async createUserTheme(@Body() data:{ip:string}) {
+    await this.userServices.createUserTheme(data.ip);
+  }
+
+  @Put('update-theme')
+  async updateUserTheme(@Body() data:{ip:string,theme:string}) {
+    await this.userServices.updateUserTheme(data);
+    return this.userServices.getUserTheme(data.ip);
+  }
+
+  @Get(`get-theme/:ip`)
+  async getUserTheme(@Param('ip') ip:string) {
+     let userTheme = await this.userServices.getUserTheme(ip)
+     
+     if(!userTheme) {
+      await fetch('http://localhost:3000/user/create-theme',{
+        method:'POST',
+        headers: {
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({ip:ip})
+       });
+       return this.userServices.getUserTheme(ip);
+     }
+
+     return userTheme;
+  }
+
 }
 
 
