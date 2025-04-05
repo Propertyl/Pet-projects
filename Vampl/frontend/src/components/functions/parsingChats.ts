@@ -1,9 +1,9 @@
 import { convertStatus } from "./convertStatus";
+import serv from "./interceptors";
 
 async function getUserInfo(id:string) {
-  const data = await fetch(`http://localhost:3000/user/infoByIp/${id}`).then(user => user.json());
-  const userStatus = await fetch(`http://localhost:3000/getData/status/${id}`)
-  .then(data => data.json())
+  const data:{name:string,image:string} = await serv.get(`/user/infoByIp/${id}`);
+  const userStatus:any = await serv.get(`/getData/status/${id}`)
   .then(table => table.status);
 
   return {name:data.name,image:data.image,ip:id,status:convertStatus(userStatus)};

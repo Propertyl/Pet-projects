@@ -9,6 +9,7 @@ import getUserChats from '../functions/getUserChats';
 import UserBurger from './UserBurger.vue';
 import useUsefulStuff from '../../store/usefulStuff';
 import { convertStatus } from '../functions/convertStatus';
+import serv from '../functions/interceptors';
 
 const chats:Ref<ParsedChat[]> = ref([]);
 const userData = useUserData();
@@ -36,7 +37,7 @@ watch(() => userData.changedUser,() => {
 
 watch(userData,async () => {
   if(userData.ip && !chats.value.length) {
-    chats.value = await getUserChats(userData);
+    chats.value = await getUserChats(userData);;
   }
 });
 
@@ -44,7 +45,10 @@ const parseLast = (id:string) => {
   return userData.allChats.find(chat => chat.id === id);
 }
 
-const openChat = (contact:ParsedChat) => {
+const openChat = async (contact:ParsedChat) => {
+  const contactChat:any = await serv.get(`/chat/chatID/${contact.id}`);
+
+  contact.messages = contactChat.messages;
   userData.setChat(contact);
 }
 </script>
@@ -52,7 +56,7 @@ const openChat = (contact:ParsedChat) => {
 <template>
   <section class="contact-tape" :class="{default:!contactDefatult}">
     <UserBurger v-if="usefulStuff.burgerOpen" :isOpen="usefulStuff.burgerOpen"/>
-    <div v-else style="padding-top: .2rem;" class="container flex-start">
+    <div v-else style="padding-top: .2rem;" class="container flex-reverse">
         <a draggable="false" v-if="chats.length" :class="{shortContact:!contactDefatult,'contact-chat-active':activeChat == contact.user.name}" class="contact-container" v-for="(contact,index) in chats" :href="`#@${contact.user.name}`" :key="`contact-${index}`">
         <div @click="(event:any) => {
         triggerEffect(event);
@@ -217,6 +221,7 @@ const openChat = (contact:ParsedChat) => {
     border-radius: 10px;
     transition: all .3s;
     background: var(--main-grey);
+    margin: .2rem 0;
   }
 
   .contact-container * {

@@ -1,41 +1,33 @@
 import type { Ref } from "vue";
 import type { SignData } from "../../types/global";
 import bcrypt from "bcryptjs";
+import serv from "./interceptors";
+
+const setAuthorized = async (ip:string) => {
+  await serv.put('/user/setAuthorized',{
+    headers: {
+      'Content-Type':'application/json'
+    },
+    ip:ip
+  });
+  return {router: '/'};
+}
 
 const auth = async (register:Ref<Boolean>,inputData:SignData | any,userIp:string) => {
   if(!register.value) {
     inputData['ip'] = userIp;
     inputData['password'] = await bcrypt.hash(inputData['password'],10);
-      await fetch('http://localhost:3000/user/createAccount',{
-        method:"POST",
-        headers:{
-          "Content-Type":'application/json'
-        },
-        body:JSON.stringify(inputData)
+      await serv.post('/user/createAccount',{
+        inputData
       });
-      await fetch('http://localhost:3000/user/setAuthorized',{
-        method:'PUT',
-        headers: {
-         "Content-Type":'application/json'
-        },
-        body:JSON.stringify({ip:inputData.ip})
-      });
-      return {router: '/'};
+      return setAuthorized(inputData.ip);
   } else {
-    const req = await fetch(`http://localhost:3000/user/verifyAccount/${inputData['phone']}`)
-    .then(data => data.json());
+    const req:any = await serv.get(`/user/verifyAccount/${inputData['phone']}`);
     console.log('entered:',req);
     if(await bcrypt.compare(inputData['password'],req.password)) {
-      await fetch('http://localhost:3000/user/setAuthorized',{
-        method:'PUT',
-        headers: {
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({ip:inputData.ip})
-      });
-      return {router: '/'};
+      return setAuthorized(inputData.ip);
     } else {
-     return {window:'phone'};
+      return {window:'phone'};
     }
   }
 }

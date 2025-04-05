@@ -9,9 +9,9 @@ import setObserver from '../functions/groupObserver';
 import parseDate from '../functions/parseDate';
 import parseToDeleteGroup from '../functions/parseChatGroups';
 import chatAfterRefresh from '../functions/getChatAfterRefresh';
-import type { DefaultRef, statusInfo, Suka } from '../../types/global';
+import type { chatData, DefaultRef, statusInfo} from '../../types/global';
 
-  const chatData:Ref<Suka | null> = ref(null);
+  const chatData:Ref<chatData | null> = ref(null);
   const messagesRef:DefaultRef = ref(null);
   const userData = useUserData();
   const socket:Socket = io('http://localhost:3000/app');
@@ -123,6 +123,7 @@ import type { DefaultRef, statusInfo, Suka } from '../../types/global';
 
   watch(() => userData.currentChat,() => {
      if(Object.keys(userData.currentChat).length && !chatData.value) {
+        console.log('pipiska',userData.currentChat);
         chatData.value = parseToDeleteGroup(userData.currentChat.messages['all']);
         console.log('opened chat:',toRaw(chatData.value));
         currentRoom.value = userData.currentChat.id;

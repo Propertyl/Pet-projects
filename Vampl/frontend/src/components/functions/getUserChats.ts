@@ -1,16 +1,10 @@
 import getLastMessage from "./getLastChatMessage";
 import parsingChats from "./parsingChats";
+import serv from "./interceptors";
 
 const getUserChats = async (userData:any) => {
-  const userChats = await fetch(`http://localhost:3000/user/chats/${userData.ip}`)
-  .then(res => {
-    return res.json();
-  })
-  .then(data => {
-    return parsingChats(data,userData)
-  });
-
-  console.log('parsed chats:',userChats);
+  const userChats = await serv.get(`/user/chats/${userData.ip}`)
+  .then(data => parsingChats(data,userData));
 
   userData.setAllChatsIp(userChats.map((chat:any) => {
     const currentLast = getLastMessage(chat.messages);

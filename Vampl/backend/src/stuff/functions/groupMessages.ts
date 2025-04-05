@@ -50,15 +50,20 @@ const groupMessages = (message:Message,chat:Chat | undefined) => {
   }
   
   const lastDateGroup:any = currentGroups.map(item => item).pop();
-  const lastDate = Object.keys(lastDateGroup).pop() ?? "";
+  let lastDate = Object.keys(lastDateGroup).pop() ?? "";
+  console.log('last:',lastDate,'date:',lastDateGroup,'date:',date);
 
   if(date != lastDate) {
     chat['all'].push({
       [date]:createDataGroup(),
     });
+
+    lastDate = date;
   }
 
   const lastGroup = chat['all'][currentGroups.length - 1];
+
+  console.log('lastGroup:',lastGroup);
 
   lastGroup[lastDate].groups = groupSubMessages(message,lastGroup[lastDate].groups);
 

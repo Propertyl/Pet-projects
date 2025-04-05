@@ -34,8 +34,10 @@ export class UserController {
 
   @Get('chats/:ip')
   async getUserChats(@Param('ip') ip:string) {
-     const userChatData = await this.userServices.getChatData(ip);
+     const userChatData:any = await this.userServices.getChatData(ip);
 
+     console.log('userrrr:',userChatData[0].messages);
+     
      if(!userChatData.length) {
         await fetch('http://localhost:3000/chat/create-chat',{
           method:'POST',

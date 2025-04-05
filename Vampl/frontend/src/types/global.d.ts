@@ -31,15 +31,15 @@ interface UserInfo {
   authorized:boolean
 }
 
-type Suka = Record<number,Record<string,S>>
+type chatData = Record<number,Record<string,DateGroup>>
 
-interface S {
+interface DateGroup {
   groups:any
 }
 
 interface ParsedChat {
   user:{name:string,image:string,ip:string,status:string},
-  messages:{chat:any},
+  messages:{all:any},
   id:string
 }
 
@@ -55,4 +55,4 @@ type AuthInputs = 'phone' | 'name' | 'password';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,Suka};
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData};

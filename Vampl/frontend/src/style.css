@@ -187,6 +187,11 @@ p {
   align-items: inherit;
 }
 
+.flex-reverse {
+  flex-direction: column;
+  align-items: center;
+}
+
 .hidden-container {
   overflow: hidden;
 }

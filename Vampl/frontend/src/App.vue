@@ -5,21 +5,20 @@ import useUserData from './store/userData';
 import type { UserInfo } from './types/global';
 import { useRouter } from 'vue-router';
 import changeTheme from './components/functions/changeTheme';
+import serv from './components/functions/interceptors';
 
 let userData = useUserData();
 const router = useRouter();
 
 onMounted(async () => {
     
-    const user = window.location.href.split('#').pop();
-    const authInfo:UserInfo = await fetch(`http://localhost:3000/user/getAuthData/${user}`)
-    .then(data => data.json());
-    const currentTheme = await fetch(`http://localhost:3000/user/get-theme/${authInfo.ip}`)
-    .then(res => res.json());
-    changeTheme(currentTheme.theme);
-    const months = await fetch('http://localhost:3000/getData/month/en').then(res => res.json());
-   
+    // const user = window.location.href.split('#').pop();
+    const authInfo:UserInfo = await serv.get(`/user/getAuthData/${false}`);
+    const currentTheme:{theme:string} = await serv.get(`/user/get-theme/${authInfo.ip}`);
 
+    changeTheme(currentTheme.theme);
+    const months = await serv.get('/getData/month/en');
+   
     userData.setMonth(months);
     userData.setIp(authInfo.ip);
         
@@ -28,8 +27,7 @@ onMounted(async () => {
       return;
     }
 
-    const userInfo = await fetch(`http://localhost:3000/user/infoByIp/${authInfo.ip}`)
-    .then(data => data.json());
+    const userInfo = await serv.get(`/user/infoByIp/${authInfo.ip}`);
 
     userData.setAdditionalData(userInfo);
  })
