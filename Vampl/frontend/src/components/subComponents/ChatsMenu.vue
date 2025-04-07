@@ -37,7 +37,7 @@ watch(() => userData.changedUser,() => {
 
 watch(userData,async () => {
   if(userData.ip && !chats.value.length) {
-    chats.value = await getUserChats(userData);;
+    chats.value = await getUserChats(userData);
   }
 });
 

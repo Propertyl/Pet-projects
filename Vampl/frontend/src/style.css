@@ -12,7 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-
+  --bg-specific:#222220;
   --black-default:rgb(0,0,0);
   --bg-main: rgb(37, 37, 37);
   --nav-bg:rgb(63, 62, 62);
@@ -71,6 +71,8 @@ body {
   min-width:100vw;
   height: 100vh;
   overflow:hidden;
+  justify-content: center;
+  background-color: var( --bg-specific);
 }
 
 h1 {
@@ -161,13 +163,20 @@ button:focus-visible {
   animation: bubble-pop .6s ease-out;
 }
 
+.nav-section {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .card {
   padding: 2em;
 }
 
 #app {
-  width: 100%;
+  width: 90%;
   min-height: 100%;
+  overflow: hidden;
 }
 
 header {
@@ -248,6 +257,7 @@ p {
 }
 
 .light {
+  --bg-specific:rgb(192, 192, 192);
   --black-default:rgb(0,0,0);
   --bg-main:rgb(255,255,255);
   --nav-bg:rgb(43, 40, 40);

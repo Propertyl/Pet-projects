@@ -6,7 +6,7 @@ const serv = axios.create({
 
 serv.interceptors.response.use(
   res => res.data,
-  error => console.log(error)
+  error => Promise.reject(error)
 );
 
 export default serv;

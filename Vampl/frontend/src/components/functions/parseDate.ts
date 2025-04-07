@@ -1,12 +1,28 @@
 import useUserData from "../../store/userData";
+import useFormatter from "./dateFormatter";
 
-const parseDate = (date:any) => {
+const dateCastling = ([day,month,year]:string[],locale:string) => {
+  if(locale === 'en-US') {
+    const temp = day;
+    day = month;
+    month = temp;
+  }
+
+  return [day,month,year];
+   
+}
+
+const parseDate = (date:any,locale = 'en-US') => {
   const allMonth = useUserData().allMonth;
-  const [day,month,global] = new Date().toLocaleString().split('.');
-  const [currentDay,currentMonth,currentYear] = date.split('.');
-  const [year,_] = global.split(',');
+  const formatter = useFormatter(locale);
+
+  const currentDate = formatter.format(new Date()).split(/[,.\/]/);
+  const [day,month,year] = dateCastling(currentDate,locale);
+  const [currentDay,currentMonth,currentYear] = dateCastling(date.split(/[,.\/]/),locale);
 
   const clearMonth = Number(currentMonth.split('0')[1]);
+
+  console.log('localerrrr:',clearMonth);
 
   if(currentYear != year) {
     return date;

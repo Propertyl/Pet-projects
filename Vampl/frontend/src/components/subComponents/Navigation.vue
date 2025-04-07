@@ -41,21 +41,26 @@ watch(themeOptions, (newValue) => {
 <template>
   <nav class="navigation">
     <div class="container nav-container">
-      <button :class="{'close-burger':usefulStuff.burgerOpen}" @click="(event:any) => {
-        triggerEffect(event);
-        usefulStuff.switchBurger();
-      }" class="burger-menu">
-        <span class="burger-line"></span>
-        <span class="burger-line"></span>
-        <span class="burger-line"></span>
-      </button>
-        <div class="search-section">
-          <input class="search-input" placeholder="Search something..." type="search">
-          <button @click="(event:any) => triggerEffect(event)"  class="search-button">
-            <i class="search-icon" style="background: url('./icon-search.svg') no-repeat center center / 60%;">{{  }}</i>
+        <div class="burger-menu-container nav-section">
+          <button :class="{'close-burger':usefulStuff.    burgerOpen}" @click="(event:any) => {
+          triggerEffect(event);
+          usefulStuff.switchBurger();
+          }" class="burger-menu">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
           </button>
         </div>
-        <div tabindex="0" ref="themeSwitcher" @click="switcher" class="theme-changer flex-center">
+        <div class="search-section-container nav-section">
+          <div class="search-section">
+            <input class="search-input" placeholder="Search something..." type="search">
+            <button @click="(event:any) => triggerEffect(event)"  class="search-button">
+              <i class="search-icon" style="background: url('./icon-search.svg') no-repeat center center / 60%;">{{  }}</i>
+            </button>
+          </div>
+        </div>
+        <div class="theme-switcher-container nav-section">
+          <div tabindex="0" ref="themeSwitcher" @click="switcher" class="theme-changer flex-center">
           Change theme
             <div v-if="themeOptions"  class="theme-options">
               <div @click="() => switchTheme('light')" class="theme-option">
@@ -76,11 +81,24 @@ watch(themeOptions, (newValue) => {
               </div>
             </div>
         </div>
+        </div>
     </div>
   </nav>
 </template>
 
 <style scoped>
+
+  .burger-menu-container {
+    width: 20%;
+  }
+
+  .search-section-container {
+    width: 60%;
+  }
+
+  .theme-switcher-container {
+    width: 20%;
+  }
 
   .theme-icons {
     width: 1.2rem;

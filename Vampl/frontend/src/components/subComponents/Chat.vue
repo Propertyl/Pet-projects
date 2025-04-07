@@ -11,6 +11,7 @@ import parseToDeleteGroup from '../functions/parseChatGroups';
 import chatAfterRefresh from '../functions/getChatAfterRefresh';
 import type { chatData, DefaultRef, statusInfo} from '../../types/global';
 import useThrottle from '../functions/useThrottle';
+import useFormatter from '../functions/dateFormatter';
 
   const chatData:Ref<chatData | null> = ref(null);
   const messagesRef:DefaultRef = ref(null);
@@ -95,8 +96,9 @@ import useThrottle from '../functions/useThrottle';
 
   const sendMessageToChat = () => {
     if(currentMessage.value.length) {
-      const time = new Date();
-      socket.emit('sendMessage',{room:currentRoom.value,message:{user:userName.value,body:currentMessage.value,time:time.toLocaleString()}});
+      const date = new Date();
+      const formatter = useFormatter(userData.locale);
+      socket.emit('sendMessage',{room:currentRoom.value,message:{user:userName.value,body:currentMessage.value,time:formatter.format(date)}});
       currentMessage.value = "";
       messagesRef.value!.scrollTo({top:messagesRef.value!.scrollHeight,behavior:'smooth'});
     }
@@ -147,7 +149,7 @@ import useThrottle from '../functions/useThrottle';
          <div class="messages-group-container">
             <div class="container container-reverse group-container" v-for="(date,_) in chatData">
               <span class="date-container">
-                <p class="group-date">{{ parseDate(Object.keys(date).pop())}}</p>
+                <p class="group-date">{{ parseDate(Object.keys(date).pop(),userData.locale)}}</p>
               </span>
               <div class="message-group" v-for="({body},_) in Object.values(date).pop()!.groups" :class="{'group-right':body.sender === userName}">
               <div class="message" :class="{'not-user-message':body.sender !== userName}" v-for="(message,index) in body.messages" :key="`message-${body}-${index}`">
@@ -207,9 +209,8 @@ import useThrottle from '../functions/useThrottle';
   .date-container {
     position: sticky; 
     top: .4rem;
-    width: 5rem;
     height: 2rem;
-    padding: .2rem;
+    padding: .3rem;
     display: flex;
     align-items: center;
     justify-content: center;

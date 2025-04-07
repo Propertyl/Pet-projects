@@ -58,3 +58,9 @@ model UserTheme {
   ip String @unique
   theme String @default("light")
 }
+
+model Locales {
+  page String  @unique
+  language String
+  text Json
+}

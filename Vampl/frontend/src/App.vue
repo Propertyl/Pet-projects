@@ -21,6 +21,7 @@ onMounted(async () => {
    
     userData.setMonth(months);
     userData.setIp(authInfo.ip);
+    userData.setLocale(navigator.language);
         
     if(!authInfo.authorized) {
       router.push('/auth');

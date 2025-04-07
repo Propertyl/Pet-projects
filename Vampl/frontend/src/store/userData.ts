@@ -4,6 +4,7 @@ import type { ParsedChat, UserData } from "../types/global";
 const useUserData = defineStore('user',{
   state:():UserData => ({
     ip:"",
+    locale:"",
     currentChat:{},
     additionalData:{},
     allChats:[],
@@ -30,6 +31,9 @@ const useUserData = defineStore('user',{
     },
     setMonth(months:any) {
       this.allMonth = months;
+    },
+    setLocale(userLocale:string) {
+      this.locale = userLocale;
     }
   }
 });

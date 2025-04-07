@@ -35,10 +35,7 @@ export class UserController {
      const userChatData:any = await this.userServices.getChatData(ip);
      
      if(!userChatData.length) {
-        await serv.post('http://localhost:3000/chat/create-chat',{
-          headers:{
-            'Content-Type':'application/json'
-          },
+        await serv.post('/chat/create-chat',{
           chatId:this.userServices.genChatID(),
           chatUsers:{users:[ip,'host']},
           messages:{"all":[]}
@@ -52,7 +49,7 @@ export class UserController {
   @Get('chat/:user')
   async getUserChat(@Param('user') user:string) {
     const currentUser = await getCryptedIP()
-    const chatter:any = await serv.get(`http://localhost:3000/user/infoByName/${user}`)
+    const chatter:any = await serv.get(`/user/infoByName/${user}`)
     .then((res:any) => res.ip);
 
     return this.userServices.getChatByLink([currentUser,chatter]);
@@ -122,7 +119,7 @@ export class UserController {
      let userTheme = await this.userServices.getUserTheme(ip)
      
      if(!userTheme) {
-      await serv.post('http://localhost:3000/user/create-theme',{
+      await serv.post('/user/create-theme',{
         headers: {
           'Content-Type':'application/json'
         },
