@@ -4,15 +4,18 @@ import useChangeTitle from '../store/changeTitle';
 import { useHead } from '@vueuse/head';
 import type { AuthInputs, SignData } from '../types/global';
 import useUserData from '../store/userData';
-import { useRouter } from 'vue-router';
 import auth from './functions/sign';
 import parsePassword from './functions/parsePassword';
 import triggerEffect from './functions/bubbleEffect';
+import serv from './functions/interceptors';
+import useSwitcher from './functions/useSwitcher';
 
   const phoneCodes = ref({});
-  const phoneInput:any = ref(null);
-  const selectedCode = ref('');
-  const codeSelector:any = ref(null);
+  const phoneInput:Ref<any | null> = ref(null);
+  const selectedCode = ref('+1');
+  const selectedCountry = ref('United States');
+  const codeSelector:Ref<HTMLDivElement | null> = ref(null);
+  const codeOptions:Ref<Boolean> = ref(false);
   const currentStrokesLength = ref(11);
   const title = useChangeTitle();
   const currentWindow:Ref<AuthInputs> = ref('phone');
@@ -21,16 +24,16 @@ import triggerEffect from './functions/bubbleEffect';
   const inputData:SignData | any = {};
   const simpleInput = ref("");
   const userData = useUserData();
-  const router = useRouter();
+  const switcher = useSwitcher(codeOptions);
 
   title.changeTitle('Sign in');
   useHead({
     title:title.currentTitle
   });
   
-  const changeCode = (event:any) => {
-    if(event.target.value) {
-      selectedCode.value = event.target.value;
+  const changeCode = (code:string) => {
+    if(code) {
+      selectedCode.value = code;
     }
     phoneInput.value.innerText = `${selectedCode.value ?? '+1'}`;
     currentStrokesLength.value = 12 - (phoneInput.value.innerText.length - 1);
@@ -120,16 +123,16 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
   }
 
   watch(currentWindow,() => {
-    console.log('window changed!',currentWindow.value);
      if(currentWindow.value === 'phone') {
        changeStrokes();
      }
   }); 
 
   const WriteInput = (event:any) => {
-    console.log('changed:',event.target.value);
     simpleInput.value = event.target.value;
-    inputError.value = "";
+    if(inputError.value) {
+      inputError.value = "";
+    }
   }
 
   const signActions = async () => {
@@ -141,8 +144,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
             break;
          }
 
-         const res = await fetch(`http://localhost:3000/user/phone/${currentPhone}`)
-         .then(data => data.json());
+         const res:any = await serv.get(`/user/phone/${currentPhone}`);
 
          inputData['phone'] = currentPhone;
          console.log('register?:',res);
@@ -171,9 +173,9 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
         inputData['password'] = simpleInput.value;
         inputData['ip'] = userData.ip;
         simpleInput.value = "";
-        const authReq = auth(register,inputData,userData.ip);
-        if((await authReq).window) {
-          window.location.reload();
+        const authReq:any = auth(register,inputData,userData.ip,inputError);
+        if((await authReq).window === 'password') {
+          currentWindow.value = 'password';
         } else {
           window.location.href = "/";
         }
@@ -188,15 +190,36 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
     }
   }
 
+  const changeValue = (country:string,code:string) => {
+     if(selectedCountry.value) {
+        selectedCountry.value = country;
+     }
+
+     changeCode(code);
+  }
+
+  const checkPaste = (event:ClipboardEvent | any) => {
+    const pasteData = event.clipboardData.getData('text');
+    event.preventDefault();
+    if(!/[A-Z,a-z]/g.test(pasteData)) {
+      phoneInput.value.innerText += pasteData;
+      PhoneValidation();
+    }
+  }
+
   onMounted(async () => {
     phoneCodes.value = await fetch("http://localhost:3000/getData/phoneCodes")
     .then(d => d.json());
 
     if(phoneInput.value) {
       phoneInput.value.addEventListener('input',PhoneValidation);
-      codeSelector.value.addEventListener('change',changeCode);
-      const event = new Event('change',{bubbles:true});
-      codeSelector.value.dispatchEvent(event);
+      phoneInput.value.addEventListener('paste',checkPaste);
+      codeSelector.value?.addEventListener('blur',() => {
+        if(codeOptions.value) {
+          codeOptions.value = false;
+        }
+      });
+      changeCode(selectedCode.value);
     }
 
     document.addEventListener('keydown',fastEnter);
@@ -215,12 +238,19 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
     <div class="container auth-list-container">
         <ul class="auth-list">
          <li v-if="currentWindow === 'phone'" class="auth-window">
-           <select v-model="selectedCode" autofocus class="code-selector" ref="codeSelector"  name="codes" id="code-selector">
-              <option class="code-option"  v-for="(code,index) in phoneCodes" :value="code" :key="`phoneCode-${index}`">
-                <p>{{ index }}</p>
-                <p>{{ code }}</p>
-              </option>
-           </select>
+           <div tabindex="0" @click="switcher" class="code-selector" :style="{pointerEvents:codeOptions ? 'none' : 'all'}" ref="codeSelector"  name="codes" id="code-selector">
+            {{ selectedCountry }}
+            <svg class="default-svg list-arrow" viewBox="0 0 24 24" :class="{'list-arrow-active':codeOptions}" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 4L6 10M12 4L18 10M12 4L12 14.5M12 20V17.5"  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
+            </svg>
+              <div class="code-options container flex-reverse" v-if="codeOptions">
+                <li @click="() => changeValue(index,code)" class="code-option" v-for="(code,index) in phoneCodes" :value="index" :key="`phoneCode-${index}`">
+                  <p>{{ index }}</p>
+                  <p class="code" >{{ code }}</p>
+                </li>
+              </div>
+            </div>
            <div class="input-container">
             <label v-if="inputError !== 'phone'" class="auth-label" for="phone-input">Your Phone Number</label>
             <label v-else class="auth-label error-label" for="phone-input">Wrong Number</label>
@@ -231,42 +261,71 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
          <li v-if="currentWindow === 'name'" class="auth-window">
            <div class="input-container">
             <label class="auth-label" for="name-input">Your Name</label>
-            <input  :autofocus="currentWindow === 'name'"  name="name-input" :value="simpleInput" @change="WriteInput" class="auth-input"  type="text">
+            <input  :autofocus="currentWindow === 'name'"  name="name-input" @input="WriteInput" class="auth-input"  type="text">
            </div>
          </li>
          <li v-if="currentWindow === 'password'" class="auth-window">
             <div class="input-container">
               <label class="auth-label" for="pass-input">Your password</label>
-              <input :class="{'input-error':inputError === 'password'}" :autofocus="currentWindow === 'password'" class="auth-input" :value="simpleInput" @input="WriteInput" name="pass-input"  type="text">
+              <input :class="{'input-error':inputError === 'password'}" :autofocus="currentWindow === 'password'" class="auth-input" @input="WriteInput" name="pass-input"  type="text">
               <label class="auth-label error-label" v-if="inputError === 'password'" for="pass-input">
                 Password must contain:
                 <p class="auth-label error-label">A-Z letter</p>
                 <p class="auth-label error-label">0-9 number</p>
                 <p class="auth-label error-label">minimum 8 symbols</p>
               </label>
+              <label v-if="inputError === 'incorrect'" class="auth-label error-label" for="pass-input">Password incorrect for this user</label>
             </div>
          </li>
          <button @click="(event:any) => {
             signActions();
             triggerEffect(event);
-         }" class="auth-button">{{ currentWindow === 'password' ? 'Enter' : 'Next' }}</button>
+         }" class="auth-button hidden-container">{{ currentWindow === 'password' ? 'Enter' : 'Next' }}</button>
        </ul>
     </div>
   </section>
 </template>
 
 <style scoped>
+  .code {
+    color:var(--night-color) !important;
+  }
+
+  .list-arrow {
+    position:absolute;
+    right:1%;
+    display:flex;
+    align-self:center;
+  }
+
+  .list-arrow-active {
+    transform:rotate(180deg);
+  }
+
+
   .auth-input {
     position: relative;
     display: flex;
     align-items: center;
     background-color: var(--secondary-color);
-    border: .2rem solid var(--bubble-color);
+    border: .2rem solid var(--light-grey-half);
     border-radius: var(--default-border-radius);
     color:var(--black-default) !important;
     padding-left: .5rem;
     height: 5rem;
-    min-width:70% ;
+    min-width:70%;
+  }
+
+  .code-options {
+    position: absolute;
+    top:103%;
+    overflow-y: scroll;
+    height:16rem;
+    z-index: 1;
+    background-color: var(--chat-bg-color);
+    backdrop-filter: blur(.5rem);
+    border-radius: 20px;
+    pointer-events: all !important;
   }
 
   .auth-container {
@@ -293,6 +352,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
   .auth-label {
     padding-left: .2rem;
     font-size: 1.3rem !important;
+    color:var(--light-grey) !important;
   }
 
   .error-label {
@@ -332,10 +392,10 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
 
   .auth-list {
     position: relative;
-     display: flex;
-     flex-direction: column;
-     padding: 0;
-     margin: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
   }
 
   .auth-window {
@@ -353,8 +413,11 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
   }
 
   .code-selector {
+    position: relative;
     width: 90%;
     height: 6rem;
+    display:flex;
+    align-items: center;
     background-color: var(--chat-bg-color);
     padding: .5rem;
     outline: none;
@@ -366,13 +429,24 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
   }
 
   .code-option {
+    width: 100%;
+    height: 4rem;
     cursor: pointer;
     padding-left: .2rem;
+    user-select: none;
+    display: flex;
+  }
+
+  .code-option > * {
+    margin: 0 .5rem;
   }
 
   .code-option:hover {
     background-color: var(--night-color);
-    
+  }
+
+  .code-option:hover .code {
+    color:var(--secondary-color) !important;
   }
 
   .code-option:checked {
@@ -403,7 +477,6 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
     padding: 1rem;
     background-color: var(--night-color);
     border-radius:var(--default-border-radius);
-    overflow: hidden;
   }
 
 </style>

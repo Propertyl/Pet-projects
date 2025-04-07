@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { Chat,Message } from "./stuff/types";
 import groupMessages from "./stuff/functions/groupMessages";
 import getCryptedIP from "./stuff/functions/cryptoIp";
+import serv from "./stuff/functions/interceptor";
 
 @WebSocketGateway({cors:true,namespace:'app'})
 
@@ -13,15 +14,14 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    private clients = new Map<string,string>();
 
    async updateUserStatus(ip:string,status:Boolean) {
-      const rooms = await fetch(`http://localhost:3000/getData/user/rooms/${ip}`)
-      .then(res => res.json())
-      .then(rooms => rooms.map(({chatId}:{chatId:string}) => chatId));
-      await fetch('http://localhost:3000/user/update-status',{
-        method:'PUT',
+      const rooms = await serv.get(`http://localhost:3000/getData/user/rooms/${ip}`)
+      .then((rooms:any) => rooms.map(({chatId}:{chatId:string}) => chatId));
+      await serv.put('http://localhost:3000/user/update-status',{
         headers: {
         'Content-Type':'application/json',
         },
-        body: JSON.stringify({ip:ip,status:status})
+        ip:ip,
+        status:status
       });
 
       this.server.to(rooms).emit('user-updates',{ip:ip,status:status});
@@ -52,22 +52,18 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(data.room).emit('message',data.message.body);
       let currentChat:any = undefined;
 
-      const chat = await fetch(`http://localhost:3000/chat/chatID/${data.room}`)
-      .then(res => res.json())
-      .then(data => data.messages);
+      const chat = await serv.get(`http://localhost:3000/chat/chatID/${data.room}`)
+      .then((data:any) => data.messages);
 
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);
       this.server.to(data.room).emit('updateChat',currentChat);
-      await fetch('http://localhost:3000/chat/updateChat',{
-         method:'PUT',
+      await serv.put('http://localhost:3000/chat/updateChat',{
          headers: {
             'Content-Type':'application/json'
          },
-         body:JSON.stringify({
-            id:data.room,
-            messages:currentChat
-         })
+         id:data.room,
+         messages:currentChat
       });
    }
    

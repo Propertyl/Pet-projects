@@ -8,12 +8,7 @@ const useUsefulStuff = defineStore('stuff',{
 
   actions:{
     switchBurger() {
-      if(this.burgerOpen) {
-        this.burgerOpen = false;
-        return;
-      }
-
-      this.burgerOpen = true;
+      return this.burgerOpen = !this.burgerOpen;    
     }
   }
 })

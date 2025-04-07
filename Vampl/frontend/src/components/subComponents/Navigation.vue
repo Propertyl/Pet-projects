@@ -4,23 +4,23 @@ import useUserData from '../../store/userData';
 import triggerEffect from '../functions/bubbleEffect';
 import {ref,watch, type Ref} from 'vue';
 import changeTheme from '../functions/changeTheme';
+import serv from '../functions/interceptors';
+import useSwitcher from '../functions/useSwitcher';
 
 const usefulStuff = useUsefulStuff();
 const themeOptions = ref(false);
 const themeSwitcher:Ref<HTMLDivElement | null> = ref(null);
 const userData = useUserData();
+const switcher = useSwitcher(themeOptions);
 
 const switchTheme = async (theme:"night" | "light") => {
-  const updatedTheme = await fetch('http://localhost:3000/user/update-theme',{
-    method:'PUT',
+  const updatedTheme:any = await serv.put('/user/update-theme',{
     headers:{
       'Content-Type':'application/json'
     },
-    body:JSON.stringify({ip:userData.ip,theme:theme})
-  })
-  .then(res => res.json());
-
-  console.log('updated theme:',updatedTheme);
+    ip:userData.ip,
+    theme:theme
+  });
 
   changeTheme(updatedTheme.theme);
 }
@@ -34,10 +34,6 @@ watch(themeOptions, (newValue) => {
     }
   }
 });
-
-const switcher = () => {
-  themeOptions.value = !themeOptions.value;
-}
 
 </script>
 

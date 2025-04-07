@@ -50,7 +50,7 @@ interface MessageGroup {
 
 interface SignData {'phone':string,'name'?:string,'password:':string}
 
-type AuthInputs = 'phone' | 'name' | 'password';
+type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 
 type DefaultRef = Ref<HTMLDivElement | null>;
 

@@ -10,6 +10,7 @@ import parseDate from '../functions/parseDate';
 import parseToDeleteGroup from '../functions/parseChatGroups';
 import chatAfterRefresh from '../functions/getChatAfterRefresh';
 import type { chatData, DefaultRef, statusInfo} from '../../types/global';
+import useThrottle from '../functions/useThrottle';
 
   const chatData:Ref<chatData | null> = ref(null);
   const messagesRef:DefaultRef = ref(null);
@@ -35,6 +36,8 @@ import type { chatData, DefaultRef, statusInfo} from '../../types/global';
       }
   }
 
+  const throttle = useThrottle(searchScroll,200);
+
   onMounted(async () => {
     socket.on('connect',async () => {
       console.log('changed ur status');
@@ -45,7 +48,6 @@ import type { chatData, DefaultRef, statusInfo} from '../../types/global';
     });
 
     socket.on('updateChat',(currentChat:any) => {
-      console.log('after update:',currentChat['all']);
       chatData.value = parseToDeleteGroup(currentChat['all']);
       const newChats = userData.allChats.map(chat => {
         if(chat.id === currentRoom.value) {
@@ -63,7 +65,7 @@ import type { chatData, DefaultRef, statusInfo} from '../../types/global';
   });
 
   onUnmounted(() => {
-    messagesRef.value!.removeEventListener('scroll',searchScroll);
+    messagesRef.value!.removeEventListener('scroll',throttle);
   });
 
   watch(userData,async () => {
@@ -78,13 +80,16 @@ import type { chatData, DefaultRef, statusInfo} from '../../types/global';
 
   watch(chatData,async () => {
      await nextTick();
-     scrollDown();
+     if(messagesRef.value) {
+      messagesRef.value.addEventListener('scroll',throttle);
+      scrollDown();
+     }
   });
 
   const scrollDown = () => {
     if(messagesRef.value) {
-      messagesRef.value.addEventListener('scroll',searchScroll);
       messagesRef.value.scrollTo({top:messagesRef.value.scrollHeight});
+      downButton.value = false;
      }
   }
 

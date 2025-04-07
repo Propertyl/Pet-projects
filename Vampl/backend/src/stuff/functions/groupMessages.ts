@@ -25,7 +25,6 @@ const groupSubMessages = (message:Message,chat:messageChat[]) => {
 
   const lastGroup:any = chat.map(chat => chat).pop();
   const [lastSender,number] = Object.keys(lastGroup).pop()!.split('-');
-  console.log('current chat:',chat,'last:',lastSender,"number:",number);
   
   if(lastSender != message.user) {
     chat.push({[`${message.user}-${Number(number) + 1}`]:createGroup(message)});
@@ -51,7 +50,6 @@ const groupMessages = (message:Message,chat:Chat | undefined) => {
   
   const lastDateGroup:any = currentGroups.map(item => item).pop();
   let lastDate = Object.keys(lastDateGroup).pop() ?? "";
-  console.log('last:',lastDate,'date:',lastDateGroup,'date:',date);
 
   if(date != lastDate) {
     chat['all'].push({
@@ -62,8 +60,6 @@ const groupMessages = (message:Message,chat:Chat | undefined) => {
   }
 
   const lastGroup = chat['all'][currentGroups.length - 1];
-
-  console.log('lastGroup:',lastGroup);
 
   lastGroup[lastDate].groups = groupSubMessages(message,lastGroup[lastDate].groups);
 

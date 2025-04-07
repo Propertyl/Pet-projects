@@ -2,7 +2,7 @@ import { Body, Controller, Get,Param, Post, Put, Res } from "@nestjs/common";
 import { Response } from "express";
 import { UserService } from "src/services/user.service";
 import getCryptedIP from "src/stuff/functions/cryptoIp";
-import cryptoIp from "src/stuff/functions/cryptoIp";
+import serv from "src/stuff/functions/interceptor";
 
 @Controller('user')
 export class UserController {
@@ -23,8 +23,6 @@ export class UserController {
   async getUserPhone(@Param('userPhone') userPhone:string, @Res() res:Response) {
     const data = await this.userServices.getUserByPhone(userPhone);
 
-    console.log('phone data:',data);
-
     if(!data) {
       return res.status(200).json({register:false});
     }
@@ -35,20 +33,15 @@ export class UserController {
   @Get('chats/:ip')
   async getUserChats(@Param('ip') ip:string) {
      const userChatData:any = await this.userServices.getChatData(ip);
-
-     console.log('userrrr:',userChatData[0].messages);
      
      if(!userChatData.length) {
-        await fetch('http://localhost:3000/chat/create-chat',{
-          method:'POST',
+        await serv.post('http://localhost:3000/chat/create-chat',{
           headers:{
             'Content-Type':'application/json'
           },
-          body:JSON.stringify({
-            chatId:this.userServices.genChatID(),
-            chatUsers:{users:[ip,'host']},
-            messages:{"all":[]}
-          })
+          chatId:this.userServices.genChatID(),
+          chatUsers:{users:[ip,'host']},
+          messages:{"all":[]}
         });
         return this.userServices.getChatData(ip);
      }
@@ -59,14 +52,8 @@ export class UserController {
   @Get('chat/:user')
   async getUserChat(@Param('user') user:string) {
     const currentUser = await getCryptedIP()
-    const chatter = await fetch(`http://localhost:3000/user/infoByName/${user}`).then(async res => {
-      try {
-        const userData = await res.json();
-        return userData.ip
-      } catch {
-        console.error("TI SHLUHA");
-      }
-    });
+    const chatter:any = await serv.get(`http://localhost:3000/user/infoByName/${user}`)
+    .then((res:any) => res.ip);
 
     return this.userServices.getChatByLink([currentUser,chatter]);
   }
@@ -135,12 +122,11 @@ export class UserController {
      let userTheme = await this.userServices.getUserTheme(ip)
      
      if(!userTheme) {
-      await fetch('http://localhost:3000/user/create-theme',{
-        method:'POST',
+      await serv.post('http://localhost:3000/user/create-theme',{
         headers: {
           'Content-Type':'application/json'
         },
-        body:JSON.stringify({ip:ip})
+        ip:ip
        });
        return this.userServices.getUserTheme(ip);
      }
@@ -149,13 +135,3 @@ export class UserController {
   }
 
 }
-
-
-// const getData = await this.userServices.getUserByIp(ident);
-
-//     if(!getData) {
-//       await this.userServices.createUser({ip:ident,image:"http://localhost:3000/images/icon.png"});
-//       return this.userServices.getUserByIp(ident);
-//     }
-    
-//     return getData;

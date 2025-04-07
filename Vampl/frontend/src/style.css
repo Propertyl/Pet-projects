@@ -85,6 +85,12 @@ button {
   cursor: pointer;
 }
 
+.default-svg {
+  width: 2rem;
+  height:2rem;
+  stroke:var(--night-color);
+}
+
 .classic-button {
   position: relative;
   display: flex;
