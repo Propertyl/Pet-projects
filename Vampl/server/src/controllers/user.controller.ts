@@ -63,8 +63,10 @@ export class UserController {
   @Get('verifyAccount/:phone')
   async signIn(@Param('phone') phone:string, @Res() response:Response) {
     const user = await this.userServices.getUserByPhone(phone);
+
+    console.log('qw:',user);
      
-    return response.status(200).json({password:user?.password ?? ''});
+    return user?.password;
   }
 
   @Put('setAuthorized')

@@ -13,7 +13,7 @@ const setAuthorized = async (ip:string) => {
   return {router: '/'};
 }
 
-const auth = async (register:boolean,inputData:SignData | any,userIp:string,inputError:AuthInputs | '') => {
+const auth = async (register:Boolean,inputData:SignData | any,userIp:string,inputError:AuthInputs | '') => {
   if(!register) {
     inputData['ip'] = userIp;
     inputData['password'] = await bcrypt.hash(inputData['password'],10);
