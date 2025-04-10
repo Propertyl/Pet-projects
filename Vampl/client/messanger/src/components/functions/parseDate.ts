@@ -1,4 +1,4 @@
-import useUserData from "../../store/userData";
+import { useSelector } from "react-redux";
 import useFormatter from "./dateFormatter";
 
 const dateCastling = ([day,month,year]:string[],locale:string) => {
@@ -13,7 +13,7 @@ const dateCastling = ([day,month,year]:string[],locale:string) => {
 }
 
 const parseDate = (date:any,locale = 'en-US') => {
-  const allMonth = useUserData().allMonth;
+  const allMonth = useSelector((state:any) => state.user.allMonth);
   const formatter = useFormatter(locale);
 
   const currentDate = formatter.format(new Date()).split(/[,.\/]/);

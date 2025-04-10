@@ -3,16 +3,17 @@ import changeTheme from './components/functions/changeTheme';
 import type { UserInfo } from './components/types/global';
 import serv from './components/functions/interceptors';
 import {useNavigate } from 'react-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setData } from './store/user';
 import Navigation from './components/Navigation';
+import { Store } from './types/global';
+import { Helmet } from 'react-helmet';
 
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const title = useSelector((state:Store) => state.stuff.title);
   
-// const router = useRo;
-
 useEffect(() => {
     const startApplication = async () => {
       // const user = window.location.href.split('#').pop();
@@ -41,10 +42,13 @@ useEffect(() => {
 
   return (
     <>
+     <Helmet>
+        <title>{title}</title>
+     </Helmet>
       <header>
         <Navigation/>
       </header>
-      <main>
+      <main className='chat-main'>
 
       </main>
     </>

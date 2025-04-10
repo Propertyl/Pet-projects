@@ -1,7 +1,7 @@
-import type { Ref } from "vue";
 import type { AuthInputs, SignData } from "../types/global";
 import bcrypt from "bcryptjs";
 import serv from "./interceptors";
+import { Dispatch, SetStateAction } from "react";
 
 const setAuthorized = async (ip:string) => {
   await serv.put('/user/setAuthorized',{
@@ -13,8 +13,8 @@ const setAuthorized = async (ip:string) => {
   return {router: '/'};
 }
 
-const auth = async (register:Ref<Boolean>,inputData:SignData | any,userIp:string,inputError:Ref<AuthInputs | ''>) => {
-  if(!register.value) {
+const auth = async (register:boolean,inputData:SignData | any,userIp:string,inputError:AuthInputs | '') => {
+  if(!register) {
     inputData['ip'] = userIp;
     inputData['password'] = await bcrypt.hash(inputData['password'],10);
       await serv.post('/user/createAccount',{
@@ -27,7 +27,7 @@ const auth = async (register:Ref<Boolean>,inputData:SignData | any,userIp:string
     if(await bcrypt.compare(inputData['password'],req.password)) {
       return setAuthorized(inputData.ip);
     } else {
-      inputError.value = "incorrect";
+      inputError = "incorrect";
       return {window:'password'};
     }
   }
