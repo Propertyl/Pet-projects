@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "project": "concurrently \"npm run back\" \"npm run front\"",
-    "back": "cd backend && npm run start",
-    "front": "cd frontend && npm run dev"
+    "back": "cd server && npm run start",
+    "front": "cd client/messanger && npm run dev"
   },
   "keywords": [],
   "author": "",
