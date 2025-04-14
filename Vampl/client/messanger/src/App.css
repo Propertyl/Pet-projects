@@ -63,7 +63,6 @@ i {
 
 html {
   font-size: var(--main-rem);
-  transition: all .2s;
 }
 
 body {
@@ -157,11 +156,10 @@ button:focus-visible {
   width: 3rem;
   height: 3rem;
   display: flex;
-  border-radius: 50%;
+  border-radius: 50% !important;
   background-color:var(--bubble-color);
-  opacity: .5;
   z-index: 0;
-  animation: bubble-pop .6s ease-out;
+  animation: bubble-pop .6s linear !important;
 }
 
 .nav-section {
@@ -217,16 +215,34 @@ p {
   height: auto !important;
 }
 
+/* (
+                <div className={`message-group ${sender === userName ? 'group-right' : ''}`} key={`group-${groupIdx}`}>
+                  {messages.map((message: any, index: number) => (
+                    <div
+                      className={`message ${sender !== userName ? 'not-user-message' : ''}`}
+                      key={`message-${groupIdx}-${index}`}
+                    >
+                      {index === messages.length - 1 && (
+                        <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail chat-message-tail">
+                          <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
+                        </svg>
+                      )}
+                      <p className="message-body">{message.body}</p>
+                      <p className="message-time">{parseMessageTime(message.time)}</p>
+                    </div>
+                  ))}
+                </div>
+              ) */
 
 
 @keyframes bubble-pop {
   0% {
       transform: scale(0);
-      opacity: 0.5;
+      opacity: .5;
   }
   70% {
       transform: scale(2);
-      opacity: 0.3;
+      opacity: .3;
   }
   100% {
       transform: scale(3);
@@ -241,7 +257,7 @@ p {
   --nav-bg:rgb(63, 62, 62);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
-  --bubble-color:rgba(0,0,0,.5);
+  --bubble-color:rgba(0,0,0,1);
   --light-grey:rgb(155,155,155);
   --light-black:#4d4d4d;
   --main-grey:#787474;

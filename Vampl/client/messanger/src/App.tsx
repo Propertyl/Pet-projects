@@ -1,40 +1,44 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import changeTheme from './components/functions/changeTheme';
 import type { UserInfo } from './components/types/global';
 import serv from './components/functions/interceptors';
-import {useNavigate } from 'react-router';
+import {RouterProvider } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { setData } from './store/user';
-import Navigation from './components/Navigation';
 import { Store } from './types/global';
-import { Helmet } from 'react-helmet';
+import router from './router/router';
 
 function App() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const title = useSelector((state:Store) => state.stuff.title);
+
+  useEffect(() => {
+    document.title = title;
+  },[title])
   
-useEffect(() => {
+  useLayoutEffect(() => {
     const startApplication = async () => {
       // const user = window.location.href.split('#').pop();
       const authInfo:UserInfo = await serv.get(`/user/getAuthData/${false}`);
-      const currentTheme:{theme:string} = await serv.get(`/user/get-theme/${authInfo.ip}`);
+      const Ip = await serv.get('/user/getUserIP');
 
-      changeTheme(currentTheme.theme);
       const months = await serv.get('/getData/month/en');
       
       dispatch(setData({field:'allMonth',value:months}));
-      dispatch(setData({field:'ip',value:authInfo.ip}));
       dispatch(setData({field:'locale',value:navigator.language}));
+      dispatch(setData({field:'ip',value:Ip}));
 
-      if(!authInfo.authorized) {
-        navigate('/auth');
-        return;
+      if(!authInfo.authorized && window.location.href.split('/').pop() != 'auth') {
+        window.location.href = '/auth';
+      } else if(authInfo.authorized) {
+        const userInfo:any = await serv.get(`/user/infoByIp/${Ip}`);
+        const userTheme:any = await serv.get(`/user/get-theme/${userInfo.phone}`);
+        
+        changeTheme(userTheme.theme)
+        dispatch(setData({field:'phone',value:userInfo.phone}));
+        dispatch(setData({field:'additionalData',value:userInfo}));
       }
 
-      const userInfo = await serv.get(`/user/infoByIp/${authInfo.ip}`);
-
-      dispatch(setData({field:'additionalData',value:userInfo}));
     }
 
     startApplication();
@@ -42,15 +46,7 @@ useEffect(() => {
 
   return (
     <>
-     <Helmet>
-        <title>{title}</title>
-     </Helmet>
-      <header>
-        <Navigation/>
-      </header>
-      <main className='chat-main'>
-
-      </main>
+      <RouterProvider router={router}/>
     </>
   )
 }

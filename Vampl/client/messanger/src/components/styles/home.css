@@ -1,0 +1,28 @@
+.chat-main {
+  position: relative;
+  background-color:var(--chat-bg-color);
+  width: 100%;
+  height: calc(100% - var(--header-height));
+  display: flex;
+  transition: all .2s;
+}
+
+.chat-footer {
+  position: relative;
+  background-color:var(--bg-main);
+  height:var(--footer-height);
+  transition: all .2s;
+}
+
+.mainUp {
+  transform: translateY(var(--foter-space));
+}
+
+.headerUp {
+  transform: translateY(var(--foter-space));
+}
+
+.footerUp {
+  display: flex;
+  transform: translateY(var(--foter-space));
+}

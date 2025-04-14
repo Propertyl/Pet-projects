@@ -30,6 +30,7 @@ const Navigation = () => {
   const themeSwitcher:Ref<HTMLDivElement | null> = useRef(null);
   const [themeOptions,setThemeOptions] = useState<Boolean>(false);
   const ip = useSelector((state:any) => state.user.ip);
+  const phone = useSelector((state:any) => state.user.phone);
   const switcher = useSwitcher(setThemeOptions);
   const burgerOpen = useSelector((state:any) => state.stuff.burgerOpen);
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const Navigation = () => {
       headers:{
         'Content-Type':'application/json'
       },
-      ip:ip,
+      phone:phone,
       theme:theme
     });
 

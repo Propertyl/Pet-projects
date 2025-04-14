@@ -1,4 +1,8 @@
 function cryptoIp(ip:string) {
+  if(ip === undefined) {
+    return "";
+  }
+
   const letters = ['A','B','C','D','E','F','J','H','I','G','K','L','M','O','N','P','R','S','T','Q','X','Y','Z'];
 
   const numberStream = ip.split('.');

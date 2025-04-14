@@ -14,6 +14,12 @@ export class UserController {
     return this.userServices.getUserByIp(ip);
   }
 
+  @Get('getPhone/:ip')
+  getUserInfoPhone(@Param('ip') ip:string) {
+    console.log("we started!!");
+    return this.userServices.getInfoByIP(ip);
+  }
+
   @Get('infoByName/:name') 
   getUserInfo(@Param('name') name:string) {
      return this.userServices.getUserByName(name);
@@ -60,18 +66,21 @@ export class UserController {
      return this.userServices.createUser(user);
   }
 
+  @Post('createAuthData')
+  createAuthData(@Body() data:{ip:string,phone:string,authorized:boolean}) {
+      return this.userServices.addAuthData(data);
+  }
+
   @Get('verifyAccount/:phone')
   async signIn(@Param('phone') phone:string, @Res() response:Response) {
     const user = await this.userServices.getUserByPhone(phone);
-
-    console.log('qw:',user);
      
-    return user?.password;
+    return response.status(200).json({password:user!.password});
   }
 
   @Put('setAuthorized')
-  updateUserAuth(@Body() data:{ip:string}) {
-     return this.userServices.updateUserAuth(data.ip);
+  updateUserAuth(@Body() data:{phone:string}) {
+     return this.userServices.updateUserAuth(data.phone);
   }
 
 
@@ -81,55 +90,41 @@ export class UserController {
     if(manual == 'true') {
       let getRes = await this.userServices.getAuthByIp('host');
 
-      if(!getRes) {
-        await this.userServices.addAuthData('host');
-        getRes = await this.userServices.getAuthByIp('host');
-      }
-
       return getRes;
     }
 
     const ident:string = await getCryptedIP();
     let getRes = await this.userServices.getAuthByIp(ident);
 
-    if(!getRes) {
-      await this.userServices.addAuthData(ident);
-      getRes = await this.userServices.getAuthByIp(ident);
-    }
-
     return getRes;
   }
 
+  @Get('getUserIp')
+  async getUserIP() {
+    return await getCryptedIP();
+  }
+
   @Put('update-status')
-  async updateUserStatus(@Body() data:{ip:string,status:boolean}) {
-     return this.userServices.updateStatus(data.ip,data.status);
+  async updateUserStatus(@Body() data:any) {
+     console.log('pipiske:',data);
+     return this.userServices.updateStatus(data,true);
   }
 
   @Post('create-theme')
-  async createUserTheme(@Body() data:{ip:string}) {
-    await this.userServices.createUserTheme(data.ip);
+  async createUserTheme(@Body() data:{phone:string}) {
+    return this.userServices.createUserTheme(data);
   }
 
   @Put('update-theme')
-  async updateUserTheme(@Body() data:{ip:string,theme:string}) {
+  async updateUserTheme(@Body() data:{phone:string,theme:string}) {
     await this.userServices.updateUserTheme(data);
-    return this.userServices.getUserTheme(data.ip);
+    return this.userServices.getUserTheme(data.phone);
   }
 
   @Get(`get-theme/:ip`)
   async getUserTheme(@Param('ip') ip:string) {
      let userTheme = await this.userServices.getUserTheme(ip)
      
-     if(!userTheme) {
-      await serv.post('/user/create-theme',{
-        headers: {
-          'Content-Type':'application/json'
-        },
-        ip:ip
-       });
-       return this.userServices.getUserTheme(ip);
-     }
-
      return userTheme;
   }
 

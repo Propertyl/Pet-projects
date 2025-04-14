@@ -1,34 +1,45 @@
-import type { AuthInputs, SignData } from "../types/global";
+import type { SignData } from "../types/global";
 import bcrypt from "bcryptjs";
 import serv from "./interceptors";
-import { Dispatch, SetStateAction } from "react";
 
-const setAuthorized = async (ip:string) => {
+const setAuthorized = async (phone:string) => {
   await serv.put('/user/setAuthorized',{
     headers: {
       'Content-Type':'application/json'
     },
-    ip:ip
+    phone:phone
   });
-  return {router: '/'};
+  return;
 }
 
-const auth = async (register:Boolean,inputData:SignData | any,userIp:string,inputError:AuthInputs | '') => {
+const createAccount = async (inputData:SignData | any) => {
+  await serv.post('/user/createAuthData',{
+    ip:inputData['ip'],
+    phone:inputData['phone'],
+    authorized:true
+  });
+  await serv.post('/user/create-theme',{
+    phone:inputData['phone']
+  })
+  await serv.post('/user/createAccount',{
+    ...inputData
+  });
+}
+
+const auth = async (register:Boolean,inputData:SignData | any) => {
   if(!register) {
-    inputData['ip'] = userIp;
     inputData['password'] = await bcrypt.hash(inputData['password'],10);
-      await serv.post('/user/createAccount',{
-        inputData
-      });
-      return setAuthorized(inputData.ip);
+    createAccount(inputData);
+    return true;
   } else {
+    console.log("start:",register,inputData);
     const req:any = await serv.get(`/user/verifyAccount/${inputData['phone']}`);
     console.log('entered:',req);
     if(await bcrypt.compare(inputData['password'],req.password)) {
-      return setAuthorized(inputData.ip);
+      await setAuthorized(inputData.phone);
+      return true;
     } else {
-      inputError = "incorrect";
-      return {window:'password'};
+      return false;
     }
   }
 }

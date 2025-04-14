@@ -1,5 +1,4 @@
 import { Ref, useCallback, useEffect, useRef, useState } from "react";
-import { Helmet } from "react-helmet";
 import { AuthInputs, SignData, Store } from "../types/global";
 import { useSelector } from "react-redux";
 import useSwitcher from "../components/functions/useSwitcher";
@@ -21,7 +20,7 @@ const AuthPage = () => {
   const [currentWindow,setCurrentWindow] = useState<AuthInputs>('phone');
   const [inputError,setInputError] = useState<AuthInputs | ''>('');
   const [register,setRegister] = useState<Boolean>(false);
-  const inputData:SignData | any = {};  
+  const [inputData,setInputData] = useState<SignData | any>({});  
   const [userInput,setInput] = useState<string>("");
   const switcher = useSwitcher(setCodeOptions);
 
@@ -35,6 +34,10 @@ const AuthPage = () => {
     setStrokes(strokes);
     changeStrokes(strokes);
   }
+
+  useEffect(() => {
+    document.title = "Join to us";
+  },[])
 
   const changeStrokes = (currentStrokes:number) => {
     console.log('strokes:',currentStrokes);
@@ -52,21 +55,21 @@ const AuthPage = () => {
 
   const saveCursorPosition = (el:any) => {
   const selection:any = window.getSelection();
-  if (!selection.rangeCount) return null; // Если курсора нет, выходим
+  if (!selection.rangeCount) return null; 
   
-  const range = selection.getRangeAt(0); // Берём текущий диапазон выделения
-  const preCaretRange = range.cloneRange(); // Копируем его
+  const range = selection.getRangeAt(0); 
+  const preCaretRange = range.cloneRange(); 
   
-  preCaretRange.selectNodeContents(el); // Берём весь контент
-  preCaretRange.setEnd(range.endContainer, range.endOffset); // Ставим конец в текущую позицию
+  preCaretRange.selectNodeContents(el); 
+  preCaretRange.setEnd(range.endContainer, range.endOffset); 
 
-  const cursorPosition = preCaretRange.toString().length; // Считаем длину текста до курсора
+  const cursorPosition = preCaretRange.toString().length;
   return cursorPosition;
 };
 
 const restoreCursorPosition = (el:any, cursorPosition:any) => {
   const selection:any = window.getSelection();
-  selection.removeAllRanges(); // Убираем старые выделения
+  selection.removeAllRanges(); 
   
   const range = document.createRange();
   let charCount = 0;
@@ -91,7 +94,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
   };
 
   findPosition(el);
-  selection.addRange(range); // Восстанавливаем курсор
+  selection.addRange(range); 
 };
 
   const PhoneValidation = () => {
@@ -146,7 +149,10 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
 
          const res:any = await serv.get(`/user/phone/${currentPhone}`);
 
-         inputData['phone'] = currentPhone;
+         setInputData((data:SignData) => {
+            data['phone'] = currentPhone;
+            return data;
+         });
          console.log('register?:',res);
          setRegister(res.register);
 
@@ -158,24 +164,29 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
          setCurrentWindow('password');
          break;
         case 'name':
-         inputData['name'] = userInput;
+          setInputData((data:SignData) => {
+            data['name'] = userInput;
+            return data;
+         });
          setInput('');
          setCurrentWindow('password');
           break;
         case 'password':
-        console.log('simple:',userInput);
         if(!parsePassword(userInput)) {
           setInputError('password');
           setInput('')
           break;
         }
-        inputData['password'] = userInput;
-        inputData['ip'] = ip;
+        console.log('simple:',userInput);
+        const finalData = inputData;
+        finalData['password'] = userInput;
+        finalData['ip'] = ip;
+        setInputData(finalData);
         setInput('');
-        const authReq:any = await auth(register,inputData,ip,inputError);
+        const authReq:any = await auth(register,finalData);
         console.log("AUTH:",authReq);
-        if((await authReq).window === 'password') {
-          setCurrentWindow('password');
+        if(!authReq) {
+          setInputError('incorrect');
         } else {
           window.location.href = "/";
         }
@@ -183,12 +194,12 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
      }
   }
 
-  const fastEnter = (event:KeyboardEvent) => {
+  const fastEnter = useCallback((event:KeyboardEvent) => {
     if(event.key === 'Enter') {
       event.preventDefault();
       signActions();
     }
-  }
+  },[currentWindow,userInput]);
 
   const changeValue = (country:string,code:string) => {
      if(country) {
@@ -207,10 +218,34 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
     }
   }
 
+  const BackToStart = () => {
+    setInputData({});
+    setCurrentWindow('phone');
+    setTimeout(connectEvents,0);
+  }
+
+  const connectEvents = () => {
+    if(phoneInput.current && codeSelector.current) {
+      phoneInput.current.addEventListener('input',PhoneValidation);
+      phoneInput.current.addEventListener('paste',checkPaste);
+      codeSelector.current.addEventListener('blur',() => {
+        console.log('blured')
+        setCodeOptions(false);
+      });
+      changeCode(phoneCode);
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown',fastEnter);
+
+    return () => document.removeEventListener('keydown',fastEnter);
+
+  },[fastEnter]);
+
   useEffect(() => {
     const setupPage = async () => {
-      const fetchedCodes:any = await fetch("http://localhost:3000/getData/phoneCodes")
-      .then(d => d.json());
+       const fetchedCodes:any = await serv.get("/getData/phoneCodes");
        setPhoneCodes((_:any) => {
         const elements = [];
 
@@ -225,36 +260,24 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
          
         return elements;
        });
+
+       connectEvents();
   
-      if(phoneInput.current && codeSelector.current) {
-        phoneInput.current.addEventListener('input',PhoneValidation);
-        phoneInput.current.addEventListener('paste',checkPaste);
-        codeSelector.current.addEventListener('blur',() => {
-          setCodeOptions(false);
-        });
-        changeCode(phoneCode);
-      }
     } 
 
     setupPage();
-
-    document.addEventListener('keydown',fastEnter);
-
-    return () => document.removeEventListener('keydown',fastEnter);
 
   },[]);
 
     return (
       <>
-        <Helmet>
-            <title>Join to us</title>
-        </Helmet>
         <section className="auth-page">
           <div className="container auth-list-container">
+            {currentWindow !== 'phone' && <button className="refresh-button" onClick={BackToStart} >Back to Start</button>}
               <ul className="auth-list">
                { currentWindow === 'phone' &&
                 <li className="auth-window">
-                  <div tabIndex={0} onClick={switcher} className="code-selector" style={{pointerEvents:codeOptions ? 'none' : 'all'}} ref={codeSelector}   id="code-selector">
+                  <div autoFocus tabIndex={0} onClick={switcher} className="code-selector" style={{pointerEvents:codeOptions ? 'none' : 'all'}} ref={codeSelector}   id="code-selector">
                    {country}
                    <svg className={`default-svg list-arrow ${codeOptions &&'list-arrow-active'}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
@@ -301,12 +324,12 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
                     }
                   </div>
                 </li>
-
                }
                <button onClick={(event:any) => {
                   signActions();
                   triggerEffect(event);
-               }} className="auth-button hidden-container">{ currentWindow === 'password' ? 'Enter' : 'Next' }</button>
+               }} className="auth-button hidden-container">{ currentWindow === 'password' ? 'Enter' : 'Next' }
+               </button>
              </ul>
           </div>
         </section>

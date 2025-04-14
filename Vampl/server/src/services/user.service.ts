@@ -8,7 +8,12 @@ export class UserService {
 
   getAuthByIp(ip:string) {
     return this.prisma.auth.findFirst({
-      where: {ip:ip}
+      where:{
+        ip:ip
+      },
+      select: {
+        authorized:true
+      }
     });
   }
 
@@ -20,12 +25,20 @@ export class UserService {
     })
   }
 
-  addAuthData(ip:string) {
-    return this.prisma.auth.create({
-      data:{
-        ip:ip,
-        authorized:false
+  getInfoByIP(ip:string) {
+    return this.prisma.user.findFirst({
+      where: {
+        ip:ip
+      },
+      select: {
+        phone:true
       }
+    })
+  }
+
+  addAuthData(data:{ip:string,phone:string,authorized:boolean}) {
+    return this.prisma.auth.create({
+      data:data
     })
   }
 
@@ -111,13 +124,13 @@ export class UserService {
      return this.prisma.chats.create({data:userChats})
   }
 
-  async updateUserAuth(ip:string) {
+  async updateUserAuth(phone:string) {
     return this.prisma.auth.update({
        where: {
-         ip:ip
+         phone:phone
        },
        data: {
-         authorized: true
+         authorized:true
        }
     })
   }
@@ -133,18 +146,19 @@ export class UserService {
   }
 
   async createUser(user:{ip:string,name:string,phone:string,birthdate?:string,password:string,image?:string}) {
-    this.prisma.user.create({data:user as any});
-    this.prisma.onlineStatuses.create({data:{
-      ip:user.ip,
+    console.log("ti voobshe rabotaesh:",user);
+    await this.prisma.user.create({data:user as any})
+    await this.prisma.onlineStatuses.create({data:{
+      phone:user.phone,
       status:false
-    }})
+    }});
   }
 
-  async updateStatus(ip:string,currentStatus:boolean) {
-   console.log('ip to update:',ip);
+  async updateStatus(phone:string,currentStatus:boolean) {
+   console.log('ip to update:',phone);
     return this.prisma.onlineStatuses.update({
       where: {
-        ip:ip
+        phone:phone
       },
       data: {
         status:currentStatus
@@ -152,10 +166,10 @@ export class UserService {
     })
   }
 
-  async getStatus(ip:string) {
+  async getStatus(phone:string) {
      return this.prisma.onlineStatuses.findFirst({
         where:{
-          ip:ip
+          phone:phone
         },
         select: {
           status:true
@@ -177,10 +191,10 @@ export class UserService {
     })
   }
 
-  async getUserTheme(ip:string) {
+  async getUserTheme(phone:string) {
     return this.prisma.userTheme.findFirst({
       where:{
-        ip:ip
+        phone:phone
       },
       select:{
         theme:true
@@ -188,18 +202,16 @@ export class UserService {
     })
   }
 
-  async createUserTheme(ip:string) {
+  async createUserTheme(data:{phone:string}) {
     return this.prisma.userTheme.create({
-      data:{
-        ip:ip
-      }
+      data:data
     })
   }
 
-  async updateUserTheme({ip,theme}:{ip:string,theme:string}) {
+  async updateUserTheme({phone,theme}:{phone:string,theme:string}) {
     return this.prisma.userTheme.update({
       where:{
-        ip:ip
+        phone:phone
       },
       data:{
         theme:theme

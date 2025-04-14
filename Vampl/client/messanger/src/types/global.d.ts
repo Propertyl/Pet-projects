@@ -54,7 +54,7 @@ interface MessageGroup {
   messages:{body:string,time:string}[]
 };
 
-interface SignData {'phone':string,'name'?:string,'password:':string}
+interface SignData {'phone':string,'name'?:string,'password':string,'ip':string}
 
 type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 

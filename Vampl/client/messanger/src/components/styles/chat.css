@@ -1,0 +1,246 @@
+.send-icon {
+  pointer-events: none;
+}
+
+.down-button {
+  position: absolute !important;
+  bottom:10%;
+  left:5%;
+  width: 3.5rem;
+  height: 3.5rem;
+  clip-path: circle();
+  background-color: var(--light-grey);
+  z-index: 10000;
+  color:var(--secondary-color);
+}
+
+.arrow-icon {
+  background: url('/down-arrow.png');
+  background-size: 90% 90%;
+  background-position: center;
+}
+
+.date-container {
+  position: sticky; 
+  top: .4rem;
+  height: 2rem;
+  padding: .3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin: .3rem;
+  z-index: 1;
+  user-select: none;
+}
+
+.date-container::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background-color:var(--night-tilelight);
+  opacity: .8;
+  backdrop-filter: blur(.2rem);
+  z-index: 0;
+}
+
+.group-date {
+  font-weight: var(--message-weight);
+  color: var(--secondary-color);
+  z-index: 1;
+}
+
+
+.chat {
+  position: relative;
+  width: calc(100% - 10rem);
+  display: flex;
+  justify-content: center;
+  height:100%;
+  background-color:var(--chat-bg-color);
+}
+
+
+.group-right  {
+  margin-left: auto;
+  margin-right: 0 !important;
+  transform: scaleX(1) !important;
+}
+
+
+.not-user-message {
+  background-color: var(--light-grey) !important;
+}
+
+.not-user-message .message-body {
+  transform: scaleX(-1);
+}
+
+.not-user-message .message-time {
+  transform:scaleX(-1);
+}
+
+.not-user-message .message-tail {
+    fill: var(--light-grey) !important;
+  }
+
+.message-group {
+  position: relative;
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  width: 100%;
+  margin-right: auto;
+  transform: scaleX(-1);
+}
+
+.message-time {
+  position: relative;
+  display: flex;
+  font-size: .7rem;
+  color: var(--message-color);
+  font-weight: 500;
+  align-self: flex-end;
+  justify-self:flex-end;
+  margin: .1rem .5rem 0 0;
+  z-index: 1;
+}
+
+.message {
+  position: relative;
+  display:flex;
+  max-width: 70%;
+  padding-left:20px;
+  padding-right: .2rem;
+  flex-direction: column;
+  border-radius:10px;
+  border-top-left-radius:50px;
+  border-bottom-left-radius:50px;
+  background-color: var(--night-color);
+  margin: .2rem;
+  text-wrap: wrap; 
+  white-space: normal; 
+}
+
+.chat-message-tail {
+  bottom:.2rem !important;
+  right:-.5rem !important;
+  width: 1rem !important;
+  height:1rem !important;
+  transform: rotate(20deg);
+  z-index: 0;
+}
+
+.message-tail {
+  position: absolute;
+  right: -.8rem;
+  bottom: 0rem;
+  width: 2rem;
+  height: 2rem;
+  fill: var(--night-color);
+}
+
+.messages-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-start;
+  align-items: center;
+  width: 100%;
+  max-height: 100%;
+  padding-bottom:1rem ;
+}
+
+.type-message-container {
+  position: relative;
+  width: 80%;
+  height: 4rem;
+  display: flex;
+}
+
+.message-body {
+  position: relative;
+  display: flex;
+  color:var(--message-color);
+  font-weight:var(--message-weight);
+  margin: 0;
+  max-width:95%;
+  white-space: normal; /* Разрешаем перенос слов */
+  word-wrap: break-word; /* Слова переносятся, когда упираются в границу */
+  max-width: 100%; /* Ширина сообщения внутри границ */
+  word-break: break-word; /* Разрешает разрыв длинных слов */
+}
+
+.message-input {
+  width:100%;
+  height:100%;
+  border-radius:20px;
+  font-size:var(--text-size);
+  padding-left: 1rem;
+}
+
+.messages-button {
+   border-radius: 50%;
+   width: 3.5rem;
+   height: 3.5rem;
+   background-color: var(--night-color);
+   margin: 1rem;
+   clip-path: circle(3rem);
+}
+
+.message-icon {
+  background-image: url('/send.png');
+  background-repeat: no-repeat;
+}
+
+.messages-group-container {
+   position: relative;
+   width:50%;
+   min-height: 100%;
+   display: flex;
+   flex-direction: column;
+}
+
+.messages {
+  position: relative;
+  width:100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  height:90%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color:var(--scrollbar-color);
+  scrollbar-width:thin;
+  transition: all .2s;
+  
+}
+
+
+.message::-webkit-scrollbar-button {
+  display: none !important;
+}
+
+.type-message-container .message-tail {
+    fill: var(--input-color) !important;
+}
+
+.messages-input {
+  position: relative;
+  display: flex;
+  width: 60%;
+  height: 10% !important;
+  align-items: center;
+  justify-content: center;
+}
+
+
+@media (prefers-color-scheme: light) {
+  .chat > * {
+    z-index: 1;
+  }
+}

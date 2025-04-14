@@ -10,6 +10,7 @@ interface Chat {
 interface UserData {
   ip:string,
   locale:string,
+  phone:string,
   currentChat:any,
   additionalData:any,
   allChats:{id:string,last:string,time:string}[],

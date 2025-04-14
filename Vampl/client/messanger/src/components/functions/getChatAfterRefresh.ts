@@ -1,13 +1,15 @@
 import parsingChats from "./parsingChats";
 import serv from "./interceptors";
+import { Dispatch } from "@reduxjs/toolkit";
+import { setData } from "../../store/user";
 
-const chatAfterRefresh = async (userData:any) => {
+const chatAfterRefresh = async (userData:any,dispatch:Dispatch) => {
   const currentHref = window.location.href;
-  if(currentHref.includes('@') && !Object.keys(userData.currentChat).length) {
+  if(currentHref.includes('@') && userData.currentChat && !Object.keys(userData.currentChat).length) {
     const openChat = currentHref.split('@')[1];
     const getOpenChat= await serv.get(`/user/chat/${openChat}`)
     .then(chat => parsingChats([chat],userData));     
-    userData.setChat(getOpenChat[0]);
+    dispatch(setData({field:'currentChat',value:getOpenChat[0]}));
   }
 }
 

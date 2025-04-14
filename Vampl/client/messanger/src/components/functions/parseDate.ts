@@ -12,8 +12,7 @@ const dateCastling = ([day,month,year]:string[],locale:string) => {
    
 }
 
-const parseDate = (date:any,locale = 'en-US') => {
-  const allMonth = useSelector((state:any) => state.user.allMonth);
+const parseDate = (date:any,locale = 'en-US',allMonth:any) => {
   const formatter = useFormatter(locale);
 
   const currentDate = formatter.format(new Date()).split(/[,.\/]/);

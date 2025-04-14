@@ -15,16 +15,17 @@ datasource db {
 
 model User {
   id    Int    @id @default(autoincrement())
-  ip    String @unique
+  ip    String 
   name  String
   phone String @unique
-  password String @unique
+  password String 
   birthData String?
   image String? @default("http://localhost:3000/images/icon.png")
 }
 
 model Auth {
-  ip String @unique
+  ip String
+  phone String @unique
   authorized Boolean @default(false)
 }
 
@@ -49,13 +50,13 @@ model MonthEN {
 
 model OnlineStatuses {
   id Int @id @default(autoincrement())
-  ip String @unique
+  phone String @unique
   status Boolean
 }
 
 model UserTheme {
   id Int @id @default(autoincrement())
-  ip String @unique
+  phone String @unique
   theme String @default("light")
 }
 

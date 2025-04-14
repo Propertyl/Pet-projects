@@ -4,6 +4,7 @@ import { UserData } from "../components/types/global";
 const initialState = {
   ip:"",
   locale:"",
+  phone:"",
   currentChat:{},
   additionalData:{},
   allChats:[],

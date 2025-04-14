@@ -13,31 +13,33 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
 
    private clients = new Map<string,string>();
 
-   async updateUserStatus(ip:string,status:Boolean) {
-      const rooms = await serv.get(`http://localhost:3000/getData/user/rooms/${ip}`)
+   async updateUserStatus(phone:string,status:Boolean,ip:string) {
+      const rooms = await serv.get(`/getData/user/rooms/${ip}`)
       .then((rooms:any) => rooms.map(({chatId}:{chatId:string}) => chatId));
-      await serv.put('http://localhost:3000/user/update-status',{
-        headers: {
-        'Content-Type':'application/json',
-        },
-        ip:ip,
-        status:status
-      });
+      console.log('vse norm:',phone,status,ip,rooms);
+      // await serv.put('/user/update-status',{
+      //    headers: {
+      //       'Content-Type':'application/json'
+      //    },
+      //   phone:phone,
+      //   status:status
+      // });
 
-      this.server.to(rooms).emit('user-updates',{ip:ip,status:status});
+      this.server.to(rooms).emit('userUpdates',{ip:phone,status:status});
     }
 
    async handleConnection(client:Socket, ...args: any[]) {
      const ip = await getCryptedIP();
-     await this.updateUserStatus(ip,true);
-     await this.updateUserStatus('host',true);
-     this.clients.set(client.id,ip);
+     const phone:string = await serv.get(`/user/getPhone/${ip}`).then((res:any) => res.phone);
+     await this.updateUserStatus(phone,true,ip);
+     await this.updateUserStatus('+380000000000',true,'host');
+     this.clients.set(client.id,phone);
    }
 
    async handleDisconnect(client:Socket) {
-     const ip:string = this.clients.get(client.id) ?? "";
-   //   await this.updateUserStatus(ip,false);
-     await this.updateUserStatus('host',false);
+     const phone:string = this.clients.get(client.id) ?? "";
+   //   await this.updateUserStatus(phone,false);
+     await this.updateUserStatus('+380000000000',false,'host');
      this.clients.delete(client.id);
    }
 
@@ -52,13 +54,13 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(data.room).emit('message',data.message.body);
       let currentChat:any = undefined;
 
-      const chat = await serv.get(`http://localhost:3000/chat/chatID/${data.room}`)
+      const chat = await serv.get(`/chat/chatID/${data.room}`)
       .then((data:any) => data.messages);
 
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);
       this.server.to(data.room).emit('updateChat',currentChat);
-      await serv.put('http://localhost:3000/chat/updateChat',{
+      await serv.put('/chat/updateChat',{
          headers: {
             'Content-Type':'application/json'
          },
