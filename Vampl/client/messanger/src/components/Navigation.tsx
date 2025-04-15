@@ -23,13 +23,14 @@ import serv from './functions/interceptors';
 import { useDispatch, useSelector } from 'react-redux';
 import useSwitcher from './functions/useSwitcher';
 import triggerEffect from './functions/bubbleEffect';
-import { switchBurger } from '../store/useFullStaff';
+import { switchBurger, switchUser } from '../store/useFullStaff';
 
 
 const Navigation = () => {
   const themeSwitcher:Ref<HTMLDivElement | null> = useRef(null);
   const [themeOptions,setThemeOptions] = useState<Boolean>(false);
   const ip = useSelector((state:any) => state.user.ip);
+  const name = useSelector((state:any) => state.user.additionalData.name);
   const phone = useSelector((state:any) => state.user.phone);
   const switcher = useSwitcher(setThemeOptions);
   const burgerOpen = useSelector((state:any) => state.stuff.burgerOpen);
@@ -69,6 +70,7 @@ const Navigation = () => {
             <button onClick={(event:any) => {
             triggerEffect(event);
             dispatch(switchBurger());
+            dispatch(switchUser(name))
             }} className={`${burgerOpen && 'close-burger'} burger-menu`}>
               <span className="burger-line"></span>
               <span className="burger-line"></span>

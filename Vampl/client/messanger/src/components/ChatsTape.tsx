@@ -10,7 +10,8 @@ import triggerEffect from "./functions/bubbleEffect";
 import checkActiveChat from "./functions/checkActiveChat";
 import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chatsmenu.css';
-import { changeRoom } from "../store/useFullStaff";
+import { changeRoom, switchBurger, switchUser } from "../store/useFullStaff";
+import UserBurger from "./UserBurger";
 
 const ChatsTape = () => {
   const [chats,setChats] = useState<ParsedChat[]>([]);
@@ -60,7 +61,7 @@ const ChatsTape = () => {
   return (
     <>
       <section className={`contact-tape ${!contactDefault ? "default" : ""}`}>
-      {/* <UserBurger v-if="usefulStuff.burgerOpen" :isOpen="usefulStuff.burgerOpen"/> */}
+        <UserBurger/>
         <div style={{paddingTop:'.2rem'}} className="container flex-reverse">
         { chats.length ? chats.map((contact,index) => (
               <a draggable="false" className={`contact-container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
@@ -73,7 +74,10 @@ const ChatsTape = () => {
                   contact.user.image ?
                   <img className="contact-image" src={`${contact.user.image}`} alt="avatar" />
                   :
-                    <div className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}></div>
+                    <div onClick={() => {
+                      dispatch(switchBurger());
+                      dispatch(switchUser(contact.user.name))
+                    }} className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}></div>
                   }
                   <span className={`contact-status ${contact.user.status === 'Online' ? 'online' : 'offline'}`}></span>
                 </div>
