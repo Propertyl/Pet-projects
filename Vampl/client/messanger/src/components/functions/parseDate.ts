@@ -16,7 +16,7 @@ const parseDate = (date:any,locale = 'en-US',allMonth:any) => {
   const formatter = useFormatter(locale);
 
   const currentDate = formatter.format(new Date()).split(/[,.\/]/);
-  const [day,month,year] = dateCastling(currentDate,locale);
+  const [__,_,year] = dateCastling(currentDate,locale);
   const [currentDay,currentMonth,currentYear] = dateCastling(date.split(/[,.\/]/),locale);
 
   const clearMonth = Number(currentMonth.split('0')[1]);

@@ -84,6 +84,9 @@ export class UserService {
             path:"$.users",
             array_contains:users
           }
+        },
+        select:{
+          chatId:true
         }
      })
   }
@@ -146,7 +149,6 @@ export class UserService {
   }
 
   async createUser(user:{ip:string,name:string,phone:string,birthdate?:string,password:string,image?:string}) {
-    console.log("ti voobshe rabotaesh:",user);
     await this.prisma.user.create({data:user as any})
     await this.prisma.onlineStatuses.create({data:{
       phone:user.phone,
@@ -154,14 +156,14 @@ export class UserService {
     }});
   }
 
-  async updateStatus(phone:string,currentStatus:boolean) {
+  async updateStatus({phone,status}:{phone:string,status:boolean}) {
    console.log('ip to update:',phone);
     return this.prisma.onlineStatuses.update({
       where: {
         phone:phone
       },
       data: {
-        status:currentStatus
+        status:status
       }
     })
   }

@@ -20,7 +20,7 @@ model User {
   phone String @unique
   password String 
   birthData String?
-  image String? @default("http://localhost:3000/images/icon.png")
+  image String? 
 }
 
 model Auth {

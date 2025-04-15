@@ -40,7 +40,7 @@ interface DateGroup {
 }
 
 interface ParsedChat {
-  user:{name:string,image:string,ip:string,status:string},
+  user:{name:string,image:string,ip:string,status:string,phone:string},
   messages:{all:any},
   id:string
 }

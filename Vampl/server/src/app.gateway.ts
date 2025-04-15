@@ -17,15 +17,12 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       const rooms = await serv.get(`/getData/user/rooms/${ip}`)
       .then((rooms:any) => rooms.map(({chatId}:{chatId:string}) => chatId));
       console.log('vse norm:',phone,status,ip,rooms);
-      // await serv.put('/user/update-status',{
-      //    headers: {
-      //       'Content-Type':'application/json'
-      //    },
-      //   phone:phone,
-      //   status:status
-      // });
+      await serv.put('/user/update-status',{
+        phone:phone,
+        status:status
+      });
 
-      this.server.to(rooms).emit('userUpdates',{ip:phone,status:status});
+      this.server.to(rooms).emit('userUpdates',{phone:phone,status:status});
     }
 
    async handleConnection(client:Socket, ...args: any[]) {

@@ -3,10 +3,11 @@ import parsingChats from "./parsingChats";
 import serv from "./interceptors";
 import { Dispatch } from "@reduxjs/toolkit";
 import { setData } from "../../store/user";
+import { ParsedChat } from "../types/global";
 
-const getUserChats = async (userData:any,dispatch:Dispatch) => {
-  const userChats = await serv.get(`/user/chats/${userData.ip}`)
-  .then(data => parsingChats(data,userData));
+const getUserChats = async (ip:string,dispatch:Dispatch) => {
+  const userChats:ParsedChat[] = await serv.get(`/chat/chats/${ip}`)
+  .then(data => parsingChats(data,ip));
 
   const contacts = userChats.map((chat:any) => {
     const currentLast = getLastMessage(chat.messages);
@@ -15,7 +16,10 @@ const getUserChats = async (userData:any,dispatch:Dispatch) => {
 
   dispatch(setData({field:'allChats',value:contacts}));
 
-  return userChats;
+  return userChats.map((chat:any) => {
+    delete chat.messages;
+    return chat;
+  });
 }
 
 export default getUserChats;

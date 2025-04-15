@@ -36,31 +36,6 @@ export class UserController {
     return res.status(200).json({register:true});
   }
 
-  @Get('chats/:ip')
-  async getUserChats(@Param('ip') ip:string) {
-     const userChatData:any = await this.userServices.getChatData(ip);
-     
-     if(!userChatData.length) {
-        await serv.post('/chat/create-chat',{
-          chatId:this.userServices.genChatID(),
-          chatUsers:{users:[ip,'host']},
-          messages:{"all":[]}
-        });
-        return this.userServices.getChatData(ip);
-     }
-
-     return userChatData;
-  }
-
-  @Get('chat/:user')
-  async getUserChat(@Param('user') user:string) {
-    const currentUser = await getCryptedIP()
-    const chatter:any = await serv.get(`/user/infoByName/${user}`)
-    .then((res:any) => res.ip);
-
-    return this.userServices.getChatByLink([currentUser,chatter]);
-  }
-
   @Post('createAccount')
   createUser(@Body() user:{ip:string,name:string,phone:string,birthdate:string,password:string,image:string}) {
      return this.userServices.createUser(user);
@@ -106,8 +81,7 @@ export class UserController {
 
   @Put('update-status')
   async updateUserStatus(@Body() data:any) {
-     console.log('pipiske:',data);
-     return this.userServices.updateStatus(data,true);
+     await this.userServices.updateStatus(data);
   }
 
   @Post('create-theme')

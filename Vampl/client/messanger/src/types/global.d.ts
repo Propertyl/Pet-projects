@@ -9,7 +9,7 @@ interface Chat {
 
 interface Store {
   user:UserData,
-  stuff:{burgerOpen:Boolean,title:string}
+  stuff:{burgerOpen:Boolean,title:string,currentRoom:string}
 }
 
 interface UserData {

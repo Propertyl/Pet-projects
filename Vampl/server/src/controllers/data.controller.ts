@@ -21,9 +21,9 @@ export class DataController {
       }
    }
 
-   @Get('status/:ip')
-   getUserStatus(@Param('ip') ip:string) {
-      return this.user.getStatus(ip);
+   @Get('status/:phone')
+   getUserStatus(@Param('ip') phone:string) {
+      return this.user.getStatus(phone);
    }
 
    @Get('user/rooms/:ip')

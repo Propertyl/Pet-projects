@@ -10,41 +10,36 @@ import triggerEffect from "./functions/bubbleEffect";
 import checkActiveChat from "./functions/checkActiveChat";
 import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chatsmenu.css';
+import { changeRoom } from "../store/useFullStaff";
 
 const ChatsTape = () => {
   const [chats,setChats] = useState<ParsedChat[]>([]);
-  const [contactDefault,setContactDefault] = useState<Boolean>(true);
-  const [activeChat,setActiveChat] = useState<string>("");
+  const [contactDefault,_] = useState<Boolean>(true);
   const [currentHref,setCurrentHref] = useState<string>("");
+  const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
   const currentChat = useSelector((state:Store) => state.user.currentChat);
   const changedUser = useSelector((state:Store) => state.user.changedUser);
   const userData = useSelector((state:Store) => state.user);
   const dispatch = useDispatch();
+  
+  useEffect(() => {
+     if(chats && Object.keys(changedUser).length) {
+        const {phone,status} = changedUser;
 
-  useEffect(() => {
-    if(currentChat && Object.keys(currentChat).length) {
-      console.log("changed:",currentChat);
-      setCurrentHref(window.location.href);
-      setActiveChat(currentChat.user.name);
-    }
-  },[currentChat]);
-  
-  useEffect(() => {
-     if(chats) {
-        const {ip,status} = changedUser;
-  
         for(let chat of chats) {
-          if(chat.user.ip === ip) {
+          if(chat.user.phone === phone) {
             chat.user.status = convertStatus(status);
           }
         }
+
+        dispatch(setData({field:'changedUser',value:{}}));
      }
   },[changedUser]);
   
   useEffect(() => {
     const checkChats = async () => {
       if(userData.ip && !chats.length) {
-        const currentChats = await getUserChats(userData,dispatch);
+        const currentChats = await getUserChats(userData.ip,dispatch);
         setChats(currentChats);
       }
     }
@@ -53,14 +48,13 @@ const ChatsTape = () => {
   },[userData]);
   
   const parseLast = useCallback((id:string) => {
+    console.log('all:',userData.allChats);
     return userData.allChats.find(chat => chat.id === id);
-  },[currentChat]);
+  },[currentChat,userData.allChats]);
   
   const openChat = async (contact:ParsedChat) => {
-    const contactChat:any = await serv.get(`/chat/chatID/${contact.id}`);
-  
-    contact.messages = contactChat.messages;
-    dispatch(setData({field:'currentChat',value:contact}));
+    dispatch(changeRoom(contact.id));
+    setCurrentHref(window.location.href);
   }
 
   return (
@@ -69,13 +63,18 @@ const ChatsTape = () => {
       {/* <UserBurger v-if="usefulStuff.burgerOpen" :isOpen="usefulStuff.burgerOpen"/> */}
         <div style={{paddingTop:'.2rem'}} className="container flex-reverse">
         { chats.length ? chats.map((contact,index) => (
-              <a draggable="false" className={`contact-container ${!contactDefault ? 'shortContact' : ''} ${activeChat === contact.user.name && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
+              <a draggable="false" className={`contact-container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
                 <div onClick={(event:any) => {
                     triggerEffect(event);
                     checkActiveChat(currentHref,contact.user.name) && openChat(contact);
                 }} className="container with-padding hidden-container">
                 <div className="status-picture-container">
+                  { 
+                  contact.user.image ?
                   <img className="contact-image" src={`${contact.user.image}`} alt="avatar" />
+                  :
+                    <div className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}></div>
+                  }
                   <span className={`contact-status ${contact.user.status === 'Online' ? 'online' : 'offline'}`}></span>
                 </div>
                 <div className="contact-info-container">

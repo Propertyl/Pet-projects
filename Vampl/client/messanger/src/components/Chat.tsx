@@ -1,5 +1,5 @@
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { chatData, DefaultRef, statusInfo, UserData } from "./types/global";
+import { ReactElement, useEffect, useRef, useState } from "react";
+import { chatData, DefaultRef, statusInfo } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../types/global";
 import { io, Socket } from "socket.io-client";
@@ -14,18 +14,18 @@ import setObserver from "./functions/groupObserver";
 import parseDate from "./functions/parseDate";
 import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chat.css';
+import serv from "./functions/interceptors";
 
 const socket:Socket = io('http://localhost:3000/app');
 
-const Chat = () => {
+const Chat = ({room}:{room:string}) => {
 
   const [chatData,setChatData] = useState<chatData | any>(null);
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
   const userData = useSelector((state:Store) => state.user);
+  const userName = userData.additionalData.name;
   const [currentMessage,setCurrentMessage] = useState<string>("");
-  const [currentRoom,setCurrentRoom] = useState<string>('');
-  const [userName,setUserName] = useState<string>('');
   const [downButton,setDownButton] = useState<boolean>(false);
   const dispatch = useDispatch();
 
@@ -53,12 +53,6 @@ const Chat = () => {
   }
 
 useEffect(() => {
-  if(messagesRef.current) {
-    scrollDown();
-  }
-},[messagesRef.current])
-
-useEffect(() => {
   const setupPage = async () => {
     socket.on('connect',() => {
       console.log('changed ur status');
@@ -70,16 +64,18 @@ useEffect(() => {
     });
   
     socket.on('updateChat',(currentChat:any) => {
-      console.log('chat updated!:',currentChat);
+      console.log('chat updated!:',currentChat,userData.allChats);
       setChatData(parseToDeleteGroup(currentChat['all']));
       const newChats = userData.allChats.map(chat => {
-        if(chat.id === currentRoom) {
+        if(chat.id === room) {
           const currentLast = getLastMessage(currentChat);
           chat = {id:chat.id,...currentLast};
         }
   
         return chat;
       });
+
+      console.log('newbie:',newChats);
   
       dispatch(setData({field:'allChats',value:newChats}));
        
@@ -96,17 +92,20 @@ useEffect(() => {
     socket.off();
   }
 
-},[socket]);
+},[socket,userData.allChats]);
+
+useEffect(() => {
+  if(messagesRef.current) {
+    scrollDown();
+  }
+},[messagesRef.current])
 
 
 useEffect(() => {
-  const tryGetChat = async () => {
-    if(Object.keys(userData.additionalData).length) {
-      setUserName(userData.additionalData.name);
-    }
-  
+  const tryGetChat = async () => {  
     if(userData.ip) {
-      await chatAfterRefresh(userData,dispatch);
+      console.log('blyat')
+      await chatAfterRefresh(dispatch,userData.ip);
     }
   }
 
@@ -163,10 +162,10 @@ useEffect(() => {
    connectEvent();
 },[chatData]);
 
-const scrollDown = () => {
+const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
   if(messagesRef.current) {
     console.log('scroll down:',messagesRef.current.scrollHeight);
-    messagesRef.current.scrollTo({top:messagesRef.current.scrollHeight});
+    messagesRef.current.scrollTo({top:messagesRef.current.scrollHeight,behavior:behavior});
     setDownButton(false);
   }
 }
@@ -175,9 +174,10 @@ const sendMessageToChat = () => {
   if(currentMessage.length) {
     const date = new Date();
     const formatter = useFormatter(userData.locale);
-    socket.emit('sendMessage',{room:currentRoom,message:{user:userName,body:currentMessage,time:formatter.format(date)}});
+    socket.emit('sendMessage',{room:room,
+      message:{user:userName,body:currentMessage,time:formatter.format(date)}});
     setCurrentMessage('');
-    messagesRef.current!.scrollTo({top:messagesRef.current!.scrollHeight,behavior:'smooth'});
+    setTimeout(() => scrollDown('smooth'),100);
   }
 }
 
@@ -206,12 +206,16 @@ useEffect(() => {
 },[userData.allChats]);
 
 useEffect(() => {
-   if(userData.currentChat && Object.keys(userData.currentChat).length && !chatData) {
-      setChatData(parseToDeleteGroup(userData.currentChat.messages['all']));
-      setCurrentRoom(userData.currentChat.id);
-      setTimeout(connectObserver,100);
+   const getChat = async () => {
+      if(room) {
+        const roomChat:{messages:any} = await serv.get(`/chat/chatID/${room}`);
+        setChatData(parseToDeleteGroup(roomChat.messages['all']));
+        setTimeout(connectObserver,100);
+      }
    }
-},[userData.currentChat]);
+
+   getChat();
+},[room]);
 
   return (
       <>
@@ -220,7 +224,7 @@ useEffect(() => {
           <>
             <div className="messages-container">
             {downButton && 
-              <button className="classic-button down-button" onClick={scrollDown}>
+              <button className="classic-button down-button" onClick={() => scrollDown()}>
                 <i className="arrow-icon icon"></i>
               </button>
             }
