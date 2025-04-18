@@ -100,22 +100,7 @@
   background-size: 50%;
 }
 
-.bubble {
-  display: flex;
-  overflow: hidden;
-}
 
-.bubble::after {
-  content: '';
-  position: absolute;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  display: flex;
-  background-color:var(--secondary-color);
-  opacity: .2;
-  animation: bubble-pop .4s ease-out forwards;
-}
 
 .nav-container {
   padding-left: 2rem;

@@ -5,7 +5,6 @@ import { Store } from "../types/global";
 import { convertStatus } from "./functions/convertStatus";
 import getUserChats from "./functions/getUserChats";
 import { setData } from "../store/user";
-import serv from "./functions/interceptors";
 import triggerEffect from "./functions/bubbleEffect";
 import checkActiveChat from "./functions/checkActiveChat";
 import parseMessageTime from "./functions/parseMessageTime";
@@ -16,7 +15,6 @@ import UserBurger from "./UserBurger";
 const ChatsTape = () => {
   const [chats,setChats] = useState<ParsedChat[]>([]);
   const [contactDefault,_] = useState<Boolean>(true);
-  const [currentHref,setCurrentHref] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
   const currentChat = useSelector((state:Store) => state.user.currentChat);
   const changedUser = useSelector((state:Store) => state.user.changedUser);
@@ -49,13 +47,11 @@ const ChatsTape = () => {
   },[userData]);
   
   const parseLast = useCallback((id:string) => {
-    console.log('all:',userData.allChats);
     return userData.allChats.find(chat => chat.id === id);
   },[currentChat,userData.allChats]);
   
-  const openChat = async (contact:ParsedChat) => {
+  const openChat = (contact:ParsedChat) => {
     dispatch(changeRoom(contact.id));
-    setCurrentHref(window.location.href);
   }
 
   return (
@@ -67,7 +63,7 @@ const ChatsTape = () => {
               <a draggable="false" className={`contact-container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
                 <div onClick={(event:any) => {
                     triggerEffect(event);
-                    checkActiveChat(currentHref,contact.user.name) && openChat(contact);
+                    checkActiveChat(window.location.href,contact.user.name) && openChat(contact);
                 }} className="container with-padding hidden-container">
                 <div className="status-picture-container">
                   { 

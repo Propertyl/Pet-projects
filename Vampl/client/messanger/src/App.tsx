@@ -26,16 +26,16 @@ function App() {
       const months = await serv.get('/getData/month/en');
       
       dispatch(setData({field:'allMonth',value:months}));
-      dispatch(setData({field:'locale',value:navigator.language}));
+      dispatch(setData({field:'locale',value:navigator.language ?? 'en-US'}));
       dispatch(setData({field:'ip',value:Ip}));
 
       if(!auth.approve && window.location.href.split('/').pop() != 'auth') {
         window.location.href = '/auth';
-      } else if(!auth.approve) {
+      } else if(auth.approve) {
         const userInfo:any = await serv.get(`/user/infoByIp/${Ip}`);
         const userTheme:any = await serv.get(`/user/get-theme/${userInfo.phone}`);
-        
-        changeTheme(userTheme.theme)
+
+        changeTheme(userTheme.theme);
         dispatch(setData({field:'phone',value:userInfo.phone}));
         dispatch(setData({field:'additionalData',value:userInfo}));
       }

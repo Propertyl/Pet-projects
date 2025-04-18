@@ -3,7 +3,6 @@ import { chatData, DefaultRef, statusInfo } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../types/global";
 import { io, Socket } from "socket.io-client";
-import useThrottle from "./functions/useThrottle";
 import { setData } from "../store/user";
 import parseToDeleteGroup from "./functions/parseChatGroups";
 import getLastMessage from "./functions/getLastChatMessage";
@@ -27,44 +26,38 @@ const Chat = ({room}:{room:string}) => {
   const userName = userData.additionalData.name;
   const [currentMessage,setCurrentMessage] = useState<string>("");
   const [downButton,setDownButton] = useState<boolean>(false);
+  const downButtonRef = useRef(downButton);
   const dispatch = useDispatch();
 
-  const searchScroll = () => {
-    if(messagesRef.current) {
-      const chatScroll = messagesRef.current;
-      const currentHeight = chatScroll.scrollTop;
+  const searchScroll = (event:Event) => {
+    if(event.target) {
+      const chat = event.target as HTMLDivElement;
+      const currentHeight = chat.scrollTop;
+      const chatRect = chat.getBoundingClientRect();
+      const scrollHeight = chat.scrollHeight - chatRect.height;
 
-      console.log('height:',currentHeight);
+      console.log('down:',downButton);
 
-      if(currentHeight < 80) {
+      if(scrollHeight - currentHeight > 80 && !downButtonRef.current) {
          setDownButton(true);
-      } else if(currentHeight > 80) {
+      } else if(scrollHeight - currentHeight < 80 && downButtonRef.current) {
          setDownButton(false);
       }
     }
   };
 
-  const throttle = useThrottle(searchScroll,100);
-
-  const connectEvent = async () => {
-    if(messagesRef.current) {
-      messagesRef.current.addEventListener('scroll',throttle);
-     }
-  }
 
 useEffect(() => {
-  const setupPage = async () => {
-    socket.on('connect',() => {
-      console.log('changed ur status');
-    });
-  
+   downButtonRef.current = downButton;
+},[downButton]);
+
+useEffect(() => {
+  const setupPage = async () => {  
     socket.on('userUpdates',(info:statusInfo) => {
-      console.log("chto-to",info);
       dispatch(setData({field:'changedUser',value:info}));
     });
   
     socket.on('updateChat',(currentChat:any) => {
-      console.log('chat updated!:',currentChat,userData.allChats);
       setChatData(parseToDeleteGroup(currentChat['all']));
       const newChats = userData.allChats.map(chat => {
         if(chat.id === room) {
@@ -74,8 +67,6 @@ useEffect(() => {
   
         return chat;
       });
-
-      console.log('newbie:',newChats);
   
       dispatch(setData({field:'allChats',value:newChats}));
        
@@ -83,10 +74,13 @@ useEffect(() => {
   }
 
   setupPage();
+  if(messagesRef.current) {
+    messagesRef.current.addEventListener('scroll',searchScroll);
+  }
 
   return () => {
     if(messagesRef.current) {
-      messagesRef.current.removeEventListener('scroll',throttle);
+      messagesRef.current.removeEventListener('scroll',searchScroll);
     }
 
     socket.off();
@@ -159,7 +153,6 @@ useEffect(() => {
    }
 
    spawnGroups();
-   connectEvent();
 },[chatData]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {

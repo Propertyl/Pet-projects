@@ -2,13 +2,12 @@ const useThrottle = (callback:Function,delay:number) => {
   let execute:boolean = false;
   let interval:any = null;
 
-  return () => {
+  return (event:Event) => {
     if(!interval) interval = setInterval(() => execute = !execute,delay);
 
     if(execute) {
-      console.log('callback:',callback);
       execute = false;
-      return callback();
+      return callback(event);
     }
   }
 }

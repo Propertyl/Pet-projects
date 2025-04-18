@@ -213,7 +213,7 @@ export class UserService {
   async updateUserTheme({phone,theme}:{phone:string,theme:string}) {
     return this.prisma.userTheme.update({
       where:{
-        phone:'+380664833894'
+        phone:phone
       },
       data:{
         theme:theme
