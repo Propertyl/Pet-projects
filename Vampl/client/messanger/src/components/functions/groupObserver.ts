@@ -1,10 +1,13 @@
-const setObserver = (elems:any,options:IntersectionObserverInit) => {
+import { Socket } from "socket.io-client";
+
+const setObserver = (elems:any,options:IntersectionObserverInit,socket:Socket) => {
 
   console.log('start connecting observers:',elems);
   const observer = new IntersectionObserver((entries,_) => {
      entries.forEach(entry => {
        if(entry.isIntersecting) {
-        console.log('see that group');
+         const group = entry.target.getAttribute('data-group-name');
+          socket.emit('messages-watch',group);
        }
      });
   },options);

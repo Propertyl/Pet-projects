@@ -14,6 +14,7 @@ import parseDate from "./functions/parseDate";
 import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
+import MessageEyes from "./messageSeen";
 
 const socket:Socket = io('http://localhost:3000/app');
 
@@ -124,7 +125,7 @@ useEffect(() => {
                  
                  for(const [groupName,group] of Object.entries(groupData) as [string,any]) {
                     groups.push(
-                        <div className={`message-group ${group.sender === userName ? 'group-right' : ''}`} key={`group-${groupIdx}`} data-group-name={groupName}>
+                        <div className={`message-group ${group.sender === userName ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`} data-group-name={groupName}>
                         {group.messages.map((message: any, index: number) => (
                           <div
                             className={`message ${group.sender !== userName ? 'not-user-message' : ''}`}
@@ -135,7 +136,10 @@ useEffect(() => {
                                 </svg>
                               )}
                             <p className="message-body">{message.body}</p>
-                            <p className="message-time">{parseMessageTime(message.time)}</p>
+                            <div className="message-additional-info">
+                              <p className="message-time">{parseMessageTime(message.time)}</p>
+                              {group.sender === userName && <MessageEyes seen={message.seen}/>}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -168,7 +172,7 @@ const sendMessageToChat = () => {
     const date = new Date();
     const formatter = useFormatter(userData.locale);
     socket.emit('sendMessage',{room:room,
-      message:{user:userName,body:currentMessage,time:formatter.format(date)}});
+      message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
     setTimeout(() => scrollDown('smooth'),100);
   }
@@ -186,8 +190,8 @@ const startSending = (event:any,type:"input" | "button") => {
 }
 
 const connectObserver = () => {
-  const groups = document.querySelectorAll('.group-container');
-  setObserver(groups,{threshold:.5});
+  const groups = document.querySelectorAll('.group-left');
+  setObserver(groups,{threshold:.5},socket);
 }
 
 useEffect(() => {

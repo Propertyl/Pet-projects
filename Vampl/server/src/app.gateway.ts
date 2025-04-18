@@ -40,6 +40,11 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
      this.clients.delete(client.id);
    }
 
+   @SubscribeMessage('messages-watch')
+   updateMessagesView(client:Socket,data:any) {
+      console.log('messages-viewed!!!!',data);
+   }
+
    @SubscribeMessage('joinRoom')
    addToRoom(client:Socket,room:string) {
       client.join(room);

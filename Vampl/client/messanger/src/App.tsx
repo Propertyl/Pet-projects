@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect } from 'react'
 import changeTheme from './components/functions/changeTheme';
-import type { UserInfo } from './components/types/global';
 import serv from './components/functions/interceptors';
 import {RouterProvider } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,6 +21,8 @@ function App() {
       // const authInfo:UserInfo = await serv.get(`/user/getAuthData/${false}`);
       const auth:any = await serv.get('/user/authorization');
       const Ip = await serv.get('/user/getUserIP');
+
+      console.log('IP:',Ip);
 
       const months = await serv.get('/getData/month/en');
       

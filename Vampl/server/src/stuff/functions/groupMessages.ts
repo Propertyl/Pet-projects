@@ -1,9 +1,9 @@
 import {Chat, DateGroup, Message, messageChat, MessageGroup } from "../types";
 
-const createGroup = ({user,body,time}:Message):MessageGroup => {
+const createGroup = ({user,body,time,seen}:Message):MessageGroup => {
   return {
     sender:user,
-    messages:[{body,time}]
+    messages:[{body,time,seen}]
   }
 }
 
@@ -33,7 +33,7 @@ const groupSubMessages = (message:Message,chat:messageChat[]) => {
 
   chat[chat.length - 1]
   [`${lastSender}-${number}`]
-  .messages.push({body:message.body,time:message.time});
+  .messages.push({body:message.body,time:message.time,seen:message.seen});
   return chat;
 }
 
