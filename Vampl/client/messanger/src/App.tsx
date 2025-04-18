@@ -19,7 +19,8 @@ function App() {
   useLayoutEffect(() => {
     const startApplication = async () => {
       // const user = window.location.href.split('#').pop();
-      const authInfo:UserInfo = await serv.get(`/user/getAuthData/${false}`);
+      // const authInfo:UserInfo = await serv.get(`/user/getAuthData/${false}`);
+      const auth:any = await serv.get('/user/authorization');
       const Ip = await serv.get('/user/getUserIP');
 
       const months = await serv.get('/getData/month/en');
@@ -28,9 +29,9 @@ function App() {
       dispatch(setData({field:'locale',value:navigator.language}));
       dispatch(setData({field:'ip',value:Ip}));
 
-      if(!authInfo.authorized && window.location.href.split('/').pop() != 'auth') {
+      if(!auth.approve && window.location.href.split('/').pop() != 'auth') {
         window.location.href = '/auth';
-      } else if(authInfo.authorized) {
+      } else if(!auth.approve) {
         const userInfo:any = await serv.get(`/user/infoByIp/${Ip}`);
         const userTheme:any = await serv.get(`/user/get-theme/${userInfo.phone}`);
         

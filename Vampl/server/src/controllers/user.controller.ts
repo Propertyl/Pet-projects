@@ -1,5 +1,5 @@
-import { Body, Controller, Get,Param, Post, Put, Res } from "@nestjs/common";
-import { Response } from "express";
+import { Body, Controller, Get,Param, Post, Put, Req, Res } from "@nestjs/common";
+import { Request, Response } from "express";
 import { UserService } from "src/services/user.service";
 import getCryptedIP from "src/stuff/functions/cryptoIp";
 import serv from "src/stuff/functions/interceptor";
@@ -53,9 +53,27 @@ export class UserController {
     return response.status(200).json({password:user!.password});
   }
 
+  @Get('authorization')
+    checkAuthorization(@Req() req:Request,@Res() res:Response) {
+      const token = req.cookies['token'];
+      console.log("token:",token);
+
+      if(token) {
+        return res.status(200).json({approve:true});
+      }
+
+        return res.status(200).json({approve:false});
+    }
+
   @Put('setAuthorized')
-  updateUserAuth(@Body() data:{phone:string}) {
-     return this.userServices.updateUserAuth(data.phone);
+  updateUserAuth(@Res({passthrough:true}) res:Response) {
+    res.cookie('token','123124124124124125', {
+      maxAge:7 * 24 * 60 * 600,
+      httpOnly:true,
+      secure:false,
+      sameSite:'lax',
+      path:'/'
+    });
   }
 
 

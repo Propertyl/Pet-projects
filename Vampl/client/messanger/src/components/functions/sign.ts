@@ -2,28 +2,23 @@ import type { SignData } from "../types/global";
 import bcrypt from "bcryptjs";
 import serv from "./interceptors";
 
-const setAuthorized = async (phone:string) => {
+const setAuthorized = async () => {
   await serv.put('/user/setAuthorized',{
     headers: {
       'Content-Type':'application/json'
     },
-    phone:phone
   });
   return;
 }
 
 const createAccount = async (inputData:SignData | any) => {
-  await serv.post('/user/createAuthData',{
-    ip:inputData['ip'],
-    phone:inputData['phone'],
-    authorized:true
-  });
   await serv.post('/user/create-theme',{
     phone:inputData['phone']
-  })
+  });
   await serv.post('/user/createAccount',{
     ...inputData
   });
+  await setAuthorized();
 }
 
 const auth = async (register:Boolean,inputData:SignData | any) => {
@@ -34,9 +29,8 @@ const auth = async (register:Boolean,inputData:SignData | any) => {
   } else {
     console.log("start:",register,inputData);
     const req:any = await serv.get(`/user/verifyAccount/${inputData['phone']}`);
-    console.log('entered:',req);
     if(await bcrypt.compare(inputData['password'],req.password)) {
-      await setAuthorized(inputData.phone);
+      await setAuthorized();
       return true;
     } else {
       return false;
