@@ -6,42 +6,6 @@ import { chatData } from "src/stuff/types";
 export class UserService {
   constructor(private prisma:PrismaService) {}
 
-  getAuthByIp(ip:string) {
-    return this.prisma.auth.findFirst({
-      where:{
-        ip:ip
-      },
-      select: {
-        authorized:true
-      }
-    });
-  }
-
-  getUserByIp(ip:string) {
-    return this.prisma.user.findFirst({
-      where: {
-        ip:ip
-      }
-    })
-  }
-
-  getInfoByIP(ip:string) {
-    return this.prisma.user.findFirst({
-      where: {
-        ip:ip
-      },
-      select: {
-        phone:true
-      }
-    })
-  }
-
-  addAuthData(data:{ip:string,phone:string,authorized:boolean}) {
-    return this.prisma.auth.create({
-      data:data
-    })
-  }
-
   getUserByPhone(phone:string) {
     return this.prisma.user.findFirst({
       where: {
@@ -102,12 +66,12 @@ export class UserService {
     })
   }
   
-  getChatData(userIp:string) {
+  getChatData(userPhone:string) {
     return this.prisma.chats.findMany({
       where: {
         chatUsers: {
           path:"$.users",
-          array_contains:[userIp]
+          array_contains:[userPhone]
         }
       }
     });
@@ -127,16 +91,6 @@ export class UserService {
      return this.prisma.chats.create({data:userChats})
   }
 
-  async updateUserAuth(phone:string) {
-    return this.prisma.auth.update({
-       where: {
-         phone:phone
-       },
-       data: {
-         authorized:true
-       }
-    })
-  }
 
   async checkUser(data:{phone:string,password:string}) {
     console.log('data:',data);
@@ -148,7 +102,7 @@ export class UserService {
     })
   }
 
-  async createUser(user:{ip:string,name:string,phone:string,birthdate?:string,password:string,image?:string}) {
+  async createUser(user:{name:string,phone:string,birthdate?:string,password:string,image?:string}) {
     await this.prisma.user.create({data:user as any})
     await this.prisma.onlineStatuses.create({data:{
       phone:user.phone,
@@ -157,7 +111,6 @@ export class UserService {
   }
 
   async updateStatus({phone,status}:{phone:string,status:boolean}) {
-   console.log('ip to update:',phone);
     return this.prisma.onlineStatuses.update({
       where: {
         phone:phone
@@ -179,12 +132,12 @@ export class UserService {
      })
   }
 
-  async getAllUserRooms(ip:string) {
+  async getAllUserRooms(phone:string) {
     return this.prisma.chats.findMany({
       where: {
         chatUsers: {
           path:"$.users",
-          array_contains:[ip]
+          array_contains:[phone]
         }
       }, 
       select: {
@@ -194,6 +147,7 @@ export class UserService {
   }
 
   async getUserTheme(phone:string) {
+    console.log("THEME PHONE:",phone);
     return this.prisma.userTheme.findFirst({
       where:{
         phone:phone

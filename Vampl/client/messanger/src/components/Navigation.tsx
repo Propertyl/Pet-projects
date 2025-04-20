@@ -27,10 +27,9 @@ import { switchBurger, switchUser } from '../store/useFullStaff';
 
 
 const Navigation = () => {
-  const themeSwitcher:Ref<HTMLDivElement | null> = useRef(null);
+  const themeSwitcher:Ref<HTMLButtonElement | null> = useRef(null);
   const [themeOptions,setThemeOptions] = useState<Boolean>(false);
   const name = useSelector((state:any) => state.user.additionalData.name);
-  const phone = useSelector((state:any) => state.user.phone);
   const switcher = useSwitcher(setThemeOptions);
   const burgerOpen = useSelector((state:any) => state.stuff.burgerOpen);
   const dispatch = useDispatch();
@@ -40,7 +39,6 @@ const Navigation = () => {
       headers:{
         'Content-Type':'application/json'
       },
-      phone:phone,
       theme:theme
     });
 
@@ -85,7 +83,7 @@ const Navigation = () => {
             </div>
           </div>
           <div className="theme-switcher-container nav-section">
-            <div tabIndex={0} ref={themeSwitcher} onClick={switcher} className="theme-changer flex-center">
+            <button tabIndex={0} ref={themeSwitcher} onClick={switcher} className="theme-changer flex-center">
             Change theme
              {themeOptions && 
               <div className="theme-options">
@@ -106,7 +104,7 @@ const Navigation = () => {
                 Dark
               </div>
             </div>}
-          </div>
+          </button>
           </div>
       </div>
     </nav>

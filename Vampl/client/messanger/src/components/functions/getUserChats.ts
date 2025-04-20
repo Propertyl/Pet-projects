@@ -5,9 +5,9 @@ import { Dispatch } from "@reduxjs/toolkit";
 import { setData } from "../../store/user";
 import { ParsedChat } from "../types/global";
 
-const getUserChats = async (ip:string,dispatch:Dispatch) => {
-  const userChats:ParsedChat[] = await serv.get(`/chat/chats/${ip}`)
-  .then(data => parsingChats(data,ip));
+const getUserChats = async (phone:string,dispatch:Dispatch) => {
+  const userChats:ParsedChat[] = await serv.get(`/chat/chats`)
+  .then(data => parsingChats(data,phone));
 
   const contacts = userChats.map((chat:any) => {
     const currentLast = getLastMessage(chat.messages);

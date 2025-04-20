@@ -37,8 +37,8 @@ const ChatsTape = () => {
   
   useEffect(() => {
     const checkChats = async () => {
-      if(userData.ip && !chats.length) {
-        const currentChats = await getUserChats(userData.ip,dispatch);
+      if(!chats.length) {
+        const currentChats = await getUserChats(userData.additionalData.phone,dispatch);
         setChats(currentChats);
       }
     }

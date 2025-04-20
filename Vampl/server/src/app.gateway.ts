@@ -2,8 +2,8 @@ import {OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGat
 import { Server, Socket } from 'socket.io';
 import { Chat,Message } from "./stuff/types";
 import groupMessages from "./stuff/functions/groupMessages";
-import getCryptedIP from "./stuff/functions/cryptoIp";
 import serv from "./stuff/functions/interceptor";
+import parseCookies from "./stuff/functions/parseCookie";
 
 @WebSocketGateway({cors:true,namespace:'app'})
 
@@ -13,10 +13,9 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
 
    private clients = new Map<string,string>();
 
-   async updateUserStatus(phone:string,status:Boolean,ip:string) {
-      const rooms = await serv.get(`/getData/user/rooms/${ip}`)
+   async updateUserStatus(phone:string,status:Boolean) {
+      const rooms = await serv.get(`/getData/user/rooms/${phone}`)
       .then((rooms:any) => rooms.map(({chatId}:{chatId:string}) => chatId));
-      console.log('vse norm:',phone,status,ip,rooms);
       await serv.put('/user/update-status',{
         phone:phone,
         status:status
@@ -26,17 +25,17 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
    async handleConnection(client:Socket, ...args: any[]) {
-     const ip = await getCryptedIP();
-     const phone:string = await serv.get(`/user/getPhone/${ip}`).then((res:any) => res.phone);
-     await this.updateUserStatus(phone,true,ip);
-     await this.updateUserStatus('+380000000000',true,'host');
-     this.clients.set(client.id,phone);
+     const cookies:string = client.handshake.headers.cookie ?? '';
+     const parsed = parseCookies(decodeURIComponent(cookies));
+     await this.updateUserStatus(parsed['token'],true);
+     await this.updateUserStatus('+380000000000',true);
+     this.clients.set(client.id,parsed['token']);
    }
 
    async handleDisconnect(client:Socket) {
      const phone:string = this.clients.get(client.id) ?? "";
    //   await this.updateUserStatus(phone,false);
-     await this.updateUserStatus('+380000000000',false,'host');
+     await this.updateUserStatus('+380000000000',false);
      this.clients.delete(client.id);
    }
 

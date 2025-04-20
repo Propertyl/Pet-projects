@@ -1,4 +1,5 @@
-import { Controller,Get, Param} from "@nestjs/common";
+import { Controller,Get, Param, Req} from "@nestjs/common";
+import { Request } from "express";
 import { UserService } from "src/services/user.service";
 
 @Controller('getData')
@@ -22,12 +23,14 @@ export class DataController {
    }
 
    @Get('status/:phone')
-   getUserStatus(@Param('ip') phone:string) {
+   getUserStatus(@Param('phone') phone:string) {
       return this.user.getStatus(phone);
    }
 
-   @Get('user/rooms/:ip')
-   getUserRooms(@Param('ip') ip:string) {
-      return this.user.getAllUserRooms(ip);
+   @Get('user/rooms/:phone')
+   getUserRooms(@Param('phone') phone:string) {      
+      if(phone) {
+         return this.user.getAllUserRooms(phone);
+      }
    }
 }

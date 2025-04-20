@@ -15,18 +15,11 @@ datasource db {
 
 model User {
   id    Int    @id @default(autoincrement())
-  ip    String 
   name  String
   phone String @unique
   password String 
   birthData String?
   image String? 
-}
-
-model Auth {
-  ip String
-  phone String @unique
-  authorized Boolean @default(false)
 }
 
 model Chats {

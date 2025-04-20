@@ -1,6 +1,5 @@
 import { Ref, useCallback, useEffect, useRef, useState } from "react";
-import { AuthInputs, SignData, Store } from "../types/global";
-import { useSelector } from "react-redux";
+import { AuthInputs, SignData } from "../types/global";
 import useSwitcher from "../components/functions/useSwitcher";
 import serv from "../components/functions/interceptors";
 import parsePassword from "../components/functions/parsePassword";
@@ -9,7 +8,6 @@ import triggerEffect from "../components/functions/bubbleEffect";
 import '../components/styles/auth.css';
 
 const AuthPage = () => {
-  const ip = useSelector((state:Store) => state.user.ip);
   const [phoneCodes,setPhoneCodes] = useState<any>([]);
   const phoneInput:Ref<any | null> = useRef(null);
   const [phoneCode,setPhoneCode] = useState('+1');
@@ -177,14 +175,11 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
           setInput('')
           break;
         }
-        console.log('simple:',userInput);
         const finalData = inputData;
         finalData['password'] = userInput;
-        finalData['ip'] = ip;
         setInputData(finalData);
         setInput('');
         const authReq:any = await auth(register,finalData);
-        console.log("AUTH:",authReq);
         if(!authReq) {
           setInputError('incorrect');
         } else {

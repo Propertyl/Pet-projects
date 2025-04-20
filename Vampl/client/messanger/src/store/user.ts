@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import { UserData } from "../components/types/global";
 
 const initialState = {
-  ip:"",
   locale:"",
   phone:"",
   currentChat:{},

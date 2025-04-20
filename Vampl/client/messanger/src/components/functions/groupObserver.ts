@@ -1,6 +1,4 @@
-import { Socket } from "socket.io-client";
-
-const setObserver = (elems:any,options:IntersectionObserverInit,socket:Socket) => {
+const setObserver = (elems:any,options:IntersectionObserverInit,socket:any) => {
 
   console.log('start connecting observers:',elems);
   const observer = new IntersectionObserver((entries,_) => {

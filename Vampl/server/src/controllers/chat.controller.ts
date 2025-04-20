@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Put,Body, Post } from "@nestjs/common";
+import { Controller, Get, Param, Put,Body, Post, Req } from "@nestjs/common";
+import { Request } from "express";
 import { UserService } from "src/services/user.service";
 import serv from "src/stuff/functions/interceptor";
 import { chatData, MessageGroup, updateChatData } from "src/stuff/types";
@@ -12,28 +13,31 @@ export class ChatController {
      return this.userServices.getChatById(id);
   }
 
-  @Get('chats/:ip')
-  async getUserChats(@Param('ip') ip:string) {
-     const userChatData:any = await this.userServices.getChatData(ip);
+  @Get('chats')
+  async getUserChats(@Req() req:Request) {
+     const phone = req.cookies['token'];
+     const userChatData:any = await this.userServices.getChatData(phone);
      
      if(!userChatData.length) {
         await serv.post('/chat/create-chat',{
           chatId:this.userServices.genChatID(),
-          chatUsers:{users:[ip,'host']},
+          chatUsers:{users:[phone,'+380000000000']},
           messages:{"all":[]}
         });
-        return this.userServices.getChatData(ip);
+        return this.userServices.getChatData(phone);
      }
 
      return userChatData;
   }
 
-  @Get('openChat/:user/:ip')
-  async getUserChat(@Param('user') user:string,@Param('ip') ip:string) {
+  @Get('openChat/:user')
+  async getUserChat(@Req() req:Request,@Param('user') user:string) {
     const chatter:any = await serv.get(`/user/infoByName/${user}`)
-    .then((res:any) => res.ip);
+    .then((res:any) => res.phone);
 
-    return this.userServices.getChatByLink([ip,chatter]);
+    const phone = req.cookies['token'];
+
+    return this.userServices.getChatByLink([phone,chatter]);
   }
 
   @Post('create-chat')

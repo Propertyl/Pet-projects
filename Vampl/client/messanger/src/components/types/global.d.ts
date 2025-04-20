@@ -8,7 +8,6 @@ interface Chat {
 }
 
 interface UserData {
-  ip:string,
   locale:string,
   phone:string,
   currentChat:any,

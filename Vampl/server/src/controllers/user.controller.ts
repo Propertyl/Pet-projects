@@ -1,23 +1,22 @@
 import { Body, Controller, Get,Param, Post, Put, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { UserService } from "src/services/user.service";
-import getCryptedIP from "src/stuff/functions/cryptoIp";
-import serv from "src/stuff/functions/interceptor";
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userServices:UserService) {}
 
 
-  @Get('infoByIp/:ip')
-  getUserInfoIP(@Param('ip') ip:string) {
-    return this.userServices.getUserByIp(ip);
+  @Get('info')
+  getUserInfoIP(@Req() req:Request) {
+    const phone = req.cookies['token'];
+    console.log('phonezalupa:',phone);
+    return this.userServices.getUserByPhone(phone);
   }
 
-  @Get('getPhone/:ip')
-  getUserInfoPhone(@Param('ip') ip:string) {
-    console.log("we started!!");
-    return this.userServices.getInfoByIP(ip);
+  @Get('getInfoByPhone/:phone')
+  getUserInfoPhone(@Param('phone') phone:string) {
+    return this.userServices.getUserByPhone(phone);
   }
 
   @Get('infoByName/:name') 
@@ -41,11 +40,6 @@ export class UserController {
      return this.userServices.createUser(user);
   }
 
-  @Post('createAuthData')
-  createAuthData(@Body() data:{ip:string,phone:string,authorized:boolean}) {
-      return this.userServices.addAuthData(data);
-  }
-
   @Get('verifyAccount/:phone')
   async signIn(@Param('phone') phone:string, @Res() response:Response) {
     const user = await this.userServices.getUserByPhone(phone);
@@ -56,7 +50,8 @@ export class UserController {
   @Get('authorization')
     checkAuthorization(@Req() req:Request,@Res() res:Response) {
       const token = req.cookies['token'];
-      console.log("token:",token);
+
+      console.log('token:',token);
 
       if(token) {
         return res.status(200).json({approve:true});
@@ -66,37 +61,17 @@ export class UserController {
     }
 
   @Put('setAuthorized')
-  updateUserAuth(@Res({passthrough:true}) res:Response) {
-    res.cookie('token','123124124124124125', {
-      maxAge:7 * 24 * 60 * 600,
+  updateUserAuth(@Res({passthrough:true}) res:Response,@Body() phone:{phone:string}) {
+    const life:number = 7 * 24 * 60 * 600;
+    res.cookie('token',phone.phone, {
+      maxAge:life,
       httpOnly:true,
-      secure:false,
+      secure:true,
       sameSite:'lax',
       path:'/'
     });
   }
-
-
-  @Get('getAuthData/:manual')
-  async getUserData(@Param('manual') manual:string) {
-    console.log('start manual:',manual);
-    if(manual == 'true') {
-      let getRes = await this.userServices.getAuthByIp('host');
-
-      return getRes;
-    }
-
-    const ident:string = await getCryptedIP();
-    let getRes = await this.userServices.getAuthByIp(ident);
-
-    return getRes;
-  }
-
-  @Get('getUserIp')
-  async getUserIP() {
-    return await getCryptedIP();
-  }
-
+  
   @Put('update-status')
   async updateUserStatus(@Body() data:any) {
      await this.userServices.updateStatus(data);
@@ -108,16 +83,17 @@ export class UserController {
   }
 
   @Put('update-theme')
-  async updateUserTheme(@Body() data:{phone:string,theme:string}) {
-    await this.userServices.updateUserTheme(data);
-    return this.userServices.getUserTheme(data.phone);
+  async updateUserTheme(@Req() req:Request,@Body() data:{theme:string}) {
+    const phone = req.cookies['token'];
+    await this.userServices.updateUserTheme({phone,theme:data.theme});
+    return this.userServices.getUserTheme(phone);
   }
 
-  @Get(`get-theme/:ip`)
-  async getUserTheme(@Param('ip') ip:string) {
-     let userTheme = await this.userServices.getUserTheme(ip)
-     
-     return userTheme;
+  @Get(`get-theme`)
+  async getUserTheme(@Req() req:Request) {
+     const phone = req.cookies['token'];
+      
+     return this.userServices.getUserTheme(phone);
   }
 
 }

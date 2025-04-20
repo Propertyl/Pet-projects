@@ -72,7 +72,7 @@ body {
   height: 100vh;
   overflow:hidden;
   justify-content: center;
-  background-color: var( --bg-specific);
+  background:none;
 }
 
 h1 {
@@ -253,7 +253,7 @@ p {
 .night {
   --light-grey-half:rgb(0,0,0,.5);
   --black-default:rgb(0,0,0);
-  --bg-main: rgb(37, 37, 37);
+  --bg-main:#2c2c2c;
   --nav-bg:rgb(63, 62, 62);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
