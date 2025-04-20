@@ -7,7 +7,8 @@ const setAuthorized = async (phone:string) => {
     headers: {
       'Content-Type':'application/json'
     },
-    phone:phone
+    phone:phone,
+    theme:'light'
   });
 }
 

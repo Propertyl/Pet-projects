@@ -12,6 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  --borders-bg:#3a3a3a;
   --bg-specific:#222220;
   --black-default:rgb(0,0,0);
   --bg-main: rgb(37, 37, 37);
@@ -36,6 +37,7 @@
   --text-size:calc(var(--main-rem) + 3px);
   --scrollbar-color:rgba(252, 252, 252, 0.301) #bbda5500;
   --message-color:rgb(255,255,255);
+  --not-ur-messages:#343434;
   --message-weight:500;
   --input-color:rgb(255,255,255);
 }
@@ -72,7 +74,7 @@ body {
   height: 100vh;
   overflow:hidden;
   justify-content: center;
-  background:none;
+  background:var(--borders-bg);
 }
 
 h1 {
@@ -127,6 +129,7 @@ button:hover {
 input {
   border: none;
   background-color: var(--input-color) !important;
+  color:var(--black-default) !important;
 }
 
 input[type="search"]::-webkit-search-cancel-button  {
@@ -268,9 +271,8 @@ p {
   --error-color:rgb(205,0,0);
   --menu-color:rgb(73,73,73);
   --sub-color:#007BFF;
-  --night-color:#da5050;
+  --night-color:#ff6161;
   --night-tilelight:hsla(0, 64%, 58%, 0.4);
-  --light-night:#ff6161;
 }
 
 .light {
@@ -290,27 +292,6 @@ p {
   --input-color:rgb(255, 255, 255);
 }
 
-@media (prefers-color-scheme: light) {
-  
-  body {
-    background-color: var(--black-default);
-  }
-
-  input {
-    color:var(--black-default);
-  }
-
-
-  input::placeholder {
-    color:var(--main-grey);
-  }
-}
-
-@media (prefers-color-scheme:dark) {
-  input {
-    color:var(--black-default);
-  }
-} 
 
 @media (max-width:1920px) and (min-width:1870px) {
   :root {

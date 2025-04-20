@@ -103,6 +103,7 @@ export class UserService {
   }
 
   async createUser(user:{name:string,phone:string,birthdate?:string,password:string,image?:string}) {
+    user['image'] = '';
     await this.prisma.user.create({data:user as any})
     await this.prisma.onlineStatuses.create({data:{
       phone:user.phone,
@@ -158,7 +159,7 @@ export class UserService {
     })
   }
 
-  async createUserTheme(data:{phone:string}) {
+  async createUserTheme(data:{phone:string,theme:string}) {
     return this.prisma.userTheme.create({
       data:data
     })

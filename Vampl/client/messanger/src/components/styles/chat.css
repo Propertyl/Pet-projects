@@ -72,7 +72,7 @@
 
 
 .not-user-message {
-  background-color: var(--light-grey) !important;
+  background-color: var(--not-ur-messages) !important;
 }
 
 .not-user-message .message-body {
@@ -84,7 +84,7 @@
 }
 
 .not-user-message .message-tail {
-    fill: var(--light-grey) !important;
+    fill: var(--not-ur-messages) !important;
   }
 
 .message-group {

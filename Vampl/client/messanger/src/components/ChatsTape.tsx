@@ -68,7 +68,10 @@ const ChatsTape = () => {
                 <div className="status-picture-container">
                   { 
                   contact.user.image ?
-                  <img className="contact-image" src={`${contact.user.image}`} alt="avatar" />
+                  <img onClick={() => {
+                    dispatch(switchBurger());
+                    dispatch(switchUser(contact.user.name))
+                  }} className="contact-image" src={`${contact.user.image}`} alt="avatar" />
                   :
                     <div onClick={() => {
                       dispatch(switchBurger());

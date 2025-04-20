@@ -14,6 +14,17 @@ const createDataGroup = ():DateGroup => {
   }
 }
 
+const inSimpleView = (time:string) => {
+ let [day,month,year] = time.split(/[.,\/]/);
+  if(time.includes('/')) {
+      const temp = day;
+      day = month;
+      month = temp;
+  }
+
+  return [day,month,year].join('.');
+}; 
+
 const groupSubMessages = (message:Message,chat:messageChat[]) => {
   if(!chat) return [];
 
@@ -52,7 +63,8 @@ const groupMessages = (message:Message,chat:Chat | undefined) => {
   const lastDateGroup:any = currentGroups.map(item => item).pop();
   let lastDate = Object.keys(lastDateGroup).pop() ?? "";
 
-  if(date != lastDate) {
+
+  if(inSimpleView(date) != inSimpleView(lastDate)) {
     chat['all'].push({
       [date]:createDataGroup(),
     });

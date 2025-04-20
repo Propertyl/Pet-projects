@@ -9,7 +9,7 @@ import getLastMessage from "./functions/getLastChatMessage";
 import chatAfterRefresh from "./functions/getChatAfterRefresh";
 import useFormatter from "./functions/dateFormatter";
 import triggerEffect from "./functions/bubbleEffect";
-import setObserver from "./functions/groupObserver";
+import useObserver from "./functions/groupObserver";
 import parseDate from "./functions/parseDate";
 import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chat.css';
@@ -28,6 +28,7 @@ const Chat = ({room}:{room:string}) => {
   const downButtonRef = useRef(downButton);
   const socket:Ref<Socket | null> = useRef(null);
   const dispatch = useDispatch();
+  const setObserver:Ref<any> = useRef(null);
 
   const searchScroll = (event:Event) => {
     if(event.target) {
@@ -53,11 +54,15 @@ useEffect(() => {
   socket.current = io('http://localhost:3000/app',{
     withCredentials:true
   });
+
 },[])
 
 useEffect(() => {
   const setupPage = async () => {  
       if(socket.current) {
+
+        setObserver.current = useObserver({threshold:1},socket.current);
+
         socket.current.on('userUpdates',(info:statusInfo) => {
           dispatch(setData({field:'changedUser',value:info}));
         });
@@ -74,6 +79,7 @@ useEffect(() => {
           });
       
           dispatch(setData({field:'allChats',value:newChats}));
+          connectObservers();
            
         });
       }
@@ -192,9 +198,9 @@ const startSending = (event:any,type:"input" | "button") => {
     }
 }
 
-const connectObserver = () => {
+const connectObservers = () => {
   const groups = document.querySelectorAll('.group-left');
-  setObserver(groups,{threshold:1},socket.current);
+  setObserver.current(groups);
 }
 
 useEffect(() => {
@@ -210,7 +216,7 @@ useEffect(() => {
       if(room) {
         const roomChat:{messages:any} = await serv.get(`/chat/chatID/${room}`);
         setChatData(parseToDeleteGroup(roomChat.messages['all']));
-        setTimeout(connectObserver,100);
+        setTimeout(connectObservers,100);
       }
    }
 

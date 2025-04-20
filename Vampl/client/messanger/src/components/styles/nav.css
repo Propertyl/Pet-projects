@@ -26,6 +26,7 @@
   border-radius: 40px;
   cursor: pointer;
   transition: all .2s;
+  color:var(--message-color);
 }
 
 .theme-changer:hover {
@@ -43,6 +44,7 @@
   border-radius: 20px;
   z-index: 100000000;
   transition: all .2s;
+  box-shadow: .2rem .2rem .5rem var(--black-default);
 }
 
 .theme-options > * {

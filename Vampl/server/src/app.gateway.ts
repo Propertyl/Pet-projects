@@ -28,14 +28,12 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
      const cookies:string = client.handshake.headers.cookie ?? '';
      const parsed = parseCookies(decodeURIComponent(cookies));
      await this.updateUserStatus(parsed['token'],true);
-     await this.updateUserStatus('+380000000000',true);
      this.clients.set(client.id,parsed['token']);
    }
 
    async handleDisconnect(client:Socket) {
      const phone:string = this.clients.get(client.id) ?? "";
-   //   await this.updateUserStatus(phone,false);
-     await this.updateUserStatus('+380000000000',false);
+     await this.updateUserStatus(phone,false);
      this.clients.delete(client.id);
    }
 
