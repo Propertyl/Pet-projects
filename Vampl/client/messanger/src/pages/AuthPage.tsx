@@ -6,6 +6,8 @@ import parsePassword from "../components/functions/parsePassword";
 import auth from "../components/functions/sign";
 import triggerEffect from "../components/functions/bubbleEffect";
 import '../components/styles/auth.css';
+import phoneValidation from "../components/functions/phoneValidation";
+import Icon from "../components/Icon";
 
 const AuthPage = () => {
   const [phoneCodes,setPhoneCodes] = useState<any>([]);
@@ -21,6 +23,8 @@ const AuthPage = () => {
   const [inputData,setInputData] = useState<SignData | any>({});  
   const [userInput,setInput] = useState<string>("");
   const switcher = useSwitcher(setCodeOptions);
+  const [showPassword,setPassword] = useState<Boolean>(false);
+  const pwSwitcher = useSwitcher(setPassword); 
 
   const changeCode = (code:string) => {
     if(code) {
@@ -112,7 +116,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
        return;
     }
 
-    if(strokes < 0) {
+    if(currentContent.length > 13) {
       phoneInput.current.innerText = currentContent.slice(0,-1);
       restoreCursorPosition(phoneInput.current,cursorPosition - 1);
       phoneInput.current.blur();
@@ -140,7 +144,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
      switch(currentWindow) {
         case 'phone':
          const currentPhone = phoneInput.current.innerText;
-         if(currentPhone.length < 12) {
+         if(!phoneValidation(currentPhone)) {
             setInputError('phone');
             break;
          }
@@ -215,8 +219,11 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
 
   const BackToStart = () => {
     setInputData({});
+    setStrokes(11);
     setCurrentWindow('phone');
     setTimeout(connectEvents,0);
+    setInputError('');
+    setPassword(false);
   }
 
   const connectEvents = () => {
@@ -224,7 +231,6 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
       phoneInput.current.addEventListener('input',PhoneValidation);
       phoneInput.current.addEventListener('paste',checkPaste);
       codeSelector.current.addEventListener('blur',() => {
-        console.log('blured')
         setCodeOptions(false);
       });
       changeCode(phoneCode);
@@ -268,7 +274,8 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
       <>
         <section className="auth-page">
           <div className="container auth-list-container">
-            {currentWindow !== 'phone' && <button className="refresh-button" onClick={BackToStart} >Back to Start</button>}
+            {currentWindow !== 'phone' && <svg className="random-icon arrow-icon" onClick={BackToStart} width="64px" height="64px" viewBox="0 -6.5 36 36" version="1.1" xmlns="http://www.w3.org/2000/svg"  fill="#da5050"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>left-arrow</title> <desc>Created with Sketch.</desc> <g id="icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="ui-gambling-website-lined-icnos-casinoshunter" transform="translate(-342.000000, -159.000000)" fill="#000000"  fill-rule="nonzero"> <g id="square-filled" transform="translate(50.000000, 120.000000)"> <path d="M317.108012,39.2902857 L327.649804,49.7417043 L327.708994,49.7959169 C327.889141,49.9745543 327.986143,50.2044182 328,50.4382227 L328,50.5617773 C327.986143,50.7955818 327.889141,51.0254457 327.708994,51.2040831 L327.6571,51.2479803 L317.108012,61.7097143 C316.717694,62.0967619 316.084865,62.0967619 315.694547,61.7097143 C315.30423,61.3226668 315.30423,60.6951387 315.694547,60.3080911 L324.702666,51.3738496 L292.99947,51.3746291 C292.447478,51.3746291 292,50.9308997 292,50.3835318 C292,49.8361639 292.447478,49.3924345 292.99947,49.3924345 L324.46779,49.3916551 L315.694547,40.6919089 C315.30423,40.3048613 315.30423,39.6773332 315.694547,39.2902857 C316.084865,38.9032381 316.717694,38.9032381 317.108012,39.2902857 Z M327.115357,50.382693 L316.401279,61.0089027 L327.002151,50.5002046 L327.002252,50.4963719 L326.943142,50.442585 L326.882737,50.382693 L327.115357,50.382693 Z" id="left-arrow" transform="translate(310.000000, 50.500000) scale(-1, 1) translate(-310.000000, -50.500000) "> </path> </g> </g> </g> </g></svg>
+            }
               <ul className="auth-list">
                { currentWindow === 'phone' &&
                 <li className="auth-window">
@@ -305,7 +312,11 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
                 <li className="auth-window">
                   <div className="input-container">
                     <label className="auth-label">Your password</label>
-                    <input autoFocus={currentWindow === 'password'} className={`auth-input ${inputError === 'password' && 'input-error'}`} onChange={WriteInput} name="pass-input" value={userInput}  type="text" />
+                    <input autoFocus={currentWindow === 'password'} className={`auth-input ${inputError === 'password' && 'input-error'}`} onChange={WriteInput} name="pass-input" value={userInput}  type={showPassword ? "text" : "password"} />
+                    <i className="random-icon">
+                      {!showPassword && <span className="pass-visibility"></span>}
+                        <svg className="pass-icon" onClick={pwSwitcher}  viewBox="0 -4 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>eyes [#90]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd"> <g id="Dribbble-Light-Preview" transform="translate(-380.000000, -7803.000000)" fill="#000000"> <g id="icons" transform="translate(56.000000, 160.000000)"> <path d="M338.003976,7653.03136 C336.938673,7653.03136 335.9754,7652.60503 335.258196,7651.92289 C336.242476,7650.1343 336.242476,7647.90333 335.258196,7646.11474 C335.628301,7645.76264 336.064425,7645.48176 336.547562,7645.29116 C335.497264,7646.79486 336.067426,7648.94659 337.717894,7649.73204 C339.327351,7650.49844 341.286908,7649.64076 341.842065,7647.94847 C342.542264,7650.46433 340.620718,7653.03136 338.003976,7653.03136 M340.004544,7647.01254 C340.004544,7648.01568 338.003976,7648.01568 338.003976,7647.01254 C338.003976,7646.00941 340.004544,7646.00941 340.004544,7647.01254 M332.747483,7651.92289 C330.936969,7653.64528 327.94412,7653.26409 326.615743,7651.15148 C325.298369,7649.05392 326.247638,7646.19699 328.54529,7645.29116 C327.523,7646.75574 328.031144,7648.83925 329.60159,7649.67186 C331.215048,7650.52753 333.270632,7649.68289 333.839793,7647.94847 C334.237906,7649.37994 333.825789,7650.89769 332.747483,7651.92289 M331.001988,7646.00941 C332.002272,7646.00941 332.002272,7648.01568 331.001988,7648.01568 C330.001704,7648.01568 330.001704,7646.00941 331.001988,7646.00941 M338.003976,7643 C336.464539,7643 335.065141,7643.58583 334.00284,7644.54182 C330.202761,7641.12414 324,7643.9269 324,7649.01881 C324,7654.11073 330.202761,7656.91349 334.00284,7653.49581 C337.186744,7656.35976 342.404225,7654.94133 343.715597,7650.87161 C344.948947,7647.04464 342.010113,7643 338.003976,7643" id="eyes-[#90]"> </path> </g> </g> </g> </g></svg>
+                    </i>
                     { inputError === 'password' && 
                       <label className="auth-label error-label">
                         Password must contain:

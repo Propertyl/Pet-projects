@@ -1,12 +1,50 @@
+.pass-icon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: all .2s;
+  cursor: pointer;
+  z-index: 0;
+}
+
+.arrow-icon {
+  left:1%;
+  top:1%;
+  width: 3rem;
+  height: 3rem;
+}
+
+.pass-visibility {
+  position: absolute;
+  width: .2rem;
+  height: 2rem;
+  background: var(--black-default);
+  transition: all .2s;
+  animation: stick-rotate .3s ease-in-out forwards;
+  transform:rotate(45deg);
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes stick-rotate {
+  from {
+    transform: rotate(45deg) scale(0);
+  }
+  to {
+    transform: rotate(45deg) scale(1);
+  }
+}
+
+
 .code {
   color:var(--night-color) !important;
 }
 
 .list-arrow {
   position:absolute;
-  right:1%;
   display:flex;
   align-self:center;
+  right:1%
 }
 
 .list-arrow-active {
@@ -71,6 +109,7 @@
 }
 
 .input-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   margin: 1rem 0;

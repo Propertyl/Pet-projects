@@ -24,8 +24,6 @@
   --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;
   --header-height:6rem;
-  --footer-height:10rem;
-  --foter-space:-10rem;
   --default-border-radius:20px;
   --error-color:rgb(205,0,0);
   --menu-color:rgb(73,73,73);
@@ -40,6 +38,7 @@
   --not-ur-messages:#343434;
   --message-weight:500;
   --input-color:rgb(255,255,255);
+  --loading-color:rgb(255,255,255);
 }
 
 a {
@@ -53,6 +52,28 @@ a:hover {
 
 * {
   box-sizing: border-box;
+}
+
+.random-icon {
+  position: absolute;
+  top:calc(50% - .2rem);
+  right:3%;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.random-icon:hover g {
+  fill:var(--night-color) !important;
+  stroke: var(--night-color) !important;
+}
+
+.random-icon:hover .pass-visibility {
+  background-color: var(--night-color);
 }
 
 i {
@@ -112,6 +133,7 @@ button {
   align-items: flex-start;
   justify-content: center;
 }
+
 
 .icon {
   width: 100%;
@@ -273,6 +295,7 @@ p {
   --sub-color:#007BFF;
   --night-color:#ff6161;
   --night-tilelight:hsla(0, 64%, 58%, 0.4);
+  --loading-color:rgb(255,255,255);
 }
 
 .light {
@@ -290,6 +313,7 @@ p {
   --night-tilelight:hsla(276, 59%, 61%, 0.4); 
   --night-color:#ae7dd6;
   --input-color:rgb(255, 255, 255);
+  --loading-color:rgb(0,0,0);
 }
 
 
