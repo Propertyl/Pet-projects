@@ -30,6 +30,11 @@ export class ChatController {
      return userChatData;
   }
 
+  @Put('update-messages')
+  async updateMessageView(@Body() data:{id:string,messages:any}) {
+      return this.userServices.updateChat(data);
+  }
+
   @Get('openChat/:user')
   async getUserChat(@Req() req:Request,@Param('user') user:string) {
     const chatter:any = await serv.get(`/user/infoByName/${user}`)

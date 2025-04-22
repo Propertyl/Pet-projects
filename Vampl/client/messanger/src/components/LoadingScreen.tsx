@@ -9,7 +9,6 @@ const LoadingScreen = () => {
             <span className="loading-dot"></span>
             <span className="loading-dot"></span>
         </div>
-        <p className='loading-text'>Check your access</p>
     </div>
   )
 }

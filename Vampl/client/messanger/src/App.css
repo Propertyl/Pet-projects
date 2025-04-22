@@ -56,7 +56,6 @@ a:hover {
 
 .random-icon {
   position: absolute;
-  top:calc(50% - .2rem);
   right:3%;
   display: flex;
   align-self: center;

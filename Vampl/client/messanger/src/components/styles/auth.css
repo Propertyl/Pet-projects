@@ -36,15 +36,21 @@
 }
 
 
-.code {
-  color:var(--night-color) !important;
-}
+
 
 .list-arrow {
   position:absolute;
   display:flex;
   align-self:center;
   right:1%
+}
+
+.pass-cover {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .list-arrow-active {
@@ -196,7 +202,7 @@
 }
 
 .code-option:hover .code {
-  color:var(--secondary-color) !important;
+  color:var(--light-grey) !important;
 }
 
 .code-option:checked {

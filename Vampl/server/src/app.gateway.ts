@@ -4,6 +4,7 @@ import { Chat,Message } from "./stuff/types";
 import groupMessages from "./stuff/functions/groupMessages";
 import serv from "./stuff/functions/interceptor";
 import parseCookies from "./stuff/functions/parseCookie";
+import updateGroupView from "./stuff/functions/updateGroup";
 
 @WebSocketGateway({cors:true,namespace:'app'})
 
@@ -38,8 +39,14 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    }
 
    @SubscribeMessage('messages-watch')
-   updateMessagesView(client:Socket,data:any) {
-      console.log('messages-viewed!!!!',data);
+   async updateMessagesView(client:Socket,{date,group,room,body}:{date:string,group:string,room:string,body:string}) {
+      let currentChat:any = await serv.get(`/chat/chatID/${room}`).then((data:any)=> data.messages);
+      currentChat = updateGroupView(currentChat,date,group,body);
+      await serv.put('/chat/update-messages',{
+         id:room,
+         messages:currentChat
+      });
+      this.server.to(room).emit('updatedMessageView',currentChat);
    }
 
    @SubscribeMessage('joinRoom')

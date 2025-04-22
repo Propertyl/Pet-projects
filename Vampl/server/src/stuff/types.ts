@@ -26,8 +26,7 @@ interface DateGroup {
 
 interface MessageGroup {
   sender:string  
-  messages:{body:string,time:string}[],
-  seen:boolean
+  messages:{body:string,time:string,seen:boolean}[]
 };
 
 interface chatData {

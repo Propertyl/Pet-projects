@@ -5,11 +5,6 @@
   flex-direction: column;
 }
 
-.loading-text {
-  color:var(--message-color);
-  font-size:1.5rem;
-}
-
 .loading-circle {
   width: 10rem;
   height: 10rem;

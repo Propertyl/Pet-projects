@@ -1,24 +1,18 @@
 const useObserver = (options:IntersectionObserverInit,socket:any) => {
-
-  const currentObserve = new Set<HTMLDivElement>();
-
+  const Groups:Map<Element,{room:string,date:string,group:string,body:string}> = new Map();
   const observer = new IntersectionObserver((entries,_) => {
      entries.forEach(entry => {
        if(entry.isIntersecting) {
-         const group = entry.target.getAttribute('data-group-name');
-         socket.emit('messages-watch',group);
+        console.log('i see');
+         socket.emit('messages-watch',Groups.get(entry.target));
+         observer.unobserve(entry.target);
        }
      });
   },options);
 
-  return (elems:HTMLDivElement[]) => {
-    console.log('start connecting observers:',elems);
-    elems.forEach((elem:any) => {
-       if(!currentObserve.has(elem)) {
-          observer.observe(elem);
-          currentObserve.add(elem);
-       }
-    });
+  return (elem:HTMLDivElement,date:string,group:string,room:string,body:string) => {
+    Groups.set(elem,{room,date,group,body});
+    observer.observe(elem);
   }
 
 }
