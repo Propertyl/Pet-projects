@@ -10,11 +10,9 @@ import chatAfterRefresh from "./functions/getChatAfterRefresh";
 import useFormatter from "./functions/dateFormatter";
 import triggerEffect from "./functions/bubbleEffect";
 import useObserver from "./functions/groupObserver";
-import parseDate from "./functions/parseDate";
-import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
-import MessageEyes from "./messageSeen";
+import spawnGroups from "./functions/spawnMessageGroups";
 
 const Chat = ({room}:{room:string}) => {
 
@@ -29,6 +27,7 @@ const Chat = ({room}:{room:string}) => {
   const socket:Ref<Socket | null> = useRef(null);
   const dispatch = useDispatch();
   const setObserver:Ref<any> = useRef(null);
+  const [placeholder,setPlaceholder] = useState<boolean>(true);
 
   const setUnreadMessage = (date:string,groupName:string,room:string,body:string) => (el:HTMLDivElement) => {
       if(el) {
@@ -74,7 +73,6 @@ useEffect(() => {
         });
       
         socket.current.on('updateChat',(currentChat) => {
-          console.log('how much!');
           setChatData(parseToDeleteGroup(currentChat['all']));
           const newChats = userData.allChats.map(chat => {
             if(chat.id === room) {
@@ -95,6 +93,7 @@ useEffect(() => {
   }
 
   setupPage();
+
   if(messagesRef.current) {
     messagesRef.current.addEventListener('scroll',searchScroll);
   }
@@ -127,56 +126,7 @@ useEffect(() => {
 },[chatData]);
 
 useEffect(() => {
-   const spawnGroups = () => {
-      if(chatData) {
-        const groups = [];
-        console.log('spwan')
-        for(const [index,date] of Object.entries(chatData)) {
-          groups.push(
-            <div className="container container-reverse group-container" key={`group-${index}`}>
-              <span className="date-container">
-                  <p className="group-date">{parseDate(Object.keys(date as any).pop() ?? "",userData.locale,userData.allMonth)}
-                  </p>
-              </span>
-              {/* @ts-ignore */}
-              {Object.values(date).pop()!.groups.map((groupData:any,groupIdx:number) => {
-                 const groups:any = [];
-                 
-                 for(const [groupName,group] of Object.entries(groupData) as [string,any]) {
-                    const isUnread = group.sender !== userName;
-                    const groupElem = 
-                    <div className={`message-group ${group.sender === userName ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
-                    {group.messages.map((message: any, index: number) => (
-                      <div ref={isUnread && !message.seen ? setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body) : null}
-                        className={`message ${group.sender !== userName ? 'not-user-message' : ''}`}
-                        key={`message-${groupIdx}-${index}`}>
-                          {index === group.messages.length - 1 && (
-                            <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail chat-message-tail">
-                              <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
-                            </svg>
-                          )}
-                        <p className="message-body">{message.body}</p>
-                        <div className="message-additional-info">
-                          <p className="message-time">{parseMessageTime(message.time)}</p>
-                          {group.sender === userName && <MessageEyes seen={message.seen}/>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  groups.push(groupElem);
-                 }
-
-                 return groups;
-              })}
-            </div>
-          );
-        }
-
-        setGroups(groups);
-      }
-   }
-
-   spawnGroups();
+   spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups);
 },[chatData]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
@@ -197,21 +147,28 @@ const sendMessageToChat = () => {
   }
 }
 
-const startSending = (event:any,type:"input" | "button") => {
-    if(type === "input" && event.key === "Enter") {
-      triggerEffect(event);
+const startSending = (event:any) => {
+    if( event.key === "Enter" && !event.shiftKey) {
+      event.target.innerText = "";
       sendMessageToChat();
       return;
-    } else if(type === "button") {
-      triggerEffect(event);
-      sendMessageToChat();
-    }
+    } 
 }
 
-// const connectObservers = () => {
-//   const groups = document.querySelectorAll('.group-left');
-//   setObserver.current(groups);
-// }
+const messageWriting = (event:any) => {
+  if(event.target.innerText.trim().length) {
+      setPlaceholder(false);
+  } else {
+      setPlaceholder(true);
+  }
+  setCurrentMessage(event.target.innerText);
+}
+
+const blurInput = (event:any) => {
+    if(!event.target.innerText.trim().length) {
+        setPlaceholder(true);
+    }
+}
 
 useEffect(() => {
     if(userData.allChats.length) {
@@ -250,18 +207,17 @@ useEffect(() => {
             </div>
             <div className="messages-input">
               <div className="type-message-container">
-                <input autoFocus value={currentMessage} onChange={(event) => setCurrentMessage(event.target.value)} onKeyDown={(event) => startSending(event,'input')} placeholder="Message" className="message-input" type="text" />
-                <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail">
-                  <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
-                </svg>
+                <div className="message-input">
+                    <div autoFocus contentEditable={true} onInput={messageWriting} onBlur={blurInput} onKeyDown={(event) => startSending(event)}  className="chat-input-area">
+                    </div>
+                    <span style={{display:placeholder ? "flex" : "none"}} contentEditable={false}className="chat-input-area-placeholder">
+                        Message
+                    </span>
+                    <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail">
+                      <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
+                    </svg>
+                </div>
               </div>
-            {/* <button onClick={(event) => startSending(event,'button')} className="classic-button messages-button">
-              <svg className="send-icon" xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 24 24" fill="none" stroke="#000000">
-            <g id="SVGRepo_bgCarrier" strokeWidth="0"/>
-            <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
-            <g id="SVGRepo_iconCarrier"> <path d="M11.5003 12H5.41872M5.24634 12.7972L4.24158 15.7986C3.69128 17.4424 3.41613 18.2643 3.61359 18.7704C3.78506 19.21 4.15335 19.5432 4.6078 19.6701C5.13111 19.8161 5.92151 19.4604 7.50231 18.7491L17.6367 14.1886C19.1797 13.4942 19.9512 13.1471 20.1896 12.6648C20.3968 12.2458 20.3968 11.7541 20.1896 11.3351C19.9512 10.8529 19.1797 10.5057 17.6367 9.81135L7.48483 5.24303C5.90879 4.53382 5.12078 4.17921 4.59799 4.32468C4.14397 4.45101 3.77572 4.78336 3.60365 5.22209C3.40551 5.72728 3.67772 6.54741 4.22215 8.18767L5.24829 11.2793C5.34179 11.561 5.38855 11.7019 5.407 11.8459C5.42338 11.9738 5.42321 12.1032 5.40651 12.231C5.38768 12.375 5.34057 12.5157 5.24634 12.7972Z" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/> </g>
-              </svg>
-            </button> */}
           </div>
         </div>
       </>

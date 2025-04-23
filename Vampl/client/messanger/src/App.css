@@ -16,13 +16,14 @@
   --bg-specific:#222220;
   --black-default:rgb(0,0,0);
   --bg-main: rgb(37, 37, 37);
-  --nav-bg:rgb(63, 62, 62);
+  --search-border:rgb(141, 137, 137);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(125,125,125,.5);
   --light-grey:rgb(155,155,155);
   --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;
+  --main-grey-lighted:#949393;
   --header-height:6rem;
   --default-border-radius:20px;
   --error-color:rgb(205,0,0);
@@ -39,6 +40,8 @@
   --message-weight:500;
   --input-color:rgb(255,255,255);
   --loading-color:rgb(255,255,255);
+  --nav-border-color:#1f1f1f;
+  --conteneditable-text:black;
 }
 
 a {
@@ -52,6 +55,11 @@ a:hover {
 
 * {
   box-sizing: border-box;
+}
+
+[contenteditable=true] {
+  outline: none;
+  color:var(--conteneditable-text);
 }
 
 .random-icon {
@@ -142,15 +150,10 @@ button {
   background-repeat: no-repeat;
 }
 
-
-button:hover {
-  border-color: #646cff;
-}
-
 input {
   border: none;
   background-color: var(--input-color) !important;
-  color:var(--black-default) !important;
+  color:var(--conteneditable-text);
 }
 
 input[type="search"]::-webkit-search-cancel-button  {
@@ -165,6 +168,7 @@ input[type="search"]::-webkit-search-cancel-button  {
 
 * {
   font-size: 1rem;
+  transition: all .2s;
 }
 
 input, button {
@@ -239,26 +243,6 @@ p {
   height: auto !important;
 }
 
-/* (
-                <div className={`message-group ${sender === userName ? 'group-right' : ''}`} key={`group-${groupIdx}`}>
-                  {messages.map((message: any, index: number) => (
-                    <div
-                      className={`message ${sender !== userName ? 'not-user-message' : ''}`}
-                      key={`message-${groupIdx}-${index}`}
-                    >
-                      {index === messages.length - 1 && (
-                        <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail chat-message-tail">
-                          <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
-                        </svg>
-                      )}
-                      <p className="message-body">{message.body}</p>
-                      <p className="message-time">{parseMessageTime(message.time)}</p>
-                    </div>
-                  ))}
-                </div>
-              ) */
-
-
 @keyframes bubble-pop {
   0% {
       transform: scale(0);
@@ -295,18 +279,20 @@ p {
   --night-color:#ff6161;
   --night-tilelight:hsla(0, 64%, 58%, 0.4);
   --loading-color:rgb(255,255,255);
+  --nav-border-color:#3b3b3b;
+  --input-color:rgb(33, 33, 33);
+  --conteneditable-text:var(--secondary-color);
 }
 
 .light {
   --bg-specific:rgb(192, 192, 192);
   --black-default:rgb(0,0,0);
   --bg-main:rgb(255,255,255);
-  --nav-bg:rgb(43, 40, 40);
   --light-black:#4d4d4d;
   --chat-bg-color:#6d696986;
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(255,255,255,.5);
-  --light-grey:rgb(37, 37, 37);
+  --light-grey:rgb(83, 83, 83);
   --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;
   --night-tilelight:hsla(276, 59%, 61%, 0.4); 
