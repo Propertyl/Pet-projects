@@ -85,7 +85,9 @@
 
 .not-user-message .message-tail {
     fill: var(--not-ur-messages) !important;
-  }
+}
+
+
 
 .message-group {
   position: relative;
@@ -158,7 +160,7 @@
 .type-message-container {
   position: relative;
   width: 70%;
-  height: 5rem;
+  max-height:10rem;
   display: flex;
   align-items: center;
 }
@@ -179,25 +181,28 @@
 .message-input {
   position: relative;
   width:100%;
-  height:70%;
+  min-height:4rem;
+  max-height:10rem;
   border-radius:20px;
   font-size:var(--text-size);
-  padding-left: 1rem;
   background-color: var(--input-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: .5rem;
+  padding-left: 1rem;
 }
 
 .chat-input-area {
   position: relative;
   width: 90%;
-
-  display: flex;
+  max-height: 10rem;
+  display:block;
   align-items: center;
   white-space: pre-wrap;
   word-break: break-word;
-  overflow-y:overlay;
+  overflow-y: auto;
+  padding:1rem 0;
 }
 
 .chat-input-area::-webkit-scrollbar {
@@ -239,16 +244,6 @@
    align-items: center;
 }
 
-.group-container::after {
-  position: absolute;
-  z-index:-1;
-  content: '';
-  width: 110%;
-  height: 100%;
-  display: flex;
-  backdrop-filter: blur(.5rem);
-}
-
 .messages {
   position: relative;
   width:100%;
@@ -265,19 +260,29 @@
   z-index: 100;
 }
 
+.messages::after {
+  position: fixed;
+  z-index:-1;
+  content: '';
+  width:50%;
+  height:70%;
+  display: flex;
+  backdrop-filter: blur(.5rem);
+}
 
 .message::-webkit-scrollbar-button {
   display: none !important;
 }
 
 .type-message-container .message-tail {
-    fill: var(--input-color) !important;
+  fill: var(--input-color) !important;
 }
 
 .messages-input {
   position: relative;
   display: flex;
   width:70%;
+  max-height:10rem;
   align-items: center;
   justify-content: center;
 }

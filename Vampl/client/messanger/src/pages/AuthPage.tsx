@@ -154,7 +154,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
             data['phone'] = currentPhone;
             return data;
          });
-         console.log('register?:',res);
+  
          setRegister(res.register);
 
          if(!res.register) {

@@ -13,6 +13,7 @@ import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
 import spawnGroups from "./functions/spawnMessageGroups";
+import { measureMemory } from "vm";
 
 const Chat = ({room}:{room:string}) => {
 
@@ -138,10 +139,17 @@ const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
 
 const sendMessageToChat = () => {
   if(currentMessage.length) {
+    const replacedMessage = currentMessage
+    .replace(/<div><br><\/div>/g, '\n')
+    .replace(/<div>/g, '\n')
+    .replace(/<\/div>/g, '')
+    .replace(/<br>/g, '\n')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
     const date = new Date();
     const formatter = useFormatter(userData.locale);
     socket.current!.emit('sendMessage',{room:room,
-      message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
+      message:{user:userName,body:replacedMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
     setTimeout(() => scrollDown('smooth'),100);
   }
@@ -149,9 +157,26 @@ const sendMessageToChat = () => {
 
 const startSending = (event:any) => {
     if( event.key === "Enter" && !event.shiftKey) {
-      event.target.innerText = "";
+      event.preventDefault();
+      const input = event.target;
+
       sendMessageToChat();
-      return;
+
+      input.innerText = "";
+      messageWriting(event);
+
+      setTimeout(() => {
+        input.focus();
+  
+        const range = document.createRange();
+        const sel = window.getSelection();
+  
+        range.setStart(input, 0);
+        range.collapse(true); // курсор в начало
+  
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      },0);
     } 
 }
 
@@ -161,7 +186,7 @@ const messageWriting = (event:any) => {
   } else {
       setPlaceholder(true);
   }
-  setCurrentMessage(event.target.innerText);
+  setCurrentMessage(event.target.innerHTML);
 }
 
 const blurInput = (event:any) => {

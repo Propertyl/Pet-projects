@@ -76,7 +76,6 @@ a:hover {
 
 .random-icon:hover g {
   fill:var(--night-color) !important;
-  stroke: var(--night-color) !important;
 }
 
 .random-icon:hover .pass-visibility {
@@ -168,7 +167,6 @@ input[type="search"]::-webkit-search-cancel-button  {
 
 * {
   font-size: 1rem;
-  transition: all .2s;
 }
 
 input, button {
