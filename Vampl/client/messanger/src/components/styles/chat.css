@@ -76,7 +76,9 @@
 }
 
 .not-user-message .message-body {
+  justify-content: flex-start;
   transform: scaleX(-1);
+  padding: .2rem 2rem 0 .5rem;
 }
 
 .not-user-message .message-time {
@@ -116,12 +118,11 @@
   position: relative;
   display:flex;
   max-width: 70%;
-  padding-left:20px;
-  padding-right: .2rem;
+  min-width:10%;
   flex-direction: column;
   border-radius:10px;
-  border-top-left-radius:50px;
-  border-bottom-left-radius:50px;
+  border-top-left-radius:20px;
+  border-bottom-left-radius:20px;
   background-color: var(--night-color);
   margin: .2rem;
   text-wrap: wrap; 
@@ -168,20 +169,21 @@
 .message-body {
   position: relative;
   display: flex;
+  justify-content:flex-end;
   color:var(--message-color);
   font-weight:var(--message-weight);
   margin: 0;
-  max-width:95%;
-  white-space: normal; /* Разрешаем перенос слов */
+  white-space:pre-wrap; /* Разрешаем перенос слов */
   word-wrap: break-word; /* Слова переносятся, когда упираются в границу */
   max-width: 100%; /* Ширина сообщения внутри границ */
   word-break: break-word; /* Разрешает разрыв длинных слов */
+  padding: .2rem .5rem 0 1.5rem;
 }
 
 .message-input {
   position: relative;
   width:100%;
-  min-height:4rem;
+  min-height:2rem;
   max-height:10rem;
   border-radius:20px;
   font-size:var(--text-size);
@@ -189,13 +191,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: .5rem;
+  padding: .2rem;
   padding-left: 1rem;
 }
 
 .chat-input-area {
   position: relative;
-  width: 90%;
+  width:100%;
   max-height: 10rem;
   display:block;
   align-items: center;
@@ -214,8 +216,8 @@
 }
 
 .chat-input-area-placeholder {
-  position: absolute;
-  left:3rem;
+  position:absolute;
+  left:1rem;
   font-size: 1rem;
   color:var(--light-grey);
   pointer-events: none;
@@ -285,6 +287,7 @@
   max-height:10rem;
   align-items: center;
   justify-content: center;
+  margin-top:.2rem;
 }
 
 .message-view-icon {
@@ -303,9 +306,10 @@
 }
 
 .message-additional-info {
+  position: relative;
   display: flex;
-  width: 100%;
   justify-content: flex-end;
+  padding:0 .2rem 0 1rem;
 }
 
 .eye-stick {

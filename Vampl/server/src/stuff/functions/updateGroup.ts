@@ -15,9 +15,13 @@ const updateGroupView = (chat:any,date:string,group:string,body:string) => {
 
           const messages = currentGroup[group].messages;
 
-          const messageInd = messages.findIndex((message:any) => message.body === body);
+          const messageInd = messages.findIndex((message:any) => message.body === body && message.seen === false);
+          
+          if(messageInd >= 0) {
+            console.log('we intersted by:',messages[messageInd],messageInd,messages);
 
-          messages[messageInd].seen = true;
+            messages[messageInd].seen = true;
+          }
         }
     }
 

@@ -32,21 +32,31 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
      this.clients.set(client.id,parsed['token']);
    }
 
+   async messageAction(client:Socket,{date,group,room,body}:{date:string,group:string,room:string,body:string},action:any,emit:string) {
+      let currentChat:any = await serv.get(`/chat/chatID/${room}`).then((data:any)=> data.messages);
+      currentChat = action(currentChat,date,group,body);
+      await serv.put('/chat/update-messages',{
+         id:room,
+         messages:currentChat
+      });
+      this.server.to(room).emit(emit,currentChat);
+   }
+
    async handleDisconnect(client:Socket) {
      const phone:string = this.clients.get(client.id) ?? "";
      await this.updateUserStatus(phone,false);
      this.clients.delete(client.id);
    }
 
+   @SubscribeMessage('message-delete')
+   async messageDelete(client:Socket,data:any) {
+      console.log('sex started!');
+      // await this.messageAction(client,data,() => "","deleted-message");
+   }
+
    @SubscribeMessage('messages-watch')
-   async updateMessagesView(client:Socket,{date,group,room,body}:{date:string,group:string,room:string,body:string}) {
-      let currentChat:any = await serv.get(`/chat/chatID/${room}`).then((data:any)=> data.messages);
-      currentChat = updateGroupView(currentChat,date,group,body);
-      await serv.put('/chat/update-messages',{
-         id:room,
-         messages:currentChat
-      });
-      this.server.to(room).emit('updatedMessageView',currentChat);
+   async messageWatch(client:Socket,data:any) {
+      await this.messageAction(client,data,updateGroupView,'updatedMessageView');
    }
 
    @SubscribeMessage('joinRoom')

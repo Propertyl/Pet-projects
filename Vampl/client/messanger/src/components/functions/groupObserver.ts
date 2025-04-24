@@ -3,7 +3,6 @@ const useObserver = (options:IntersectionObserverInit,socket:any) => {
   const observer = new IntersectionObserver((entries,_) => {
      entries.forEach(entry => {
        if(entry.isIntersecting) {
-        console.log('i see');
          socket.emit('messages-watch',Groups.get(entry.target));
          observer.unobserve(entry.target);
        }

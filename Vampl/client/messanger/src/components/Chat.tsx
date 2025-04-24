@@ -8,12 +8,10 @@ import parseToDeleteGroup from "./functions/parseChatGroups";
 import getLastMessage from "./functions/getLastChatMessage";
 import chatAfterRefresh from "./functions/getChatAfterRefresh";
 import useFormatter from "./functions/dateFormatter";
-import triggerEffect from "./functions/bubbleEffect";
 import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
 import spawnGroups from "./functions/spawnMessageGroups";
-import { measureMemory } from "vm";
 
 const Chat = ({room}:{room:string}) => {
 
@@ -35,6 +33,8 @@ const Chat = ({room}:{room:string}) => {
         setObserver.current(el,date,groupName,room,body);
       }
   }
+
+
 
   const searchScroll = (event:Event) => {
     if(event.target) {
@@ -127,7 +127,7 @@ useEffect(() => {
 },[chatData]);
 
 useEffect(() => {
-   spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups);
+   spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,socket.current as Socket);
 },[chatData]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
@@ -139,26 +139,19 @@ const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
 
 const sendMessageToChat = () => {
   if(currentMessage.length) {
-    const replacedMessage = currentMessage
-    .replace(/<div><br><\/div>/g, '\n')
-    .replace(/<div>/g, '\n')
-    .replace(/<\/div>/g, '')
-    .replace(/<br>/g, '\n')
-    .replace(/&nbsp;/g, ' ')
-    .trim();
     const date = new Date();
     const formatter = useFormatter(userData.locale);
     socket.current!.emit('sendMessage',{room:room,
-      message:{user:userName,body:replacedMessage,time:formatter.format(date),seen:false}});
+      message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
     setTimeout(() => scrollDown('smooth'),100);
   }
 }
 
-const startSending = (event:any) => {
+const startSending = (event:React.KeyboardEvent<HTMLElement>) => {
+  const input = event.target as HTMLDivElement;
     if( event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      const input = event.target;
 
       sendMessageToChat();
 
@@ -177,7 +170,11 @@ const startSending = (event:any) => {
         sel?.removeAllRanges();
         sel?.addRange(range);
       },0);
-    } 
+    }
+    
+    if(event.shiftKey && event.key === "Enter" && !input.innerHTML.length) {
+      event.preventDefault();
+    }
 }
 
 const messageWriting = (event:any) => {
@@ -186,6 +183,7 @@ const messageWriting = (event:any) => {
   } else {
       setPlaceholder(true);
   }
+
   setCurrentMessage(event.target.innerHTML);
 }
 
@@ -193,6 +191,22 @@ const blurInput = (event:any) => {
     if(!event.target.innerText.trim().length) {
         setPlaceholder(true);
     }
+}
+
+const messagePaste = (event:ClipboardEvent | any) => {
+    event.preventDefault();
+    const pasted = event.clipboardData?.getData('text/plain');
+
+    const selection = window.getSelection();
+    if(!selection?.rangeCount) return;
+
+
+    selection.deleteFromDocument();
+    selection.getRangeAt(0).insertNode(document.createTextNode(pasted));
+    
+    setPlaceholder(false);
+    setCurrentMessage(pasted);
+    return;
 }
 
 useEffect(() => {
@@ -233,7 +247,7 @@ useEffect(() => {
             <div className="messages-input">
               <div className="type-message-container">
                 <div className="message-input">
-                    <div autoFocus contentEditable={true} onInput={messageWriting} onBlur={blurInput} onKeyDown={(event) => startSending(event)}  className="chat-input-area">
+                    <div onPaste={messagePaste} autoFocus contentEditable={true} onInput={messageWriting} onBlur={blurInput} onKeyDown={(event) => startSending(event)}  className="chat-input-area">
                     </div>
                     <span style={{display:placeholder ? "flex" : "none"}} contentEditable={false}className="chat-input-area-placeholder">
                         Message
