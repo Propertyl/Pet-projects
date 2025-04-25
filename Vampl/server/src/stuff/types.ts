@@ -14,6 +14,8 @@ interface DBChat {
   messages:any
 };
 
+type condition = 'view' | 'delete';
+
 type Chat = {"all":Record<string,DateGroup>[]};
 
 type updateChatData = {id:string,messages:MessageGroup};
@@ -35,4 +37,12 @@ interface chatData {
   messages:any
 }
 
-export {Message,MessageGroup,DBChat,Chat,DateGroup,messageChat,updateChatData,chatData};
+interface updateMessagesData {
+  date:string,
+  group:string,
+  room:string,
+  body:string,
+  time?:string
+}
+
+export {Message,MessageGroup,DBChat,Chat,DateGroup,messageChat,updateChatData,chatData,condition,updateMessagesData};

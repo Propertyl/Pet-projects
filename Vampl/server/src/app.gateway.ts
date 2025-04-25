@@ -1,10 +1,10 @@
 import {OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway,WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io';
-import { Chat,Message } from "./stuff/types";
+import { Chat,condition,Message, updateMessagesData } from "./stuff/types";
 import groupMessages from "./stuff/functions/groupMessages";
 import serv from "./stuff/functions/interceptor";
 import parseCookies from "./stuff/functions/parseCookie";
-import updateGroupView from "./stuff/functions/updateGroup";
+import updateGroup from "./stuff/functions/updateGroup";
 
 @WebSocketGateway({cors:true,namespace:'app'})
 
@@ -32,14 +32,14 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
      this.clients.set(client.id,parsed['token']);
    }
 
-   async messageAction(client:Socket,{date,group,room,body}:{date:string,group:string,room:string,body:string},action:any,emit:string) {
+   async messageAction(client:Socket,{date,group,room,body,time}:updateMessagesData,condition:condition) {
       let currentChat:any = await serv.get(`/chat/chatID/${room}`).then((data:any)=> data.messages);
-      currentChat = action(currentChat,date,group,body);
+      currentChat = updateGroup(currentChat,date,group,body,time,condition);
       await serv.put('/chat/update-messages',{
          id:room,
          messages:currentChat
       });
-      this.server.to(room).emit(emit,currentChat);
+      this.server.to(room).emit('updatedMessages',currentChat);
    }
 
    async handleDisconnect(client:Socket) {
@@ -49,14 +49,14 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    }
 
    @SubscribeMessage('message-delete')
-   async messageDelete(client:Socket,data:any) {
-      console.log('sex started!');
-      // await this.messageAction(client,data,() => "","deleted-message");
+   async messageDelete(client:Socket,data:updateMessagesData) {
+      console.log('sex started!',data);
+      await this.messageAction(client,data,'delete');
    }
 
    @SubscribeMessage('messages-watch')
-   async messageWatch(client:Socket,data:any) {
-      await this.messageAction(client,data,updateGroupView,'updatedMessageView');
+   async messageWatch(client:Socket,data:updateMessagesData) {
+      await this.messageAction(client,data,'view');
    }
 
    @SubscribeMessage('joinRoom')

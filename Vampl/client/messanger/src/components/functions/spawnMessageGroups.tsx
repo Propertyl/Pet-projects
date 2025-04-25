@@ -4,9 +4,9 @@ import parseDate from "./parseDate";
 import parseMessageTime from "./parseMessageTime";
 import { Socket } from "socket.io-client";
 
-const setDeletedMessage = (date:string,groupName:string,room:string,body:string,time:string,socket:any) => (event:React.MouseEvent<HTMLElement>) => {
+const setDeletedMessage = (date:string,group:string,room:string,body:string,time:string,socket:any) => (event:React.MouseEvent<HTMLElement>) => {
   event.preventDefault();
-  socket.emit('message-delete',{date,groupName,room,body,time});
+  socket.emit('message-delete',{date,group,room,body,time});
 }
 
 const spawnGroups = (chatData:any,userData:any,userName:string,room:string,setUnreadMessage:any,setGroups:Dispatch<SetStateAction<ReactElement[]>>,socket:Socket) => {
@@ -28,9 +28,7 @@ const spawnGroups = (chatData:any,userData:any,userName:string,room:string,setUn
                 const groupElem = 
                 <div className={`message-group ${group.sender === userName ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
                 {group.messages.map((message: any, index: number) => (
-                  <div onContextMenu={
-                    setDeletedMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body,message.time,socket)
-                  } ref={
+                  <div onContextMenu={group.sender === userName ? setDeletedMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body,message.time,socket) : () => {}} ref={
                     isUnread && !message.seen ? setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body) : null
                   }
                     className={`message ${group.sender !== userName ? 'not-user-message' : ''}`}

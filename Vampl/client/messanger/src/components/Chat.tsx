@@ -87,7 +87,7 @@ useEffect(() => {
           dispatch(setData({field:'allChats',value:newChats}));           
         });
 
-        socket.current.on('updatedMessageView',(chat) => {
+        socket.current.on('updatedMessages',(chat) => {
           setChatData(parseToDeleteGroup(chat['all']));
         });
       }
