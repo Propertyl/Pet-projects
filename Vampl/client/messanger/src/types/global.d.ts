@@ -7,9 +7,18 @@ interface Chat {
   id:string
 }
 
+interface MessagesData {
+  date:string,
+  group:string,
+  room:string,
+  body:string,
+  time:string
+}
+
 interface Store {
   user:UserData,
-  stuff:{burgerOpen:Boolean,title:string,currentRoom:string,userInBurger:string,approve:boolean}
+  stuff:{burgerOpen:Boolean,title:string,currentRoom:string,userInBurger:string,approve:boolean},
+  chat:{deleteArgs:MessagesData,deleteChat:string}
 }
 
 interface UserData {
@@ -61,4 +70,4 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,Store};
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,Store,MessagesData};

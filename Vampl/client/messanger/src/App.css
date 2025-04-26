@@ -32,9 +32,10 @@
   --night-color:#da5050;
   --night-tilelight:hsla(0, 64%, 58%, 0.4);
   --light-night:#ff6161;
+  --light-night-half:#ff616136;
   --main-rem:16px;
   --text-size:calc(var(--main-rem) + 3px);
-  --scrollbar-color:rgba(252, 252, 252, 0.301) #bbda5500;
+  --scrollbar-color:rgba(255, 255, 255, 0.075) #bbda5500;
   --message-color:rgb(255,255,255);
   --not-ur-messages:#343434;
   --message-weight:500;
@@ -42,6 +43,7 @@
   --loading-color:rgb(255,255,255);
   --nav-border-color:#1f1f1f;
   --conteneditable-text:black;
+  --tile-white:rgba(255,255,255,.4);
 }
 
 a {
@@ -60,6 +62,10 @@ a:hover {
 [contenteditable=true] {
   outline: none;
   color:var(--conteneditable-text);
+}
+
+div:focus {
+  outline: none;
 }
 
 .random-icon {

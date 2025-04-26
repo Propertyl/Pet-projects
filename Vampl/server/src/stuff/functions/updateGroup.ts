@@ -1,8 +1,8 @@
 import { Chat, DateGroup, Message } from "../types";
 
 const updateGroup = (chat:Chat,date:string,group:string,body:string,time:string = '',type:'view' | 'delete') => {
-    const all = chat['all'];
-    let condition = (message:Message) => {
+    let all = chat['all'];
+    const condition = (message:Message) => {
        if(type === 'view') {
           return message.body === body && message.seen === false;
        }
@@ -31,11 +31,19 @@ const updateGroup = (chat:Chat,date:string,group:string,body:string,time:string 
           messages[messageInd].seen = true;
         } else {
           messages.splice(messageInd,1);
+          if(!messages.length) {
+             currentDate[date].groups.splice(currentGroupInd,1);
+             if(!currentDate[date].groups.length) {
+                chat['all'] = all.filter(dateGroup => {
+                  const [groupDate] = Object.keys(dateGroup);
+                
+                  return groupDate !== date;
+               });
+             }
+          }
         }
       }
     }
-
-    
 
     return chat;
 }

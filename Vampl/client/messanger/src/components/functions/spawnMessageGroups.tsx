@@ -1,15 +1,23 @@
-import { Dispatch, ReactElement, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction} from "react";
 import MessageEyes from "../messageSeen";
 import parseDate from "./parseDate";
 import parseMessageTime from "./parseMessageTime";
-import { Socket } from "socket.io-client";
+import { Dispatch as DispatchRedux } from "@reduxjs/toolkit";
+import { setDeleteFunc } from "../../store/chat";
 
-const setDeletedMessage = (date:string,group:string,room:string,body:string,time:string,socket:any) => (event:React.MouseEvent<HTMLElement>) => {
-  event.preventDefault();
-  socket.emit('message-delete',{date,group,room,body,time});
-}
+const spawnGroups = (chatData:any,userData:any,userName:string,room:string,setUnreadMessage:any,setGroups:Dispatch<SetStateAction<ReactElement[]>>,
+setContextMenu:Dispatch<SetStateAction<boolean>>,
+setContextMenuPos:Dispatch<SetStateAction<{x:number,y:number}>>,
+dispatch:DispatchRedux
+) => {
 
-const spawnGroups = (chatData:any,userData:any,userName:string,room:string,setUnreadMessage:any,setGroups:Dispatch<SetStateAction<ReactElement[]>>,socket:Socket) => {
+ const spawnContextMenu = (date:string,group:string,room:string,body:string,time:string) => (event:any) => {
+    event.preventDefault();
+    setContextMenu(true);
+    setContextMenuPos({x:event.clientX,y:event.clientY});
+    dispatch(setDeleteFunc({date:date,group:group,room:room,body:body,time:time}));
+ }
+
   if(chatData) {
     const groups = [];
     for(const [index,date] of Object.entries(chatData)) {
@@ -28,7 +36,10 @@ const spawnGroups = (chatData:any,userData:any,userName:string,room:string,setUn
                 const groupElem = 
                 <div className={`message-group ${group.sender === userName ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
                 {group.messages.map((message: any, index: number) => (
-                  <div onContextMenu={group.sender === userName ? setDeletedMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body,message.time,socket) : () => {}} ref={
+                  <div onContextMenu={spawnContextMenu(
+                    Object.keys(date as any).pop() ?? "",
+                    groupName,room,message.body,message.time
+                  )} ref={
                     isUnread && !message.seen ? setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body) : null
                   }
                     className={`message ${group.sender !== userName ? 'not-user-message' : ''}`}

@@ -173,10 +173,10 @@
   color:var(--message-color);
   font-weight:var(--message-weight);
   margin: 0;
-  white-space:pre-wrap; /* Разрешаем перенос слов */
-  word-wrap: break-word; /* Слова переносятся, когда упираются в границу */
-  max-width: 100%; /* Ширина сообщения внутри границ */
-  word-break: break-word; /* Разрешает разрыв длинных слов */
+  white-space:pre-wrap; 
+  word-wrap: break-word; 
+  max-width: 100%;
+  word-break: break-word; 
   padding: .2rem .5rem 0 1.5rem;
 }
 
@@ -255,12 +255,13 @@
   align-items: center;
   flex-direction: column;
   overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-color:var(--scrollbar-color);
-  scrollbar-width:thin;
+  overflow-y: overlay;
+  scrollbar-color: var(--scrollbar-color);
+  scrollbar-width: thin;
   transition: all .2s;
   z-index: 100;
 }
+
 
 .messages::after {
   position: fixed;
@@ -270,10 +271,6 @@
   height:70%;
   display: flex;
   backdrop-filter: blur(.5rem);
-}
-
-.message::-webkit-scrollbar-button {
-  display: none !important;
 }
 
 .type-message-container .message-tail {
@@ -318,6 +315,68 @@
   height: 100%;
   background-color: var(--secondary-color);
   animation: stick-appear .3s ease-in-out forwards;
+}
+
+.context-menu {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width:13rem;
+  height:3rem;
+  padding: .5rem;
+  border-radius:10px;
+  background-color: rgba(33,33,33, .75);
+  backdrop-filter: blur(50px);
+  z-index: 1000000000000;
+  animation: context-menu-appear .2s ease-out forwards;
+}
+
+.context-menu-option {
+  width: 90%;
+  display: flex;
+  align-items: center;
+  transition: all .2s;
+  cursor: pointer;
+  border-radius: 20px;
+  padding: .2rem;
+}
+
+.context-menu-icon {
+  position:  relative !important;
+  pointer-events: none;
+  margin: 0 0 0 .8rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.context-menu-icon g {
+  stroke:var(--light-night) !important;
+}
+
+
+.context-menu-option:hover {
+  background-color: var(--tile-white);
+}
+
+.error-option:hover {
+  background-color: var(--light-night-half) !important;
+}
+
+.delete-text {
+  color:var(--light-night);
+}
+
+.hidden {
+  overflow-y: hidden;
+}
+
+@keyframes context-menu-appear {
+  from {
+    transform: scale(0);
+  } to {
+    transform: scale(1);
+  }
 }
 
 @keyframes stick-appear {

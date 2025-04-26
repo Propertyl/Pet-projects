@@ -1,7 +1,7 @@
 import { ReactElement, Ref, useEffect, useRef, useState } from "react";
 import { chatData, DefaultRef, statusInfo } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
-import { Store } from "../types/global";
+import { MessagesData, Store } from "../types/global";
 import { io, Socket } from "socket.io-client";
 import { setData } from "../store/user";
 import parseToDeleteGroup from "./functions/parseChatGroups";
@@ -12,12 +12,15 @@ import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
 import spawnGroups from "./functions/spawnMessageGroups";
+import ContextMenu from "./ContextMenu";
+import { setDeleteChat } from "../store/chat";
 
 const Chat = ({room}:{room:string}) => {
-
   const [chatData,setChatData] = useState<chatData | any>(null);
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
+  const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
+  const deleteChat = useSelector((state:Store) => state.chat.deleteChat);
   const userData = useSelector((state:Store) => state.user);
   const userName = userData.additionalData.name;
   const [currentMessage,setCurrentMessage] = useState<string>("");
@@ -27,14 +30,15 @@ const Chat = ({room}:{room:string}) => {
   const dispatch = useDispatch();
   const setObserver:Ref<any> = useRef(null);
   const [placeholder,setPlaceholder] = useState<boolean>(true);
+  const [contextMenu,setContextMenu] = useState<boolean>(false);
+  const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
+
 
   const setUnreadMessage = (date:string,groupName:string,room:string,body:string) => (el:HTMLDivElement) => {
       if(el) {
         setObserver.current(el,date,groupName,room,body);
       }
   }
-
-
 
   const searchScroll = (event:Event) => {
     if(event.target) {
@@ -55,6 +59,13 @@ const Chat = ({room}:{room:string}) => {
 useEffect(() => {
    downButtonRef.current = downButton;
 },[downButton]);
+
+useEffect(() => {
+  if(deleteChat) {
+    socket.current!.emit('delete-chat',deleteChat);
+    dispatch(setDeleteChat(""));
+  }
+},[deleteChat])
 
 useEffect(() => {
   socket.current = io('http://localhost:3000/app',{
@@ -87,8 +98,18 @@ useEffect(() => {
           dispatch(setData({field:'allChats',value:newChats}));           
         });
 
-        socket.current.on('updatedMessages',(chat) => {
-          setChatData(parseToDeleteGroup(chat['all']));
+        socket.current.on('updatedMessages',(currentChat) => {
+          setChatData(parseToDeleteGroup(currentChat['all']));
+          const newChats = userData.allChats.map(chat => {
+            if(chat.id === room) {
+              const currentLast = getLastMessage(currentChat);
+              chat = {id:chat.id,...currentLast};
+            }
+      
+            return chat;
+          });
+      
+          dispatch(setData({field:'allChats',value:newChats}));    
         });
       }
   }
@@ -127,7 +148,11 @@ useEffect(() => {
 },[chatData]);
 
 useEffect(() => {
-   spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,socket.current as Socket);
+  spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,
+  setContextMenu,
+  setContextMenuPos,
+  dispatch
+  );
 },[chatData]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
@@ -165,14 +190,14 @@ const startSending = (event:React.KeyboardEvent<HTMLElement>) => {
         const sel = window.getSelection();
   
         range.setStart(input, 0);
-        range.collapse(true); // курсор в начало
+        range.collapse(true); 
   
         sel?.removeAllRanges();
         sel?.addRange(range);
       },0);
     }
     
-    if(event.shiftKey && event.key === "Enter" && !input.innerHTML.length) {
+    if(event.shiftKey && event.key === "Enter" && !input.innerText.trim().length) {
       event.preventDefault();
     }
 }
@@ -209,6 +234,10 @@ const messagePaste = (event:ClipboardEvent | any) => {
     return;
 }
 
+const setDeletedMessage = (deleteArgs:MessagesData) => () => {
+  socket.current!.emit('message-delete',deleteArgs);
+}
+
 useEffect(() => {
     if(userData.allChats.length) {
       userData.allChats.forEach(room => {
@@ -216,6 +245,16 @@ useEffect(() => {
       });
     }
 },[userData.allChats]);
+
+useEffect(() => {
+   if(messagesRef.current) {
+    if(contextMenu) {
+      messagesRef.current.classList.add('hidden');
+    } else if(messagesRef.current.classList.contains('hidden')) {
+      messagesRef.current.classList.remove('hidden');
+    }
+   }
+},[contextMenu,messagesRef])
 
 useEffect(() => {
    const getChat = async () => {
@@ -243,6 +282,9 @@ useEffect(() => {
               <div className="messages-group-container">
                 { chatData && groups}
               </div>
+              {
+                contextMenu && <ContextMenu phrase="Delete" switchState={setContextMenu} pos={contextMenuPos} func={() => setDeletedMessage(deleteArgs)}/>
+              }
             </div>
             <div className="messages-input">
               <div className="type-message-container">

@@ -65,6 +65,14 @@ export class UserService {
       }
     })
   }
+
+  deleteChat(id:string) {
+    return this.prisma.chats.delete({
+      where:{
+        chatId:id
+      }
+    })
+  }
   
   getChatData(userPhone:string) {
     return this.prisma.chats.findMany({

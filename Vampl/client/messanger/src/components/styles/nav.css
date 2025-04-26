@@ -124,7 +124,7 @@
    border-top-left-radius:30px;
    border-bottom-left-radius:30px;
    padding-left: 1rem;
-   border:.1rem solid var(--search-border);
+   border:.2rem solid var(--search-border);
    border-right: none;
    transition: all .2s;
 }
@@ -149,7 +149,7 @@
   border-top-right-radius:30px;
   border-bottom-right-radius:30px;
   overflow: hidden;
-  border:.1rem solid var(--search-border);
+  border:.2rem solid var(--search-border);
   border-left: none;
 }
 

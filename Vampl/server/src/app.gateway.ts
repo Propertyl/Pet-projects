@@ -48,9 +48,18 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
      this.clients.delete(client.id);
    }
 
+   @SubscribeMessage('delete-chat')
+   async chatDelete(client:Socket,chatID:string) {
+      await serv.put('/chat/delete-chat',{
+         headers:{
+            'Content-Type':'application/json'
+         },
+         id:chatID
+      });
+   }
+
    @SubscribeMessage('message-delete')
    async messageDelete(client:Socket,data:updateMessagesData) {
-      console.log('sex started!',data);
       await this.messageAction(client,data,'delete');
    }
 

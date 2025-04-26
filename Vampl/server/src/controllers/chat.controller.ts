@@ -54,4 +54,10 @@ export class ChatController {
   updateChatByID(@Body() {id,messages}:updateChatData) {
      return this.userServices.updateChat({id,messages});
   }
+
+  @Put('delete-chat')
+  async deleteUserChat(@Body() {id}:{id:string}) {
+    console.log('volna:',id);
+    return this.userServices.deleteChat(id);
+  }
 }
