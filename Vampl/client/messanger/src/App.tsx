@@ -37,8 +37,6 @@ function App() {
         console.log('AUTH:',auth);
         const userInfo:any = await serv.get('/user/info');
         const userTheme:any = await serv.get('/user/get-theme');
-
-        console.log('pipiska');
         
         changeTheme(userTheme.theme);
         dispatch(setData({field:'additionalData',value:userInfo}));
@@ -52,7 +50,7 @@ function App() {
 
   return (
     <>
-        <RouterProvider router={router}/>
+      <RouterProvider router={router}/>
     </>
   )
 }

@@ -44,6 +44,12 @@ interface ParsedChat {
   id:string
 }
 
+interface UserContact {
+  user:ParsedChat.user,
+  message:{last:string,time:string},
+  id:string
+}
+
 interface MessageGroup {
   sender:string  
   messages:{body:string,time:string}[]
@@ -56,4 +62,4 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData};
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact};

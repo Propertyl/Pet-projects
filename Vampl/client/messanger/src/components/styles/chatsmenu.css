@@ -23,7 +23,7 @@
   cursor: pointer;
   display: flex;
   padding-top: .5rem;
-  border-top:.2rem solid var(--nav-border-color);
+  border-top:.4rem solid var(--borders-bg);
 }
 
 .status-picture-container {

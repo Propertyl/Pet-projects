@@ -2,11 +2,9 @@ import { ReactElement, Ref, useEffect, useRef, useState } from "react";
 import { chatData, DefaultRef, statusInfo } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { MessagesData, Store } from "../types/global";
-import { io, Socket } from "socket.io-client";
+import {Socket } from "socket.io-client";
 import { setData } from "../store/user";
 import parseToDeleteGroup from "./functions/parseChatGroups";
-import getLastMessage from "./functions/getLastChatMessage";
-import chatAfterRefresh from "./functions/getChatAfterRefresh";
 import useFormatter from "./functions/dateFormatter";
 import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
@@ -15,7 +13,7 @@ import spawnGroups from "./functions/spawnMessageGroups";
 import ContextMenu from "./ContextMenu";
 import { setDeleteChat } from "../store/chat";
 
-const Chat = ({room}:{room:string}) => {
+const Chat = ({room,socket}:{room:string,socket:Socket | null}) => {
   const [chatData,setChatData] = useState<chatData | any>(null);
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
@@ -26,13 +24,11 @@ const Chat = ({room}:{room:string}) => {
   const [currentMessage,setCurrentMessage] = useState<string>("");
   const [downButton,setDownButton] = useState<boolean>(false);
   const downButtonRef = useRef(downButton);
-  const socket:Ref<Socket | null> = useRef(null);
   const dispatch = useDispatch();
   const setObserver:Ref<any> = useRef(null);
   const [placeholder,setPlaceholder] = useState<boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
-
 
   const setUnreadMessage = (date:string,groupName:string,room:string,body:string) => (el:HTMLDivElement) => {
       if(el) {
@@ -53,8 +49,7 @@ const Chat = ({room}:{room:string}) => {
          setDownButton(false);
       }
     }
-  };
-
+  }
 
 useEffect(() => {
    downButtonRef.current = downButton;
@@ -62,56 +57,28 @@ useEffect(() => {
 
 useEffect(() => {
   if(deleteChat) {
-    socket.current!.emit('delete-chat',deleteChat);
+    socket!.emit('delete-chat',deleteChat);
     dispatch(setDeleteChat(""));
   }
 },[deleteChat])
 
 useEffect(() => {
-  socket.current = io('http://localhost:3000/app',{
-    withCredentials:true
-  });
-
-},[])
-
-useEffect(() => {
   const setupPage = async () => {  
-      if(socket.current) {
+    console.log('socket:',socket?.connected);
+        setObserver.current = useObserver({threshold:1},socket);
 
-        setObserver.current = useObserver({threshold:1},socket.current);
-
-        socket.current.on('userUpdates',(info:statusInfo) => {
+        socket!.on('userUpdates',(info:statusInfo) => {
           dispatch(setData({field:'changedUser',value:info}));
         });
       
-        socket.current.on('updateChat',(currentChat) => {
+        socket!.on('updateChat',(currentChat) => {
+          console.log('current:',currentChat);
           setChatData(parseToDeleteGroup(currentChat['all']));
-          const newChats = userData.allChats.map(chat => {
-            if(chat.id === room) {
-              const currentLast = getLastMessage(currentChat);
-              chat = {id:chat.id,...currentLast};
-            }
-      
-            return chat;
-          });
-      
-          dispatch(setData({field:'allChats',value:newChats}));           
         });
 
-        socket.current.on('updatedMessages',(currentChat) => {
-          setChatData(parseToDeleteGroup(currentChat['all']));
-          const newChats = userData.allChats.map(chat => {
-            if(chat.id === room) {
-              const currentLast = getLastMessage(currentChat);
-              chat = {id:chat.id,...currentLast};
-            }
-      
-            return chat;
-          });
-      
-          dispatch(setData({field:'allChats',value:newChats}));    
+        socket!.on('joinedRoom',(room) => {
+           console.log('sucefull:',room);
         });
-      }
   }
 
   setupPage();
@@ -124,28 +91,24 @@ useEffect(() => {
     if(messagesRef.current) {
       messagesRef.current.removeEventListener('scroll',searchScroll);
     }
-
-    socket.current?.off();
   }
 
-},[socket.current,userData.allChats]);
+},[socket]);
+
+// useEffect(() => {
+//   if(userData.allChats) {
+//     userData.allChats.map(chat => {
+//       console.log('join to room:',chat.id);
+//       socket?.emit('joinRoom',chat.id);
+//     });
+//   }
+// },[userData.allChats])
 
 useEffect(() => {
   if(messagesRef.current) {
     scrollDown();
   }
 },[messagesRef.current])
-
-
-useEffect(() => {
-  const tryGetChat = async () => {  
-    if(window.location.href.includes('@') && !chatData) {
-      await chatAfterRefresh(dispatch);
-    }
-  }
-
-  tryGetChat ();
-},[chatData]);
 
 useEffect(() => {
   spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,
@@ -163,10 +126,11 @@ const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
 }
 
 const sendMessageToChat = () => {
-  if(currentMessage.length) {
+  if(currentMessage.length && socket) {
     const date = new Date();
     const formatter = useFormatter(userData.locale);
-    socket.current!.emit('sendMessage',{room:room,
+    console.log('so:',socket.connected);
+    socket!.emit('sendMessage',{room:room,
       message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
     setTimeout(() => scrollDown('smooth'),100);
@@ -209,7 +173,7 @@ const messageWriting = (event:any) => {
       setPlaceholder(true);
   }
 
-  setCurrentMessage(event.target.innerHTML);
+  setCurrentMessage(event.target.innerText);
 }
 
 const blurInput = (event:any) => {
@@ -235,16 +199,8 @@ const messagePaste = (event:ClipboardEvent | any) => {
 }
 
 const setDeletedMessage = (deleteArgs:MessagesData) => () => {
-  socket.current!.emit('message-delete',deleteArgs);
+  socket!.emit('message-delete',deleteArgs);
 }
-
-useEffect(() => {
-    if(userData.allChats.length) {
-      userData.allChats.forEach(room => {
-        socket.current?.emit('joinRoom',room.id);
-      });
-    }
-},[userData.allChats]);
 
 useEffect(() => {
    if(messagesRef.current) {
@@ -268,8 +224,7 @@ useEffect(() => {
 },[room]);
 
   return (
-      <>
-      <div className="chat">
+    <>
         { chatData && 
           <>
             <div className="messages-container">
@@ -303,8 +258,7 @@ useEffect(() => {
         </div>
       </>
       }
-    </div>
-  </>
+    </>
   )
 }
 

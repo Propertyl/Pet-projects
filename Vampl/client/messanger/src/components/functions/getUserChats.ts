@@ -2,24 +2,30 @@ import getLastMessage from "./getLastChatMessage";
 import parsingChats from "./parsingChats";
 import serv from "./interceptors";
 import { Dispatch } from "@reduxjs/toolkit";
-import { setData } from "../../store/user";
-import { ParsedChat } from "../types/global";
+import { UserContact } from "../types/global";
 
 const getUserChats = async (phone:string,dispatch:Dispatch) => {
-  const userChats:ParsedChat[] = await serv.get(`/chat/chats`)
-  .then(data => parsingChats(data,phone));
+  const userChats:UserContact[] = await serv.get(`/chat/chats`)
+  .then(data => parsingChats(data,phone))
+  .then(chats => {
+     const parsed = chats.map((chat:any) => {
+        const currentLast = getLastMessage(chat.messages);
+        delete chat.messages;
+        chat['message'] = currentLast;
+        return chat;
+     });
 
-  const contacts = userChats.map((chat:any) => {
-    const currentLast = getLastMessage(chat.messages);
-    return {id:chat.id,...currentLast};
+     return parsed;
   });
 
-  dispatch(setData({field:'allChats',value:contacts}));
+  // const contacts = userChats.map((chat:any) => {
+  //   const currentLast = getLastMessage(chat.messages);
+  //   return {id:chat.id,...currentLast};
+  // });
 
-  return userChats.map((chat:any) => {
-    delete chat.messages;
-    return chat;
-  });
+  // dispatch(setData({field:'allChats',value:contacts}));
+
+  return userChats;
 }
 
 export default getUserChats;

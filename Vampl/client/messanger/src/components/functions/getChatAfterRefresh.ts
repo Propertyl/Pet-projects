@@ -7,6 +7,7 @@ const chatAfterRefresh = async (dispatch:Dispatch) => {
     const openChat = currentHref.split('@')[1];
     const room:{chatId:string} = await serv.get(`/chat/openChat/${openChat}`)
     .then((chat:any) => chat.chatId);   
+    console.log('get:',room);
     dispatch(changeRoom(room));
 }
 

@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useState } from "react";
-import { ParsedChat } from "./types/global";
+import { useEffect, useState } from "react";
+import { Chat, UserContact } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../types/global";
 import { convertStatus } from "./functions/convertStatus";
@@ -12,17 +12,19 @@ import './styles/chatsmenu.css';
 import { changeRoom, switchBurger, switchUser } from "../store/useFullStaff";
 import UserBurger from "./UserBurger";
 import ContextMenu from "./ContextMenu";
-import serv from "./functions/interceptors";
 import { setDeleteChat } from "../store/chat";
+import { useNavigate } from "react-router";
+import { Socket } from "socket.io-client";
+import getLastMessage from "./functions/getLastChatMessage";
 
-const ChatsTape = () => {
-  const [chats,setChats] = useState<ParsedChat[]>([]);
+const ChatsTape = ({socket}:{socket:Socket | null}) => {
+  const router = useNavigate();
+  const [chats,setChats] = useState<UserContact[]>([]);
   const [contactDefault,_] = useState<Boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextPos,setContextPos] = useState<{x:number,y:number}>({x:0,y:0});
   const [deleteId,setDeleteId] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
-  const currentChat = useSelector((state:Store) => state.user.currentChat);
   const changedUser = useSelector((state:Store) => state.user.changedUser);
   const userData = useSelector((state:Store) => state.user);
   const dispatch = useDispatch();
@@ -40,23 +42,58 @@ const ChatsTape = () => {
         dispatch(setData({field:'changedUser',value:{}}));
      }
   },[changedUser]);
+
+  useEffect(() => {
+    const setupPage = async () => {
+      if(socket) {
+        socket.on('updateChat',(currentChat:Chat,room:string) => {
+          setChats(chats.map(chat => {
+            if(chat.id === room) {
+              console.log('chat:',chat);
+              chat.message = getLastMessage(currentChat);
+            }
+            return chat;
+          }));
+
+          console.log('push to tape:',chats,currentChat);
+        });
+      }
+    }
+    
+    setupPage();
+
+    return () => {
+      socket?.off();
+    }
+  },[chats,socket])
+
+  useEffect(() => {
+    if(userData.allChats) {
+      userData.allChats.map(chat => {
+        console.log('join to room:',chat.id);
+        socket?.emit('joinRoom',chat.id);
+      });
+    }
+  },[userData.allChats])
   
   useEffect(() => {
     const checkChats = async () => {
       if(!chats.length) {
-        const currentChats = await getUserChats(userData.additionalData.phone,dispatch);
-        setChats(currentChats);
+        const currentChats:UserContact[] = await getUserChats(userData.additionalData.phone,dispatch);
+        setChats([...currentChats]);
+
+        dispatch(setData({field:'allChats',value:currentChats}));
       }
     }
 
     checkChats();
   },[userData]);
   
-  const parseLast = useCallback((id:string) => {
-    return userData.allChats.find(chat => chat.id === id);
-  },[currentChat,userData.allChats]);
+  // const parseLast = (id:string) => {
+  //   return userData.allChats.find(chat => chat.id === id);
+  // };
   
-  const openChat = (contact:ParsedChat) => {
+  const openChat = (contact:UserContact) => {
     dispatch(changeRoom(contact.id));
   }
 
@@ -64,15 +101,16 @@ const ChatsTape = () => {
     dispatch(setDeleteChat(chatId));
     setChats(chats.filter(contact => contact.id != chatId));
     if(currentRoom === chatId) {
-      window.location.href = '/';
+        router('/');
+        dispatch(changeRoom(''));
     }
   }
 
   const openContextMenu = (id:string) => (event:any) => {
-      event.preventDefault();
-      setContextMenu(true);
-      setContextPos({x:event.clientX,y:event.clientY});
-      setDeleteId(id);
+    event.preventDefault();
+    setContextMenu(true);
+    setContextPos({x:event.clientX,y:event.clientY});
+    setDeleteId(id);
   }
 
   return (
@@ -104,8 +142,8 @@ const ChatsTape = () => {
                 </div>
                 <div className="contact-info-container">
                 <p  className="contact-name">{contact.user.name}</p>
-                <p className="contact-chat-last-message">{parseLast(contact.id)?.last}</p>
-                <p className="contact-chat-message-time">{parseMessageTime(parseLast(contact.id)?.time ?? "") }</p>
+                <p className="contact-chat-last-message">{contact.message.last}</p>
+                <p className="contact-chat-message-time">{parseMessageTime(contact.message.time) }</p>
                 </div>
               </div>
             </a>
