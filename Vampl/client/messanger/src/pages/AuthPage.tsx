@@ -42,7 +42,7 @@ const AuthPage = () => {
 
   const changeStrokes = (currentStrokes:number) => {
     console.log('strokes:',currentStrokes);
-    const newSpaces = "-".repeat(currentStrokes)
+    const newSpaces = "_".repeat(currentStrokes)
     .split('').map((stroke,i,arr) => {
       if(i % Math.floor(arr.length / 3) === 0) {
         return stroke + " ";

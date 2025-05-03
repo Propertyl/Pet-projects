@@ -1,17 +1,16 @@
 import getLastMessage from "./getLastChatMessage";
 import parsingChats from "./parsingChats";
 import serv from "./interceptors";
-import { Dispatch } from "@reduxjs/toolkit";
 import { UserContact } from "../types/global";
 
-const getUserChats = async (phone:string,dispatch:Dispatch) => {
+const getUserChats = async (phone:string) => {
   const userChats:UserContact[] = await serv.get(`/chat/chats`)
   .then(data => parsingChats(data,phone))
   .then(chats => {
      const parsed = chats.map((chat:any) => {
         const currentLast = getLastMessage(chat.messages);
         delete chat.messages;
-        chat['message'] = currentLast;
+        chat.message = currentLast;
         return chat;
      });
 

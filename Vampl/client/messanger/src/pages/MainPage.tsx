@@ -6,7 +6,7 @@ import '../components/styles/home.css';
 import '../components/styles/chat.css';
 import { Store } from "../types/global";
 import LoadingScreen from "../components/LoadingScreen";
-import { Ref, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import chatAfterRefresh from "../components/functions/getChatAfterRefresh";
 import { io, Socket } from "socket.io-client";
 
@@ -14,11 +14,10 @@ const MainPage = () => {
  const room = useSelector((state:Store) => state.stuff.currentRoom);
  const access = useSelector((state:Store) => state.stuff.approve);
  const dispatch = useDispatch();
- const socketConnection:Ref<Socket | null> = useRef(null);
+ const socketConnection:React.RefObject<Socket | null> = useRef(null);
  const [connection,setConnection] = useState(false);
- const userData = useSelector((state:Store) => state.user);
-
- useEffect(() => {
+ 
+  useEffect(() => {
    if(access) {
      const socket = io('http://localhost:3000/app',{
       withCredentials:true
@@ -41,8 +40,8 @@ const MainPage = () => {
       }
     }
 
-    tryGetChat ();
-  },[room,access])
+    tryGetChat();
+  },[access])
 
   return (
     <>
@@ -53,9 +52,9 @@ const MainPage = () => {
             </header>
             {connection &&
               <main className="chat-main">
-                <ChatsTape socket={socketConnection.current}/>
+                <ChatsTape socket={socketConnection}/>
                 <div className="chat">
-                  {room && <Chat socket={socketConnection.current} room={room}/>}
+                  {<Chat socket={socketConnection} room={room}/>}
                 </div>
               </main>
             }

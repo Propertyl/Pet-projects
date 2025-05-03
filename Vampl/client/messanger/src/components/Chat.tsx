@@ -1,9 +1,8 @@
 import { ReactElement, Ref, useEffect, useRef, useState } from "react";
-import { chatData, DefaultRef, statusInfo } from "./types/global";
+import { chatData, DefaultRef } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { MessagesData, Store } from "../types/global";
 import {Socket } from "socket.io-client";
-import { setData } from "../store/user";
 import parseToDeleteGroup from "./functions/parseChatGroups";
 import useFormatter from "./functions/dateFormatter";
 import useObserver from "./functions/groupObserver";
@@ -13,7 +12,7 @@ import spawnGroups from "./functions/spawnMessageGroups";
 import ContextMenu from "./ContextMenu";
 import { setDeleteChat } from "../store/chat";
 
-const Chat = ({room,socket}:{room:string,socket:Socket | null}) => {
+const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
   const [chatData,setChatData] = useState<chatData | any>(null);
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
@@ -51,34 +50,29 @@ const Chat = ({room,socket}:{room:string,socket:Socket | null}) => {
     }
   }
 
+  const handleUpdatingChat = (currentChat:any) => {
+    console.log('current:',currentChat);
+    setChatData(parseToDeleteGroup(currentChat['all']));
+  }
+
 useEffect(() => {
    downButtonRef.current = downButton;
 },[downButton]);
 
 useEffect(() => {
   if(deleteChat) {
-    socket!.emit('delete-chat',deleteChat);
+    socket.current!.emit('delete-chat',deleteChat);
     dispatch(setDeleteChat(""));
   }
 },[deleteChat])
 
 useEffect(() => {
   const setupPage = async () => {  
-    console.log('socket:',socket?.connected);
-        setObserver.current = useObserver({threshold:1},socket);
-
-        socket!.on('userUpdates',(info:statusInfo) => {
-          dispatch(setData({field:'changedUser',value:info}));
-        });
+      if(socket.current) {
+        setObserver.current = useObserver({threshold:1},socket.current);
       
-        socket!.on('updateChat',(currentChat) => {
-          console.log('current:',currentChat);
-          setChatData(parseToDeleteGroup(currentChat['all']));
-        });
-
-        socket!.on('joinedRoom',(room) => {
-           console.log('sucefull:',room);
-        });
+        socket.current.on('updateChat',handleUpdatingChat);
+      }
   }
 
   setupPage();
@@ -91,9 +85,11 @@ useEffect(() => {
     if(messagesRef.current) {
       messagesRef.current.removeEventListener('scroll',searchScroll);
     }
+
+    socket.current?.off('updateChat',handleUpdatingChat);
   }
 
-},[socket]);
+},[])
 
 // useEffect(() => {
 //   if(userData.allChats) {
@@ -129,8 +125,7 @@ const sendMessageToChat = () => {
   if(currentMessage.length && socket) {
     const date = new Date();
     const formatter = useFormatter(userData.locale);
-    console.log('so:',socket.connected);
-    socket!.emit('sendMessage',{room:room,
+    socket.current!.emit('sendMessage',{room:room,
       message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
     setTimeout(() => scrollDown('smooth'),100);
@@ -153,7 +148,7 @@ const startSending = (event:React.KeyboardEvent<HTMLElement>) => {
         const range = document.createRange();
         const sel = window.getSelection();
   
-        range.setStart(input, 0);
+        range.setStart(input,0);
         range.collapse(true); 
   
         sel?.removeAllRanges();
@@ -199,7 +194,7 @@ const messagePaste = (event:ClipboardEvent | any) => {
 }
 
 const setDeletedMessage = (deleteArgs:MessagesData) => () => {
-  socket!.emit('message-delete',deleteArgs);
+  socket.current!.emit('message-delete',deleteArgs);
 }
 
 useEffect(() => {

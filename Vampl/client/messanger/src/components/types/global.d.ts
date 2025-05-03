@@ -17,7 +17,7 @@ interface UserData {
   changedUser:any
 }
 
-type statusInfo = {ip:string,status:Boolean};
+type statusInfo = {phone:string,status:Boolean};
 
 type lastMessage = (chat:any) => {last:string,time:string};
 

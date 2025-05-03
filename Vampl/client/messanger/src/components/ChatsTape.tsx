@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Chat, UserContact } from "./types/global";
+import { Chat, statusInfo, UserContact } from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../types/global";
 import { convertStatus } from "./functions/convertStatus";
@@ -17,70 +17,71 @@ import { useNavigate } from "react-router";
 import { Socket } from "socket.io-client";
 import getLastMessage from "./functions/getLastChatMessage";
 
-const ChatsTape = ({socket}:{socket:Socket | null}) => {
+const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const router = useNavigate();
   const [chats,setChats] = useState<UserContact[]>([]);
   const [contactDefault,_] = useState<Boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextPos,setContextPos] = useState<{x:number,y:number}>({x:0,y:0});
+  const [roomConnected,setRoomConnected] = useState<boolean>(false);
   const [deleteId,setDeleteId] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
-  const changedUser = useSelector((state:Store) => state.user.changedUser);
   const userData = useSelector((state:Store) => state.user);
   const dispatch = useDispatch();
   
-  useEffect(() => {
-     if(chats && Object.keys(changedUser).length) {
-        const {phone,status} = changedUser;
+  const handleChangeStatus = (changedUser:statusInfo) => {
+    setChats(chats => chats.map(chat => {
+      if(chat.user.phone === changedUser.phone) {
+        const updateUser = {...chat,user:{...chat.user,status:convertStatus(changedUser.status)}};
+        return updateUser;
+      }
+      
+      return chat;
+    }))
+  }
 
-        for(let chat of chats) {
-          if(chat.user.phone === phone) {
-            chat.user.status = convertStatus(status);
-          }
-        }
+  const handleUpdateContacts = (currentChat:Chat,room:string) => {
+    setChats(chats => chats.map(chat => {
+      if(chat.id === room) {
+        return {...chat,message:getLastMessage(currentChat)};
+      }
 
-        dispatch(setData({field:'changedUser',value:{}}));
-     }
-  },[changedUser]);
+      return chat;
+    }));
+
+  }
 
   useEffect(() => {
     const setupPage = async () => {
-      if(socket) {
-        socket.on('updateChat',(currentChat:Chat,room:string) => {
-          setChats(chats.map(chat => {
-            if(chat.id === room) {
-              console.log('chat:',chat);
-              chat.message = getLastMessage(currentChat);
-            }
-            return chat;
-          }));
+      if(socket.current) {
+        socket.current.on('updateContactChat',handleUpdateContacts);
 
-          console.log('push to tape:',chats,currentChat);
-        });
+        socket.current.on('userUpdates',handleChangeStatus);
       }
     }
     
     setupPage();
 
     return () => {
-      socket?.off();
+      socket.current?.off('userUpdates',handleChangeStatus);
+      socket.current?.off('updateContactChat',handleUpdateContacts);
     }
-  },[chats,socket])
+  },[chats])
 
   useEffect(() => {
-    if(userData.allChats) {
+    if(userData.allChats && !roomConnected) {
       userData.allChats.map(chat => {
         console.log('join to room:',chat.id);
-        socket?.emit('joinRoom',chat.id);
+        socket.current?.emit('joinRoom',chat.id);
       });
     }
-  },[userData.allChats])
+  },[userData.allChats,roomConnected])
   
   useEffect(() => {
     const checkChats = async () => {
       if(!chats.length) {
-        const currentChats:UserContact[] = await getUserChats(userData.additionalData.phone,dispatch);
-        setChats([...currentChats]);
+        const currentChats:UserContact[] = await getUserChats(userData.additionalData.phone);
+        setChats(currentChats);
 
         dispatch(setData({field:'allChats',value:currentChats}));
       }
