@@ -24,10 +24,11 @@ export class ChatController {
           chatUsers:{users:[phone,'+380000000000']},
           messages:{"all":[]}
         });
-        return this.userServices.getChatData(phone);
+        
+        return {data:this.userServices.getChatData(phone),phone};
      }
 
-     return userChatData;
+     return {data:userChatData,phone};
   }
 
   @Put('update-messages')

@@ -10,12 +10,13 @@ import checkActiveChat from "./functions/checkActiveChat";
 import parseMessageTime from "./functions/parseMessageTime";
 import './styles/chatsmenu.css';
 import { changeRoom, switchBurger, switchUser } from "../store/useFullStaff";
-import UserBurger from "./UserBurger";
-import ContextMenu from "./ContextMenu";
+import UserBurger from "./subComponents/UserBurger";
+import ContextMenu from "./subComponents/ContextMenu";
 import { setDeleteChat } from "../store/chat";
 import { useNavigate } from "react-router";
 import { Socket } from "socket.io-client";
 import getLastMessage from "./functions/getLastChatMessage";
+import not from '/notification.mp3';
 
 const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const router = useNavigate();
@@ -23,11 +24,12 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const [contactDefault,_] = useState<Boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextPos,setContextPos] = useState<{x:number,y:number}>({x:0,y:0});
-  const [roomConnected,setRoomConnected] = useState<boolean>(false);
+  const [connectedToRooms,setConnectedToRooms] = useState<boolean>(false);
   const [deleteId,setDeleteId] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
   const userData = useSelector((state:Store) => state.user);
   const dispatch = useDispatch();
+  const notification:HTMLAudioElement = new Audio(not);
   
   const handleChangeStatus = (changedUser:statusInfo) => {
     setChats(chats => chats.map(chat => {
@@ -40,20 +42,30 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     }))
   }
 
-  const handleUpdateContacts = (currentChat:Chat,room:string) => {
-    setChats(chats => chats.map(chat => {
-      if(chat.id === room) {
-        return {...chat,message:getLastMessage(currentChat)};
-      }
+  const handleUpdateContacts = (currentChat:any,room:string) => {
+    if(document.visibilityState === 'hidden') {
+      notification.play();
+    }
+    
+    setChats(chats => {
+       const newChats = [...chats];
+       
+       for(let i:number = 0; i < newChats.length; i++) {
+          if(newChats[i].id === room) {
+            newChats[i] = {...newChats[i],message:getLastMessage({...currentChat})};
+            break;
+          }
+       }
 
-      return chat;
-    }));
+       return newChats;
+    });
 
   }
 
   useEffect(() => {
     const setupPage = async () => {
       if(socket.current) {
+        console.log('on');
         socket.current.on('updateContactChat',handleUpdateContacts);
 
         socket.current.on('userUpdates',handleChangeStatus);
@@ -63,24 +75,25 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     setupPage();
 
     return () => {
-      socket.current?.off('userUpdates',handleChangeStatus);
-      socket.current?.off('updateContactChat',handleUpdateContacts);
+      console.log('off');
+      socket.current!.off('userUpdates',handleChangeStatus);
+      socket.current!.off('updateContactChat',handleUpdateContacts);
     }
-  },[chats])
+  },[])
 
   useEffect(() => {
-    if(userData.allChats && !roomConnected) {
+    if(userData.allChats.length && !connectedToRooms) {
+      setConnectedToRooms(true);
       userData.allChats.map(chat => {
-        console.log('join to room:',chat.id);
         socket.current?.emit('joinRoom',chat.id);
       });
     }
-  },[userData.allChats,roomConnected])
+  },[userData.allChats,connectedToRooms])
   
   useEffect(() => {
     const checkChats = async () => {
       if(!chats.length) {
-        const currentChats:UserContact[] = await getUserChats(userData.additionalData.phone);
+        const currentChats:UserContact[] = await getUserChats();
         setChats(currentChats);
 
         dispatch(setData({field:'allChats',value:currentChats}));
@@ -89,11 +102,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
 
     checkChats();
   },[userData]);
-  
-  // const parseLast = (id:string) => {
-  //   return userData.allChats.find(chat => chat.id === id);
-  // };
-  
+    
   const openChat = (contact:UserContact) => {
     dispatch(changeRoom(contact.id));
   }
@@ -134,10 +143,10 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
                       dispatch(switchUser(contact.user.name))
                     }} className="contact-image" src={`${contact.user.image}`} alt="avatar" />
                     :
-                      <div onClick={() => {
-                        dispatch(switchBurger());
-                        dispatch(switchUser(contact.user.name))
-                      }} className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}></div>
+                    <div onClick={() => {
+                      dispatch(switchBurger());
+                      dispatch(switchUser(contact.user.name));
+                    }} className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}/> 
                     }
                   <span className={`contact-status ${contact.user.status === 'Online' ? 'online' : 'offline'}`}></span>
                 </div>

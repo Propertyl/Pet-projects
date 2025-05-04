@@ -7,6 +7,7 @@ import auth from "../components/functions/sign";
 import triggerEffect from "../components/functions/bubbleEffect";
 import '../components/styles/auth.css';
 import phoneValidation from "../components/functions/phoneValidation";
+import nameValidation from "../components/functions/nameValidation";
 
 const AuthPage = () => {
   const [phoneCodes,setPhoneCodes] = useState<any>([]);
@@ -165,12 +166,15 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
          setCurrentWindow('password');
          break;
         case 'name':
-          setInputData((data:SignData) => {
-            data['name'] = userInput;
-            return data;
-         });
+          if(nameValidation(userInput)) {
+            setInputData((data:SignData) => {
+              data['name'] = userInput;
+              return data;
+            });
+
+            setCurrentWindow('password');
+          }
          setInput('');
-         setCurrentWindow('password');
           break;
         case 'password':
         if(!parsePassword(userInput)) {

@@ -17,7 +17,6 @@ const useUsefulStuff = createSlice({
     changeRoom(state,action) {state.currentRoom = action.payload},
     switchUser(state,action) {state.userInBurger = action.payload},
     switchAccess(state,action) {
-      console.log("SET ACCESS:", action.payload);
       state.approve = action.payload;
     }
   }

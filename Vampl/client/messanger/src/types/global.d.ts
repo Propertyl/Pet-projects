@@ -25,7 +25,7 @@ interface UserData {
   ip:string,
   locale:string,
   currentChat:any,
-  additionalData:any,
+  userName:string
   allChats:{id:string,last:string,time:string}[],
   allMonth:any,
   changedUser:any

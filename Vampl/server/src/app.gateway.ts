@@ -88,7 +88,7 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       console.log('data:room:',data.room)
       this.server.to(data.room).emit('updateChat',currentChat,data.room);
       this.server.to(data.room).emit('updateContactChat',currentChat,data.room);
-      console.log("pidorasik:",currentChat);
+      
       await serv.put('/chat/updateChat',{
          headers: {
             'Content-Type':'application/json'

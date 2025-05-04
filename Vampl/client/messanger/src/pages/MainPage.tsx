@@ -5,7 +5,7 @@ import Navigation from "../components/Navigation";
 import '../components/styles/home.css';
 import '../components/styles/chat.css';
 import { Store } from "../types/global";
-import LoadingScreen from "../components/LoadingScreen";
+import LoadingScreen from "../components/subComponents/LoadingScreen";
 import { useEffect, useRef, useState } from "react";
 import chatAfterRefresh from "../components/functions/getChatAfterRefresh";
 import { io, Socket } from "socket.io-client";
@@ -54,7 +54,7 @@ const MainPage = () => {
               <main className="chat-main">
                 <ChatsTape socket={socketConnection}/>
                 <div className="chat">
-                  {<Chat socket={socketConnection} room={room}/>}
+                  {room && <Chat socket={socketConnection} room={room}/>}
                 </div>
               </main>
             }

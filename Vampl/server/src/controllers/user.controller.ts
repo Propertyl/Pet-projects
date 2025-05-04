@@ -10,9 +10,12 @@ export class UserController {
   @Get('info')
   getUserInfoIP(@Req() req:Request) {
     const phone = req.cookies['token'];
-    console.log('phonezalupa:',phone);
-    return this.userServices.getUserByPhone(phone);
+
+    const res:any = this.userServices.getUserByPhone(phone);
+
+    return res;
   }
+
 
   @Get('getInfoByPhone/:phone')
   getUserInfoPhone(@Param('phone') phone:string) {

@@ -5,7 +5,7 @@ const initialState = {
   locale:"",
   phone:"",
   currentChat:{},
-  additionalData:{},
+  userName:"",
   allChats:[],
   allMonth:{},
   changedUser:{}

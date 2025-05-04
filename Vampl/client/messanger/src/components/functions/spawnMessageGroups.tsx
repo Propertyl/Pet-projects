@@ -1,5 +1,5 @@
 import { Dispatch, ReactElement, SetStateAction} from "react";
-import MessageEyes from "../messageSeen";
+import MessageEyes from "../subComponents/messageSeen";
 import parseDate from "./parseDate";
 import parseMessageTime from "./parseMessageTime";
 import { Dispatch as DispatchRedux } from "@reduxjs/toolkit";
@@ -42,7 +42,7 @@ dispatch:DispatchRedux
                   )} ref={
                     isUnread && !message.seen ? setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,room,message.body) : null
                   }
-                    className={`message ${group.sender !== userName ? 'not-user-message' : ''}`}
+                    className={`message ${index === 0 && 'rounded-message'} ${group.sender !== userName ? 'not-user-message' : ''}`} 
                     key={`message-${groupIdx}-${index}`}>
                       {index === group.messages.length - 1 && (
                         <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail chat-message-tail">

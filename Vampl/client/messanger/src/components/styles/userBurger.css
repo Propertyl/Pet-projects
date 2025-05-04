@@ -8,13 +8,19 @@
   z-index: 10;
 }
 
-.appear {
+
+
+.user-burger-menu-appear {
   display: flex !important;
   animation: menu-appear .2s ease-in forwards;
 }
 
-.disappear {
+.user-burger-menu-disappear {
   animation: menu-disappear .2s ease-in forwards;
+}
+
+.user-burger-menu-not-spawned {
+  display: none;
 }
 
 @keyframes menu-appear {

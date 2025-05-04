@@ -6,9 +6,10 @@ const getLastMessage:lastMessage = (chat:any) => {
     return {last:"Чат порожній",time:""};
   }
   
-  const lastDateGroup = currentChat.pop();
+  const lastDateGroup = currentChat[currentChat.length - 1];
   const currentDate:string = Object.keys(lastDateGroup).pop() ?? "";
   const {groups} = lastDateGroup[currentDate]; 
+
 
   if(groups.length) {
     const lastGroup = groups[groups.length - 1];

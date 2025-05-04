@@ -29,7 +29,7 @@ import { switchBurger, switchUser } from '../store/useFullStaff';
 const Navigation = () => {
   const themeSwitcher:Ref<HTMLButtonElement | null> = useRef(null);
   const [themeOptions,setThemeOptions] = useState<Boolean>(false);
-  const name = useSelector((state:any) => state.user.additionalData.name);
+  const name = useSelector((state:any) => state.user.userName);
   const switcher = useSwitcher(setThemeOptions);
   const burgerOpen = useSelector((state:any) => state.stuff.burgerOpen);
   const dispatch = useDispatch();
@@ -67,7 +67,11 @@ const Navigation = () => {
             <button onClick={(event:any) => {
             triggerEffect(event);
             dispatch(switchBurger());
-            dispatch(switchUser(name))
+            if(burgerOpen) {
+              dispatch(switchUser(''));
+            } else {
+              dispatch(switchUser(name));
+            }
             }} className={`${burgerOpen && 'close-burger'} burger-menu`}>
               <span className="burger-line"></span>
               <span className="burger-line"></span>

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import './styles/chat.css';
-import { DefaultRef } from "./types/global";
+import '../styles/chat.css';
+import { DefaultRef } from "../types/global";
 
 const ContextMenu = ({func,pos,switchState,phrase}:{func:any,pos:{x:number,y:number},switchState:Dispatch<SetStateAction<boolean>>,phrase:string}) => {
 

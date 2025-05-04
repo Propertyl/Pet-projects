@@ -62,7 +62,9 @@ a:hover {
 [contenteditable=true] {
   outline: none;
   color:var(--conteneditable-text);
+  caret-color: var(--night-color);
 }
+
 
 div:focus {
   outline: none;
@@ -159,6 +161,7 @@ input {
   border: none;
   background-color: var(--input-color) !important;
   color:var(--conteneditable-text);
+  caret-color: var(--night-color);
 }
 
 input[type="search"]::-webkit-search-cancel-button  {
@@ -303,6 +306,11 @@ p {
   --night-color:#ae7dd6;
   --input-color:rgb(255, 255, 255);
   --loading-color:rgb(0,0,0);
+}
+
+
+.light .user-burger-menu > * p {
+  color:var(--black-default);
 }
 
 

@@ -11,7 +11,7 @@ interface UserData {
   locale:string,
   phone:string,
   currentChat:any,
-  additionalData:any,
+  userName:string,
   allChats:{id:string,last:string,time:string}[],
   allMonth:any,
   changedUser:any
@@ -23,13 +23,14 @@ type lastMessage = (chat:any) => {last:string,time:string};
 
 interface UserInfo {
   id:number,
-  ip:string,
   name:string,
-  email:string,
   phone:string,
-  age:number,
+  birthDate:number,
   image:string,
-  authorized:boolean
+}
+
+interface BurgerInfo extends UserInfo {
+  status:string
 }
 
 type chatData = Record<number,Record<string,DateGroup>>
@@ -62,4 +63,4 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact};
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo};

@@ -9,7 +9,7 @@ import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
 import spawnGroups from "./functions/spawnMessageGroups";
-import ContextMenu from "./ContextMenu";
+import ContextMenu from "./subComponents/ContextMenu";
 import { setDeleteChat } from "../store/chat";
 
 const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
@@ -19,7 +19,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
   const deleteChat = useSelector((state:Store) => state.chat.deleteChat);
   const userData = useSelector((state:Store) => state.user);
-  const userName = userData.additionalData.name;
+  const userName = userData.userName;
   const [currentMessage,setCurrentMessage] = useState<string>("");
   const [downButton,setDownButton] = useState<boolean>(false);
   const downButtonRef = useRef(downButton);
@@ -51,7 +51,6 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   }
 
   const handleUpdatingChat = (currentChat:any) => {
-    console.log('current:',currentChat);
     setChatData(parseToDeleteGroup(currentChat['all']));
   }
 
@@ -89,20 +88,12 @@ useEffect(() => {
     socket.current?.off('updateChat',handleUpdatingChat);
   }
 
-},[])
-
-// useEffect(() => {
-//   if(userData.allChats) {
-//     userData.allChats.map(chat => {
-//       console.log('join to room:',chat.id);
-//       socket?.emit('joinRoom',chat.id);
-//     });
-//   }
-// },[userData.allChats])
+},[messagesRef.current])
 
 useEffect(() => {
   if(messagesRef.current) {
-    scrollDown();
+    messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    messagesRef.current.classList.remove('messages-hidden');
   }
 },[messagesRef.current])
 
@@ -228,7 +219,7 @@ useEffect(() => {
                 <i className="arrow-icon icon"></i>
               </button>
             }
-            <div ref={messagesRef} className="messages">
+            <div ref={messagesRef} className="messages messages-hidden">
               <div className="messages-group-container">
                 { chatData && groups}
               </div>
