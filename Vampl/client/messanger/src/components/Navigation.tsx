@@ -16,7 +16,7 @@ const switcher = useSwitcher(themeOptions);
 </script> */}
 
 
-import { Ref, useEffect, useRef, useState } from 'react';
+import { Ref, RefObject, useEffect, useRef, useState } from 'react';
 import './styles/nav.css';
 import changeTheme from './functions/changeTheme';
 import serv from './functions/interceptors';
@@ -33,6 +33,8 @@ const Navigation = () => {
   const switcher = useSwitcher(setThemeOptions);
   const burgerOpen = useSelector((state:any) => state.stuff.burgerOpen);
   const dispatch = useDispatch();
+  const [searchRequest,setSearchRequest] = useState<string>('');
+  const [searchActive,setSearchActive] = useState<boolean>(false);
 
   const switchTheme = async (theme:"night" | "light") => {
     const updatedTheme:any = await serv.put('/user/update-theme',{
@@ -80,13 +82,16 @@ const Navigation = () => {
           </div>
           <div className="search-section-container nav-section">
             <div className="search-section">
-              <div className='search-input-container'>
-                <input className="search-input" placeholder="Search something..." type="search"/>
-                <svg className='erase-icon random-icon' viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#000000" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><line x1="8.06" y1="8.06" x2="55.41" y2="55.94"></line><line x1="55.94" y1="8.06" x2="8.59" y2="55.94"></line></g></svg>
+              <div className={`input-form ${searchActive ? 'input-active' : ''}`}>
+                  <div className='search-input-container'>
+                    <input onFocus={() => setSearchActive(true)} onBlur={() => setSearchActive(false)} value={searchRequest} onChange={(event) => setSearchRequest(event.target.value)} className="search-input" placeholder="Search something..." type="search"/>
+                    {searchRequest && <svg onClick={() => setSearchRequest('')} className='erase-icon random-icon' viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#000000" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><line x1="8.06" y1="8.06" x2="55.41" y2="55.94"></line><line x1="55.94" y1="8.06" x2="8.59" y2="55.94"></line></g></svg>
+                    }
+                  </div>
+                  <button onClick={triggerEffect} className="search-button">
+                    <i className="search-icon" style={{background:"url('./icon-search.svg') no-repeat center center / 60%"}}>{}</i>
+                  </button>
               </div>
-              <button onClick={triggerEffect} className="search-button">
-                <i className="search-icon" style={{background:"url('./icon-search.svg') no-repeat center center / 60%"}}>{}</i>
-              </button>
             </div>
           </div>
           <div className="theme-switcher-container nav-section">
