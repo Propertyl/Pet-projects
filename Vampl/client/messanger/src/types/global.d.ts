@@ -7,6 +7,10 @@ interface Chat {
   id:string
 }
 
+interface ChatStructure {
+  all:DateGroup
+}
+
 interface MessagesData {
   date:string,
   group:string,
@@ -22,13 +26,13 @@ interface Store {
 }
 
 interface UserData {
-  ip:string,
   locale:string,
-  currentChat:any,
-  userName:string
+  phone:string,
+  currentChat:ChatStructure | null,
+  userName:string,
   allChats:{id:string,last:string,time:string}[],
-  allMonth:any,
-  changedUser:any
+  allMonth:Record<number,string>,
+  changedUser:Record<string,string>,
 }
 
 type statusInfo = {ip:string,status:Boolean};
@@ -70,4 +74,4 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,Store,MessagesData};
+export {ChatStructure,Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,Store,MessagesData};

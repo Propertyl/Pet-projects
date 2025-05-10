@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Chat, statusInfo, UserContact } from "./types/global";
+import {ChatStructure, statusInfo, UserContact} from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../types/global";
-import { convertStatus } from "./functions/convertStatus";
 import getUserChats from "./functions/getUserChats";
 import { setData } from "../store/user";
 import triggerEffect from "./functions/bubbleEffect";
@@ -21,20 +20,21 @@ import not from '/notification.mp3';
 const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const router = useNavigate();
   const [chats,setChats] = useState<UserContact[]>([]);
-  const [contactDefault,_] = useState<Boolean>(true);
+  const [contactDefault] = useState<boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextPos,setContextPos] = useState<{x:number,y:number}>({x:0,y:0});
   const [connectedToRooms,setConnectedToRooms] = useState<boolean>(false);
   const [deleteId,setDeleteId] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
   const userData = useSelector((state:Store) => state.user);
+  const [unReadMessage,setUnReadMessage] = useState<number>(0);
   const dispatch = useDispatch();
   const notification:HTMLAudioElement = new Audio(not);
   
   const handleChangeStatus = (changedUser:statusInfo) => {
     setChats(chats => chats.map(chat => {
       if(chat.user.phone === changedUser.phone) {
-        const updateUser = {...chat,user:{...chat.user,status:convertStatus(changedUser.status)}};
+        const updateUser = {...chat,user:{...chat.user,status:changedUser.status}};
         return updateUser;
       }
       
@@ -42,9 +42,14 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     }))
   }
 
-  const handleUpdateContacts = (currentChat:any,room:string) => {
+  const handleUpdateContacts = (currentChat:ChatStructure,room:string) => {
     if(document.visibilityState === 'hidden') {
+      notification.currentTime = 0;
       notification.play();
+    }
+
+    if(room !== currentRoom) {
+      setUnReadMessage(messages => messages + 1);
     }
     
     setChats(chats => {
@@ -65,7 +70,6 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   useEffect(() => {
     const setupPage = async () => {
       if(socket.current) {
-        console.log('on');
         socket.current.on('updateContactChat',handleUpdateContacts);
 
         socket.current.on('userUpdates',handleChangeStatus);
@@ -75,7 +79,6 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     setupPage();
 
     return () => {
-      console.log('off');
       socket.current!.off('userUpdates',handleChangeStatus);
       socket.current!.off('updateContactChat',handleUpdateContacts);
     }
@@ -101,7 +104,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     }
 
     checkChats();
-  },[userData]);
+  },[userData])
     
   const openChat = (contact:UserContact) => {
     dispatch(changeRoom(contact.id));
@@ -116,7 +119,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     }
   }
 
-  const openContextMenu = (id:string) => (event:any) => {
+  const openContextMenu = (id:string) => (event:React.MouseEvent) => {
     event.preventDefault();
     setContextMenu(true);
     setContextPos({x:event.clientX,y:event.clientY});
@@ -125,15 +128,17 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
 
   return (
     <>
-      <section className={`contact-tape ${!contactDefault ? "default" : ""}`}>
+      <section className={`contact-tape ${!contactDefault ? "default" : ""} flex-center`}>
         <UserBurger/>
-        <div style={{paddingTop:'.2rem'}} className="container flex-reverse">
+        <div style={{paddingTop:'2rem'}} className="contact-tape-container container flex-reverse">
         {contextMenu && <ContextMenu phrase="Delete Chat" func={(() => () => deleteChat(deleteId))} pos={contextPos} switchState={setContextMenu}/>}
           { chats.length ? chats.map((contact,index) => (
                 <a draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
-                  <div onClick={(event:any) => {
+                  <div onClick={(event) => {
                       triggerEffect(event);
-                      checkActiveChat(window.location.href,contact.user.name) && openChat(contact);
+                      if(checkActiveChat(window.location.href,contact.user.name)) {
+                        openChat(contact);
+                      }
                   }} className="container with-padding hidden-container">
                   <div className="status-picture-container">
                     { 
@@ -148,14 +153,19 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
                       dispatch(switchUser(contact.user.name));
                     }} className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}/> 
                     }
-                  <span className={`contact-status ${contact.user.status === 'Online' ? 'online' : 'offline'}`}></span>
+                  <span className={`contact-status ${contact.user.status ? 'online' : 'offline'}`}></span>
                 </div>
-                <div className="contact-info-container">
-                <p  className="contact-name">{contact.user.name}</p>
-                <p className="contact-chat-last-message">{contact.message.last}</p>
-                <p className="contact-chat-message-time">{parseMessageTime(contact.message.time) }</p>
+                  <div className="contact-info-container">
+                    <p  className="contact-name">{contact.user.name}</p>
+                    <p className="contact-chat-last-message">{contact.message.last}</p>
+                    <p className="contact-chat-message-time">{parseMessageTime(contact.message.time) }</p>
+                  </div>
                 </div>
-              </div>
+                  {unReadMessage != 0 && currentRoom !== contact.id &&
+                      <span className="contact-unread-messages-container" >
+                          <p className="contact-unread-messages-count">{unReadMessage}</p>
+                      </span>
+                  }
             </a>
         ))
         :
@@ -165,7 +175,6 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
             </svg>
         </div>
       }
-          
       </div>
     </section>
     </>

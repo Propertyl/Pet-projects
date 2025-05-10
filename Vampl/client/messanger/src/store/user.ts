@@ -4,18 +4,18 @@ import { UserData } from "../components/types/global";
 const initialState = {
   locale:"",
   phone:"",
-  currentChat:{},
+  currentChat:null,
   userName:"",
   allChats:[],
   allMonth:{},
   changedUser:{}
-} satisfies UserData as UserData;
+} satisfies UserData;
 
 const useUserData = createSlice({
   name:'user-data',
   initialState,
   reducers:{
-    setData(state,action) {
+    setData(state:UserData,action) {
       const {field,value} = action.payload;
       state[field as keyof UserData] = value;
     }

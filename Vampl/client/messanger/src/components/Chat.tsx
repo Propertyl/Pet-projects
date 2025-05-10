@@ -1,5 +1,5 @@
-import { ReactElement, Ref, useEffect, useRef, useState } from "react";
-import { chatData, DefaultRef } from "./types/global";
+import {ReactElement ,RefObject, useEffect, useRef, useState} from "react";
+import {ChatStructure, DefaultRef, UserData} from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { MessagesData, Store } from "../types/global";
 import {Socket } from "socket.io-client";
@@ -13,18 +13,21 @@ import ContextMenu from "./subComponents/ContextMenu";
 import { setDeleteChat } from "../store/chat";
 
 const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
-  const [chatData,setChatData] = useState<chatData | any>(null);
+  const [chatData,setChatData] = useState<ChatStructure | null>(null);
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
   const deleteChat = useSelector((state:Store) => state.chat.deleteChat);
-  const userData = useSelector((state:Store) => state.user);
+  const userData:UserData = useSelector((state:Store) => state.user);
   const userName = userData.userName;
   const [currentMessage,setCurrentMessage] = useState<string>("");
   const [downButton,setDownButton] = useState<boolean>(false);
   const downButtonRef = useRef(downButton);
+  const chatEndedRef:RefObject<boolean> = useRef(false);
+  const cantUpdateRef:RefObject<boolean> = useRef(false);
+  const groupsSpawner:RefObject<any> = useRef(null);
   const dispatch = useDispatch();
-  const setObserver:Ref<any> = useRef(null);
+  const setObserver:RefObject<any> = useRef(null);
   const [placeholder,setPlaceholder] = useState<boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
@@ -35,24 +38,41 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
       }
   }
 
-  const searchScroll = (event:Event) => {
-    if(event.target) {
+  const updateChatContent = (chat:HTMLDivElement) => {
+    const beforePos = chat.scrollHeight - chat.scrollTop;
+
+    groupsSpawner.current();
+    setTimeout(() => {
+      chat.scrollTo({top:chat.scrollHeight - beforePos,behavior: "instant"});
+      cantUpdateRef.current = false;
+    },10);
+  }
+
+  const searchScroll = (event: Event) => {
+    if (event.target) {
       const chat = event.target as HTMLDivElement;
-      const currentHeight = chat.scrollTop;
+      const currentScrollTop = chat.scrollTop;
+  
       const chatRect = chat.getBoundingClientRect();
       const scrollHeight = chat.scrollHeight - chatRect.height;
 
-      if(scrollHeight - currentHeight > 80 && !downButtonRef.current) {
-         setDownButton(true);
-      } else if(scrollHeight - currentHeight < 80 && downButtonRef.current) {
-         setDownButton(false);
+      if (scrollHeight - currentScrollTop > 80 && !downButtonRef.current) {
+        setDownButton(true);
+      } else if (scrollHeight - currentScrollTop < 80 && downButtonRef.current) {
+        setDownButton(false);
+      }
+
+      if (currentScrollTop < 50 && !chatEndedRef.current && !cantUpdateRef.current) {
+        cantUpdateRef.current = true;
+        updateChatContent(chat);
       }
     }
-  }
+  };
 
-  const handleUpdatingChat = (currentChat:any) => {
+  const handleUpdatingChat = (currentChat:ChatStructure) => {
     setChatData(parseToDeleteGroup(currentChat['all']));
   }
+
 
 useEffect(() => {
    downButtonRef.current = downButton;
@@ -91,18 +111,24 @@ useEffect(() => {
 },[messagesRef.current])
 
 useEffect(() => {
-  if(messagesRef.current) {
+  if(messagesRef.current && groups.length && messagesRef.current.classList.contains('messages-hidden')) {
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     messagesRef.current.classList.remove('messages-hidden');
   }
-},[messagesRef.current])
+},[messagesRef.current,groups])
 
 useEffect(() => {
-  spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,
-  setContextMenu,
-  setContextMenuPos,
-  dispatch
-  );
+  if(chatData) {
+    groupsSpawner.current = spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,
+      setContextMenu,
+      setContextMenuPos,
+      chatEndedRef,
+      dispatch
+    );
+
+    groupsSpawner.current();
+    setTimeout(() => scrollDown('smooth'),200);
+  }
 },[chatData]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
@@ -119,7 +145,7 @@ const sendMessageToChat = () => {
     socket.current!.emit('sendMessage',{room:room,
       message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
-    setTimeout(() => scrollDown('smooth'),100);
+    // setTimeout(() => scrollDown('smooth'),200);
   }
 }
 
@@ -201,8 +227,8 @@ useEffect(() => {
 useEffect(() => {
    const getChat = async () => {
       if(room) {
-        const roomChat:{messages:any} = await serv.get(`/chat/chatID/${room}`);
-        setChatData(parseToDeleteGroup(roomChat.messages['all']));
+        const roomChat:ChatStructure = await serv.get(`/chat/chatID/${room}`);
+        setChatData(parseToDeleteGroup(roomChat['all']));
       }
    }
 
@@ -214,11 +240,6 @@ useEffect(() => {
         { chatData && 
           <>
             <div className="messages-container">
-            {downButton && 
-              <button className="classic-button down-button" onClick={() => scrollDown()}>
-                <i className="arrow-icon icon"></i>
-              </button>
-            }
             <div ref={messagesRef} className="messages messages-hidden">
               <div className="messages-group-container">
                 { chatData && groups}
@@ -228,11 +249,16 @@ useEffect(() => {
               }
             </div>
             <div className="messages-input">
+              {downButton && 
+                <button className="classic-button down-button" onClick={() => scrollDown()}>
+                  <i className="arrow-icon icon"></i>
+                </button>
+              }
               <div className="type-message-container">
                 <div className="message-input">
                     <div onPaste={messagePaste} autoFocus contentEditable={true} onInput={messageWriting} onBlur={blurInput} onKeyDown={(event) => startSending(event)}  className="chat-input-area">
                     </div>
-                    <span style={{display:placeholder ? "flex" : "none"}} contentEditable={false}className="chat-input-area-placeholder">
+                    <span style={{display:placeholder ? "flex" : "none"}} contentEditable={false} className="chat-input-area-placeholder">
                         Message
                     </span>
                     <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail">

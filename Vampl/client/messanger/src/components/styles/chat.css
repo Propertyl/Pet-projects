@@ -4,14 +4,14 @@
 
 .down-button {
   position: absolute !important;
-  bottom:10%;
-  left:5%;
+  left:-4rem;
   width: 3.5rem;
   height: 3.5rem;
   clip-path: circle();
-  background-color: var(--light-grey);
+  background-color: var(--night-color);
   z-index: 10000;
   color:var(--secondary-color);
+  animation: button-appear .3s ease-in forwards;
 }
 
 .arrow-icon {
@@ -32,6 +32,7 @@
   margin: .3rem;
   z-index: 1;
   user-select: none;
+  --webkit-user-select: none;
 }
 
 .date-container::after {
@@ -58,7 +59,7 @@
   display: flex;
   justify-content: center;
   height:100%;
-  background:url('/chat-bg.png') no-repeat center center;
+  background:url('/chat-bg.webp') no-repeat center center;
   background-size: cover;
 }
 
@@ -126,11 +127,12 @@
   border-bottom-left-radius:20px;
   background-color: var(--night-color);
   margin: .1rem;
-  text-wrap: wrap; 
+  text-wrap: wrap;
   white-space: normal; 
-  transition: transform .2s;
+  transition: all .3s;
   transform-origin: 100% 100%;
 }
+
 
 .rounded-message {
   border-top-right-radius:20px;
@@ -177,7 +179,7 @@
 
 .type-message-container {
   position: relative;
-  width: 70%;
+  width: 100%;
   max-height:10rem;
   display: flex;
   align-items: center;
@@ -280,15 +282,6 @@
 }
 
 
-.messages::after {
-  position: fixed;
-  z-index:-1;
-  content: '';
-  width:50%;
-  height:70%;
-  display: flex;
-  backdrop-filter: blur(.5rem);
-}
 
 .type-message-container .message-tail {
   fill: var(--input-color) !important;
@@ -297,7 +290,7 @@
 .messages-input {
   position: relative;
   display: flex;
-  width:70%;
+  width:50%;
   max-height:10rem;
   align-items: center;
   justify-content: center;
@@ -406,19 +399,29 @@
   pointer-events: all;
 }
 
+@keyframes button-appear {
+  0% {
+    transform: scale(0%);
+  } 50% {
+    transform: scale(110%);
+  } 100% {
+    transform: scale(100%);
+  }
+}
+
 @keyframes context-menu-appear {
   from {
-    transform: scale(0%);
+    transform: scale(0)
   } to {
-    transform: scale(100%);
+    transform: scale(1);
   }
 }
 
 @keyframes context-menu-disappear {
   from {
-    transform: scale(100%);
+    transform: scale(1);
   } to {
-    transform: scale(0%);
+    transform: scale(0);
   }
 }
 

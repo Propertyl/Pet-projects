@@ -18,7 +18,7 @@ function App() {
   
   useLayoutEffect(() => {
     const startApplication = async () => {
-      const auth:any = await serv.get('/user/authorization');
+      const auth:{approve:boolean} = await serv.get('/user/authorization');
 
       const months = await serv.get('/getData/month/en');
       
@@ -30,8 +30,6 @@ function App() {
       } else if(auth.approve) {
         const {name} = await serv.get('/user/info') as UserInfo;
         const userTheme = await serv.get('/user/get-theme') as {theme:string};
-        
-        console.log('nume:',name,userTheme);
 
         changeTheme(userTheme.theme);
         dispatch(setData({field:'userName',value:name}));
@@ -40,8 +38,8 @@ function App() {
 
     }
 
-    startApplication();
- },[])
+    startApplication().then();
+ },[dispatch])
 
   return (
     <>

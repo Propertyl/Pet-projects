@@ -1,25 +1,27 @@
-import type { Ref } from "vue";
-
 interface Chat {
   name:string,
   image:string,
-  chat:any,
+  chat:ChatStructure,
   id:string
+}
+
+interface ChatStructure {
+  all:DateGroup
 }
 
 interface UserData {
   locale:string,
   phone:string,
-  currentChat:any,
+  currentChat:ChatStructure | null,
   userName:string,
   allChats:{id:string,last:string,time:string}[],
-  allMonth:any,
-  changedUser:any
+  allMonth:Record<number,string>,
+  changedUser:Record<string,string>,
 }
 
-type statusInfo = {phone:string,status:Boolean};
+type statusInfo = {phone:string,status:boolean};
 
-type lastMessage = (chat:any) => {last:string,time:string};
+type lastMessage = (chat:ChatStructure) => {last:string,time:string};
 
 interface UserInfo {
   id:number,
@@ -36,12 +38,12 @@ interface BurgerInfo extends UserInfo {
 type chatData = Record<number,Record<string,DateGroup>>
 
 interface DateGroup {
-  groups:any
+  groups:MessageGroup[]
 }
 
 interface ParsedChat {
   user:{name:string,image:string,ip:string,status:string,phone:string},
-  messages:{all:any},
+  messages:ChatStructure,
   id:string
 }
 
@@ -53,8 +55,10 @@ interface UserContact {
 
 interface MessageGroup {
   sender:string  
-  messages:{body:string,time:string}[]
-};
+  messages:Message[]
+}
+
+type Message = {body:string,time:string,seen:boolean};
 
 interface SignData {'phone':string,'name'?:string,'password:':string}
 
@@ -63,4 +67,4 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo};
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure}

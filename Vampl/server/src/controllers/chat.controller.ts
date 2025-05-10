@@ -2,15 +2,18 @@ import { Controller, Get, Param, Put,Body, Post, Req } from "@nestjs/common";
 import { Request } from "express";
 import { UserService } from "src/services/user.service";
 import serv from "src/stuff/functions/interceptor";
-import { chatData, MessageGroup, updateChatData } from "src/stuff/types";
+import { chatData, ChatStructure, MessageGroup ,updateChatData } from "src/stuff/types";
+
 
 @Controller('chat')
 export class ChatController {
   constructor(private readonly userServices:UserService) {}
 
   @Get('chatID/:id')
-  getChatByID(@Param('id') id:string) {
-     return this.userServices.getChatById(id);
+  async getChatByID(@Param('id') id:string) {
+    const {messages}:{messages:ChatStructure} = await this.userServices.getChatById(id) as any;
+   
+    return messages;
   }
 
   @Get('chats')

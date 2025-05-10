@@ -5,7 +5,9 @@ interface Message {
   seen:boolean
 };
 
-
+interface ChatStructure {
+  all:DateGroup[]
+}
 
 interface DBChat {
   id:number,
@@ -45,4 +47,4 @@ interface updateMessagesData {
   time?:string
 }
 
-export {Message,MessageGroup,DBChat,Chat,DateGroup,messageChat,updateChatData,chatData,condition,updateMessagesData};
+export {ChatStructure,Message,MessageGroup,DBChat,Chat,DateGroup,messageChat,updateChatData,chatData,condition,updateMessagesData};

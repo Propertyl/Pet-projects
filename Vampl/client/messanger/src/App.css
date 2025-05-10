@@ -35,7 +35,7 @@
   --light-night-half:#ff616136;
   --main-rem:16px;
   --text-size:calc(var(--main-rem) + 3px);
-  --scrollbar-color:rgba(255, 255, 255, 0.075) #bbda5500;
+  --scrollbar-color:rgba(255, 255, 255, 0.212) #bbda5500;
   --message-color:rgb(255,255,255);
   --not-ur-messages:#343434;
   --message-weight:500;
@@ -44,6 +44,12 @@
   --nav-border-color:#1f1f1f;
   --conteneditable-text:black;
   --tile-white:rgba(255,255,255,.4);
+  --transition-standard-easing: cubic-bezier(.4, 0, .2, 1);
+  --transition-standard-out-time: 1s;
+  --transition-standard-out: var(--transition-standard-out-time) var(--transition-standard-easing);
+  --bubble-transition-out: transform var(--transition-standard-out)
+  1s cubic-bezier(.4, 0, .2, 1)
+  , opacity var(--transition-standard-out);
 }
 
 a {
@@ -68,6 +74,12 @@ a:hover {
 
 div:focus {
   outline: none;
+}
+
+
+.erase-icon {
+  fill:var(--night-color);
+  stroke: var(--night-color);
 }
 
 .random-icon {
@@ -139,7 +151,7 @@ button {
 }
 
 .flex-center {
-  align-items: center;
+  align-items: center !important;
   justify-content: center;
 }
 
@@ -268,8 +280,8 @@ p {
 .night {
   --light-grey-half:rgb(0,0,0,.5);
   --black-default:rgb(0,0,0);
-  --bg-main:#2c2c2c;
-  --nav-bg:rgb(63, 62, 62);
+  --bg-main:#252525;
+  --nav-bg:rgb(0, 0, 0);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(0,0,0,1);
@@ -289,6 +301,7 @@ p {
   --nav-border-color:#3b3b3b;
   --input-color:rgb(33, 33, 33);
   --conteneditable-text:var(--secondary-color);
+  --tape-bg:rgb(65, 65, 65);
 }
 
 .light {
@@ -306,6 +319,7 @@ p {
   --night-color:#ae7dd6;
   --input-color:rgb(255, 255, 255);
   --loading-color:rgb(0,0,0);
+  --tape-bg:#CCCCFF;
 }
 
 

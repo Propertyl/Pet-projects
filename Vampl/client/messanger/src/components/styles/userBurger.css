@@ -8,7 +8,23 @@
   z-index: 10;
 }
 
+.head-info-container {
+  height: 40% !important;
+  flex-direction: column;
+}
 
+.body-info-container {
+  flex-direction: column;
+  flex: 1;
+}
+
+.user-burger-avatar {
+  height: 8rem !important;
+  width: 8rem !important;
+  display: flex;
+  border: .2rem solid var(--night-color);
+  border-radius: 50%;
+}
 
 .user-burger-menu-appear {
   display: flex !important;

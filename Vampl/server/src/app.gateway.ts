@@ -33,7 +33,7 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    }
 
    async messageAction(client:Socket,{date,group,room,body,time}:updateMessagesData,condition:condition) {
-      let currentChat:any = await serv.get(`/chat/chatID/${room}`).then((data:any)=> data.messages);
+      let currentChat:any = await serv.get(`/chat/chatID/${room}`);
       currentChat = updateGroup(currentChat,date,group,body,time,condition);
       await serv.put('/chat/update-messages',{
          id:room,
@@ -80,8 +80,7 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(data.room).emit('message',data.message.body);
       let currentChat:any = undefined;
 
-      const chat = await serv.get(`/chat/chatID/${data.room}`)
-      .then((data:any) => data.messages);
+      const chat = await serv.get(`/chat/chatID/${data.room}`);
 
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);

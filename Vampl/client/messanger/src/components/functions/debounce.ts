@@ -3,10 +3,12 @@ const useDebounce = (func:any,delay:number) => {
 
   return function() {
     if(timer) {
-      clearTimeout
+      clearTimeout(timer);
     }
 
-    timer = setTimeout(func,delay);
+    timer = setTimeout(() => {
+      func();
+    },delay);
   }
 
 }

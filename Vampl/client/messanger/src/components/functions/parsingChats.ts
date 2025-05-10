@@ -1,4 +1,3 @@
-import { convertStatus } from "./convertStatus";
 import serv from "./interceptors";
 
 async function getUserInfo(phone:string) {
@@ -6,7 +5,7 @@ async function getUserInfo(phone:string) {
   const userStatus:any = await serv.get(`/getData/status/${phone}`)
   .then((table:any) => table.status);
 
-  return {name:data.name,image:data.image,status:convertStatus(userStatus),phone:data.phone};
+  return {name:data.name,image:data.image,status:userStatus,phone:data.phone};
 }
 
 const parsingChats = async (res:any,userPhone:string) => {

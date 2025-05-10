@@ -7,7 +7,18 @@ const serv = axios.create({
 
 serv.interceptors.response.use(
   response => response.data,
-  error => Promise.reject(error)
+  async error => {
+     const config = error.config;
+
+     if(!config || config.__retry) {
+        return Promise.reject(error);
+     }
+
+     config.__retry = true;
+
+     await new Promise(resolve => setTimeout(resolve,1000));
+     return serv(config);
+  }
 );
 
 export default serv;
