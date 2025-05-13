@@ -4,11 +4,9 @@ import { UserData } from "../components/types/global";
 const initialState = {
   locale:"",
   phone:"",
-  currentChat:null,
   userName:"",
   allChats:[],
-  allMonth:{},
-  changedUser:{}
+  allMonth:{}
 } satisfies UserData;
 
 const useUserData = createSlice({

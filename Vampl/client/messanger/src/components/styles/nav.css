@@ -17,7 +17,15 @@
   height: 1.2rem;
   margin-right:.5rem;
   enable-background:0 0 240 240;
+  fill: var(--other-text-color) !important;
+  stroke:var(--other-text-color) !important; 
 }
+
+.theme-icons * {
+  fill: var(--other-text-color) !important;
+  stroke:var(--other-text-color) !important; 
+}
+
 .theme-changer {
   position: relative;
   left:50%;
@@ -29,6 +37,7 @@
   cursor: pointer;
   transition: all .2s;
   color:var(--message-color);
+  user-select: none;
 }
 
 .theme-changer:hover {
@@ -40,16 +49,28 @@
   top:100%;
   right:90%;
   display: flex;
-  flex-direction: column;
   width: 120%;
-  background-color: var(--light-grey);
-  border-radius: 20px;
   z-index: 100000000;
-  transition: all .2s;
-  box-shadow: .2rem .2rem .5rem var(--black-default);
+  perspective: 500px;
 }
 
-.theme-options > * {
+.theme-options-container {
+  position: relative;
+  transition: all .2s;
+  background-color: var(--context-bg);
+  backdrop-filter: blur(50px);
+  border-radius: 20px;
+  flex-direction: column;
+  box-shadow: 0 0 .5rem var(--black-default);
+  pointer-events: all !important;
+  animation: context-menu-appear .1s ease-out forwards;
+}
+
+.theme-options-close {
+  animation: context-menu-disappear .1s ease-out forwards;
+}
+
+.theme-options-container > .theme-option {
   padding-left: 20px;
 }
 
@@ -63,6 +84,7 @@
   min-height: 2rem;
   align-items: center;
   transition: all .2s;
+  color:var(--other-text-color);
 }
 
 .theme-option:nth-child(1) {
@@ -76,7 +98,7 @@
 }
 
 .theme-option:hover {
-  background-color: var(--light-grey-half);
+  background-color: var(--tile-white);
 }
 
 
@@ -89,13 +111,6 @@
   align-items: center;
 }
 
-.day-icon {
-  background-image: url('/day.svg');
-}
-
-.night-icon {
-  background-image: url('/night.svg');
-}
 
 .search-icon {
   width:100%;

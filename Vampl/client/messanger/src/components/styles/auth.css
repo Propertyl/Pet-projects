@@ -71,6 +71,7 @@
 .code-options {
   position: absolute;
   top:103%;
+  left:0;
   overflow-y: scroll;
   height:16rem;
   z-index: 1;

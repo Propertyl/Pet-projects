@@ -74,6 +74,12 @@ export class UserController {
       path:'/'
     });
   }
+
+  @Put('log-out')
+  accLogOut(@Res({passthrough:true}) res:Response) {
+    res.clearCookie('token',{path:'/'});
+    return {message:'Logged out!'};
+  }
   
   @Put('update-status')
   async updateUserStatus(@Body() data:any) {

@@ -11,7 +11,6 @@ import './styles/chatsmenu.css';
 import { changeRoom, switchBurger, switchUser } from "../store/useFullStaff";
 import UserBurger from "./subComponents/UserBurger";
 import ContextMenu from "./subComponents/ContextMenu";
-import { setDeleteChat } from "../store/chat";
 import { useNavigate } from "react-router";
 import { Socket } from "socket.io-client";
 import getLastMessage from "./functions/getLastChatMessage";
@@ -111,7 +110,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   }
 
   const deleteChat = async (chatId:string) => {
-    dispatch(setDeleteChat(chatId));
+    socket.current!.emit('delete-chat',chatId);
     setChats(chats.filter(contact => contact.id != chatId));
     if(currentRoom === chatId) {
         router('/');

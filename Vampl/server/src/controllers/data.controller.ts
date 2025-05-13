@@ -33,4 +33,17 @@ export class DataController {
          return this.user.getAllUserRooms(phone);
       }
    }
+
+   @Get('burger/:phone')
+   isUserBurger(@Param('phone') phone:string,@Req() req:Request) {
+     const tokenPhone = req.cookies['token'];
+
+     console.log('weqweqwe:',tokenPhone,phone);
+
+     if(tokenPhone === phone) {
+       return {isOwn:true};
+     }
+
+     return {isOwn:false}
+   }
 }

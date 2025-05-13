@@ -13,8 +13,8 @@ const ContextMenu = ({func,pos,switchState,phrase}:{func:any,pos:{x:number,y:num
    }
    const animationOff = () => {
       const menu = contexMenuRef.current;
-      menu.classList.remove('context-menu-reverse');
       offContextMenu();
+      menu.classList.remove('context-menu-reverse');
       menu.removeEventListener('animationend',animationOff);
    }
 
@@ -25,8 +25,8 @@ const ContextMenu = ({func,pos,switchState,phrase}:{func:any,pos:{x:number,y:num
    },[contexMenuRef])
 
     return (
-      <div onMouseLeave={contextUnFocus} style={{top:pos.y - 16,left:pos.x - 16}}  className="context-menu">
-        <div ref={contexMenuRef} className="context-menu-container flex-center">
+      <div onMouseLeave={contextUnFocus} style={{top:pos.y - 16,left:pos.x - 16}} className="context-menu">
+        <div ref={contexMenuRef} className="context-menu-container flex-center container">
           <div className="container context-menu-option flex-center error-option" onClick={() => {
             switchState(false);
             func()();

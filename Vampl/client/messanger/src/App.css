@@ -254,6 +254,26 @@ p {
   height: auto !important;
 }
 
+.context-menu-option {
+  width: 80%;
+  height: 70%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all .2s;
+  cursor: pointer;
+  border-radius: 20px;
+  padding: .2rem;
+}
+
+.context-menu-icon {
+  position:  relative !important;
+  pointer-events: none;
+  margin: 0 0 0 .8rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
 @keyframes bubble-pop {
   0% {
       transform: scale(0);
@@ -266,6 +286,26 @@ p {
   100% {
       transform: scale(3);
       opacity: 0;
+  }
+}
+
+@keyframes context-menu-appear {
+  from {
+    transform:translateZ(-100px);
+    opacity: 0;
+  } to {
+    transform:translateZ(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes context-menu-disappear {
+  from {
+    transform:translateZ(0px);
+    opacity: 1;
+  } to {
+    transform:translateZ(-100px);
+    opacity: 0;
   }
 }
 
@@ -294,6 +334,8 @@ p {
   --input-color:rgb(33, 33, 33);
   --conteneditable-text:var(--secondary-color);
   --tape-bg:rgb(65, 65, 65);
+  --context-bg:rgba(33,33,33, .75);
+  --other-text-color:var(--secondary-color);
 }
 
 .light {
@@ -301,7 +343,7 @@ p {
   --black-default:rgb(0,0,0);
   --bg-main:rgb(255,255,255);
   --light-black:#4d4d4d;
-  --chat-bg-color:#6d696986;
+  --chat-bg-color:#444444;
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(255,255,255,.5);
   --light-grey:rgb(83, 83, 83);
@@ -311,7 +353,10 @@ p {
   --night-color:#ae7dd6;
   --input-color:rgb(255, 255, 255);
   --loading-color:rgb(0,0,0);
-  --tape-bg:#CCCCFF;
+  --tape-bg:#eeeeee;
+  --context-bg:rgba(255,255,255, .75);
+  --other-text-color:var(--black-default);
+  --tile-white:rgba(155,155,155,.4);
 }
 
 

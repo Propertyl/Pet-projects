@@ -6,17 +6,15 @@ interface Chat {
 }
 
 interface ChatStructure {
-  all:DateGroup
+  all:DateGroup[]
 }
 
 interface UserData {
   locale:string,
   phone:string,
-  currentChat:ChatStructure | null,
   userName:string,
   allChats:{id:string,last:string,time:string}[],
   allMonth:Record<number,string>,
-  changedUser:Record<string,string>,
 }
 
 type statusInfo = {phone:string,status:boolean};

@@ -11,11 +11,11 @@
 .head-info-container {
   height: 40% !important;
   flex-direction: column;
+  user-select: none;
 }
 
 .body-info-container {
   flex-direction: column;
-  flex: 1;
 }
 
 .user-burger-avatar {
@@ -35,8 +35,125 @@
   animation: menu-disappear .2s ease-in forwards;
 }
 
+.user-edit-burger-menu-appear {
+  display: flex !important;
+  animation: edit-menu-appear .2s ease-in forwards;
+}
+
+.user-edit-burger-menu-disappear {
+  display: flex !important;
+  animation: edit-menu-disappear .2s ease-in forwards;
+}
+
 .user-burger-menu-not-spawned {
   display: none;
+}
+
+.user-burger-name {
+  text-align: center;
+  font-weight: 600;
+  font-size:calc(var(--main-rem) + 5px);
+}
+
+.user-burger-status {
+  display: flex;
+  align-items: center;
+}
+
+.user-burger-status-dot {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  display: flex;
+  margin: 0 .5rem;
+}
+
+.status-Online {
+  background-color: var(--night-color);
+  animation: blink 2s linear infinite;
+}
+
+.status-Offline {
+  background-color: var(--main-grey);
+}
+
+.additional-actions-container {
+  position:absolute;
+  display: flex;
+  top:1%;
+  right:1%;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  transition: all .2s;
+}
+
+.additional-actions-container .random-icon {
+  fill: var(--other-text-color);
+  right: 0%;
+}
+
+.moreMenu {
+  position: absolute;
+  top:100%;
+  right: 100%;
+  min-width:10rem;
+  height:3rem;
+  display: flex;
+  perspective: 500px;
+  z-index: 1000;
+  pointer-events: all !important;
+}
+
+.moreMenu-container {
+  position: relative;
+  border-radius: 10px;
+  background-color:var(--context-bg);
+  backdrop-filter: blur(50px);
+  box-shadow: 0 0 .5rem var(--light-grey-half);
+  transform-origin: right;
+  animation: context-menu-appear .1s ease-out forwards;
+}
+
+.log-out-icon {
+  stroke: var(--secondary-color) !important;
+  fill: var(--other-text-color) !important;
+  margin:0 .2rem 0 0 !important;
+}
+
+.log-out-icon g {
+  stroke: none !important;
+}
+
+.moreMenu-disappear {
+  animation: context-menu-disappear .1s ease-out forwards;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  } 50% {
+    opacity: 1;
+  } 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes edit-menu-appear {
+  from {
+    transform: translateX(100%);
+  } 
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes edit-menu-disappear {
+  from {
+    transform: translateX(0%);
+  } 
+  to {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes menu-appear {

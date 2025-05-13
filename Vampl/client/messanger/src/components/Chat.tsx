@@ -1,23 +1,32 @@
-import {ReactElement ,RefObject, useEffect, useRef, useState} from "react";
-import {ChatStructure, DefaultRef, UserData} from "./types/global";
+import {ReactElement ,RefObject, useCallback, useEffect, useRef, useState} from "react";
+import {ChatStructure, DefaultRef} from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
-import { MessagesData, Store } from "../types/global";
+import { MessagesData, Store, UserData } from "../types/global";
 import {Socket } from "socket.io-client";
 import parseToDeleteGroup from "./functions/parseChatGroups";
 import useFormatter from "./functions/dateFormatter";
 import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
 import serv from "./functions/interceptors";
-import spawnGroups from "./functions/spawnMessageGroups";
 import ContextMenu from "./subComponents/ContextMenu";
-import { setDeleteChat } from "../store/chat";
+import { ChatProcess } from "./functions/spawnMessageGroups";
+import findLastGroup from "./functions/findLastGroup";
+
+const updateChatContent = (chat:HTMLDivElement,groupsSpawner:RefObject<any>,cantUpdateRef:RefObject<boolean>) => {
+    const beforePos = chat.scrollHeight - chat.scrollTop;
+
+    groupsSpawner.current();
+    setTimeout(() => {
+      chat.scrollTo({top:chat.scrollHeight - beforePos,behavior: "instant"});
+      cantUpdateRef.current = false;
+    },10);
+}
 
 const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
-  const [chatData,setChatData] = useState<ChatStructure | null>(null);
+  const [chatData,setChatData] = useState<any | null>(null);
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
-  const deleteChat = useSelector((state:Store) => state.chat.deleteChat);
   const userData:UserData = useSelector((state:Store) => state.user);
   const userName = userData.userName;
   const [currentMessage,setCurrentMessage] = useState<string>("");
@@ -31,59 +40,55 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const [placeholder,setPlaceholder] = useState<boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
+  const chatProcess:RefObject<ChatProcess | null> = useRef(null);
 
-  const setUnreadMessage = (date:string,groupName:string,room:string,body:string) => (el:HTMLDivElement) => {
-      if(el) {
-        setObserver.current(el,date,groupName,room,body);
-      }
-  }
-
-  const updateChatContent = (chat:HTMLDivElement) => {
-    const beforePos = chat.scrollHeight - chat.scrollTop;
-
-    groupsSpawner.current();
-    setTimeout(() => {
-      chat.scrollTo({top:chat.scrollHeight - beforePos,behavior: "instant"});
-      cantUpdateRef.current = false;
-    },10);
-  }
-
-  const searchScroll = (event: Event) => {
-    if (event.target) {
-      const chat = event.target as HTMLDivElement;
-      const currentScrollTop = chat.scrollTop;
-  
-      const chatRect = chat.getBoundingClientRect();
-      const scrollHeight = chat.scrollHeight - chatRect.height;
-
-      if (scrollHeight - currentScrollTop > 80 && !downButtonRef.current) {
-        setDownButton(true);
-      } else if (scrollHeight - currentScrollTop < 80 && downButtonRef.current) {
-        setDownButton(false);
-      }
-
-      if (currentScrollTop < 50 && !chatEndedRef.current && !cantUpdateRef.current) {
-        cantUpdateRef.current = true;
-        updateChatContent(chat);
-      }
+const setUnreadMessage = (date:string,groupName:string,room:string,body:string) => (el:HTMLDivElement) => {
+    if(el) {
+      setObserver.current(el,date,groupName,room,body);
     }
-  };
+}
 
-  const handleUpdatingChat = (currentChat:ChatStructure) => {
-    setChatData(parseToDeleteGroup(currentChat['all']));
+const searchScroll = (event: Event) => {
+  if (event.target) {
+    const chat = event.target as HTMLDivElement;
+    const currentScrollTop = chat.scrollTop;
+
+    const chatRect = chat.getBoundingClientRect();
+    const scrollHeight = chat.scrollHeight - chatRect.height;
+    if (scrollHeight - currentScrollTop > 80 && !downButtonRef.current) {
+      setDownButton(true);
+    } else if (scrollHeight - currentScrollTop < 80 && downButtonRef.current) {
+      setDownButton(false);
+    }
+    if (currentScrollTop < 50 && !chatEndedRef.current && !cantUpdateRef.current) {
+      cantUpdateRef.current = true;
+      updateChatContent(chat,groupsSpawner,cantUpdateRef);
+    }
   }
+}
 
+const handleUpdatingChat = (currentChat:ChatStructure) => {
+  if(chatData) {
+    setGroups(groups => {
+    const newGroup = [...groups];
+    const all = currentChat['all'];
+    const parsed = parseToDeleteGroup(all[all.length - 1]);
+    const [groupDate] = Object.keys(parsed);
+    const [currentGroupDate] = Object.keys(chatData[findLastGroup(chatData)]);
+    if(groupDate === currentGroupDate) {
+      newGroup[newGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
+    } else {
+      newGroup.push(chatProcess.current!.spawnGroup(all.length + 1,parsed));
+    }
+    return newGroup;
+    });
+    setTimeout(() => scrollDown('smooth'),200);
+  }
+}
 
 useEffect(() => {
    downButtonRef.current = downButton;
 },[downButton]);
-
-useEffect(() => {
-  if(deleteChat) {
-    socket.current!.emit('delete-chat',deleteChat);
-    dispatch(setDeleteChat(""));
-  }
-},[deleteChat])
 
 useEffect(() => {
   const setupPage = async () => {  
@@ -110,26 +115,49 @@ useEffect(() => {
 
 },[messagesRef.current])
 
-useEffect(() => {
-  if(messagesRef.current && groups.length && messagesRef.current.classList.contains('messages-hidden')) {
-    messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    messagesRef.current.classList.remove('messages-hidden');
+const spawnUntilScroll = useCallback(async () => {
+  const chat = messagesRef.current;
+  await new Promise((r) => requestAnimationFrame(r));
+  console.log('chat:',chat.scrollHeight,chat.clientHeight);
+  if(chat.scrollHeight === chat.clientHeight && !chatEndedRef.current) {
+    groupsSpawner.current();
+    
+    await new Promise((r) => requestAnimationFrame(r));
+    spawnUntilScroll();
   }
+},[messagesRef.current?.scrollHeight])
+
+
+useEffect(() => {
+  const revealMesssges = () => {
+    if(messagesRef.current && groups.length && messagesRef.current.classList.contains('messages-hidden')) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      messagesRef.current.classList.remove('messages-hidden');
+    }
+  }
+
+  revealMesssges();
 },[messagesRef.current,groups])
 
 useEffect(() => {
-  if(chatData) {
-    groupsSpawner.current = spawnGroups(chatData,userData,userName,room,setUnreadMessage,setGroups,
-      setContextMenu,
-      setContextMenuPos,
-      chatEndedRef,
-      dispatch
-    );
-
-    groupsSpawner.current();
-    setTimeout(() => scrollDown('smooth'),200);
+  if(chatData && !chatProcess.current) {
+    chatProcess.current = new ChatProcess(chatData,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
   }
-},[chatData]);
+},[chatData,chatProcess.current])
+
+useEffect(() => {
+  const initiateGroups = async () => {
+    if(chatData && !groups.length && chatProcess.current) {
+      groupsSpawner.current = chatProcess.current.spawnGroups();
+
+      groupsSpawner.current();
+      await new Promise((r) => requestAnimationFrame(r));
+      await spawnUntilScroll();
+    }
+  }
+
+  initiateGroups();
+},[chatData,chatProcess.current]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
   if(messagesRef.current) {
@@ -145,7 +173,6 @@ const sendMessageToChat = () => {
     socket.current!.emit('sendMessage',{room:room,
       message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
-    // setTimeout(() => scrollDown('smooth'),200);
   }
 }
 
@@ -201,7 +228,6 @@ const messagePaste = (event:ClipboardEvent | any) => {
     const selection = window.getSelection();
     if(!selection?.rangeCount) return;
 
-
     selection.deleteFromDocument();
     selection.getRangeAt(0).insertNode(document.createTextNode(pasted));
     
@@ -242,7 +268,7 @@ useEffect(() => {
             <div className="messages-container">
             <div ref={messagesRef} className="messages messages-hidden">
               <div className="messages-group-container">
-                { chatData && groups}
+                {chatData && groups}
               </div>
               {
                 contextMenu && <ContextMenu phrase="Delete" switchState={setContextMenu} pos={contextMenuPos} func={() => setDeletedMessage(deleteArgs)}/>

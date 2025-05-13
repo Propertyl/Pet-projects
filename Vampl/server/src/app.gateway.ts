@@ -85,7 +85,8 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);
       console.log('data:room:',data.room)
-      this.server.to(data.room).emit('updateChat',currentChat,data.room);
+      this.server.to(data.room).emit('updateChat',currentChat,
+      data.room);
       this.server.to(data.room).emit('updateContactChat',currentChat,data.room);
       
       await serv.put('/chat/updateChat',{
