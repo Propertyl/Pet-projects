@@ -1,10 +1,9 @@
 const phoneValidation = (phone:string) => {
-
-    if(/[A-Za-z]/g.test(phone) || phone.length < 12 || !phone.includes('+')) {
-      return false;
+    if(!/[A-ZА-Я]/ig.test(phone) && phone.length === 13 && phone.includes('+')) {
+      return true;
     }
 
-    return true;
+    return false;
 }
 
 export default phoneValidation;

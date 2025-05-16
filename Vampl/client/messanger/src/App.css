@@ -12,6 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  --secondary-grey:155,155,155;
   --borders-bg:#3a3a3a;
   --bg-specific:#222220;
   --black-default:rgb(0,0,0);
@@ -30,6 +31,7 @@
   --menu-color:rgb(73,73,73);
   --sub-color:#007BFF;
   --night-color:#da5050;
+  --light-night-color:#b17adf;
   --night-tilelight:hsla(0, 64%, 58%, 0.4);
   --light-night:#ff6161;
   --light-night-half:#ff616136;
@@ -61,8 +63,8 @@ a:hover {
   color: #535bf2;
 }
 
-* {
-  box-sizing: border-box;
+*,*::after,*::before {
+  box-sizing: border-box !important;
 }
 
 [contenteditable=true] {
@@ -70,6 +72,7 @@ a:hover {
   color:var(--conteneditable-text);
   caret-color: var(--night-color);
 }
+
 
 
 div:focus {

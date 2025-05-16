@@ -59,7 +59,7 @@
   transition: all .2s;
   background-color: var(--context-bg);
   backdrop-filter: blur(50px);
-  border-radius: 20px;
+  border-radius:var(--default-border-radius);
   flex-direction: column;
   box-shadow: 0 0 .5rem var(--black-default);
   pointer-events: all !important;
@@ -71,7 +71,7 @@
 }
 
 .theme-options-container > .theme-option {
-  padding-left: 20px;
+  padding-left:20px;
 }
 
 .theme-icon {
@@ -228,7 +228,7 @@
   width: 80%;
   min-height: .2rem;
   background-color: var(--secondary-color);
-  border-radius:20px;
+  border-radius:var(--default-border-radius);
   z-index: 1;
   pointer-events: none;
   transition: all .2s;

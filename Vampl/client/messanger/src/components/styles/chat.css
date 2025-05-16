@@ -40,7 +40,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 20px;
+  border-radius:var(--default-border-radius);
   background-color:var(--night-tilelight);
   opacity: .8;
   backdrop-filter: blur(.2rem);
@@ -141,12 +141,12 @@
 
 
 .rounded-message {
-  border-top-right-radius:20px;
+  border-top-right-radius:var(--default-border-radius);
 }
 
 .rounded-message .not-user-message {
   border-top-left-radius:30px;
-  border-top-right-radius:20px !important;
+  border-top-right-radius:var(--default-border-radius) !important;
 }
 
 .messages-hidden .message {
@@ -214,7 +214,7 @@
   width:100%;
   min-height:2rem;
   max-height:10rem;
-  border-radius:20px;
+  border-radius:var(--default-border-radius);
   font-size:var(--text-size);
   background-color: var(--input-color);
   display: flex;
