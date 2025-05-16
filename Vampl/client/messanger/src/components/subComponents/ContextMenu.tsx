@@ -14,7 +14,6 @@ const ContextMenu = ({func,pos,switchState,phrase}:{func:any,pos:{x:number,y:num
    const animationOff = () => {
       const menu = contexMenuRef.current;
       offContextMenu();
-      menu.classList.remove('context-menu-reverse');
       menu.removeEventListener('animationend',animationOff);
    }
 

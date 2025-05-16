@@ -65,7 +65,7 @@ export class UserController {
 
   @Put('setAuthorized')
   updateUserAuth(@Res({passthrough:true}) res:Response,@Body() phone:{phone:string}) {
-    const life:number = 7 * 24 * 60 * 600;
+    const life:number = 7 * 24 * 60 * 3600;
     res.cookie('token',phone.phone, {
       maxAge:life,
       httpOnly:true,
