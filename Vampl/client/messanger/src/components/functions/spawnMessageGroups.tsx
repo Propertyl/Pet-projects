@@ -64,7 +64,7 @@ export class ChatProcess {
                  </p>
              </span>
              {/* @ts-ignore */}
-             {Object.values(date).pop()!.groups.map((groupData:any,groupIdx:number) => {
+             {Object.values(date).pop()!.groups.map((groupData:any,groupIdx:number,arr:any) => {
                 const groups:any = [];
                 for(const [groupName,group] of Object.entries(groupData) as [string,any]) {
                    const isUnread = group.sender !== this.userName;
@@ -77,7 +77,7 @@ export class ChatProcess {
                       )} ref={
                         isUnread && !message.seen ? this.setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,this.room,message.body) : null
                       }
-                      style={{transition:`opacity ${groupIdx * .05}s ease-out`}}
+                      style={{transition:`opacity ${(arr.length - groupIdx) * .05}s ease-out`}}
                       className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.userName ? 'not-user-message' : ''}`}
                        key={`message-${groupIdx}-${index}`}>
                          {index === group.messages.length - 1 && (

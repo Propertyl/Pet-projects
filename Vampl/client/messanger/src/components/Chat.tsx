@@ -82,7 +82,6 @@ const handleUpdatingChat = (currentChat:ChatStructure) => {
     }
     return newGroup;
     });
-    setTimeout(() => scrollDown('smooth'),200);
   }
 }
 
@@ -115,29 +114,28 @@ useEffect(() => {
 
 },[messagesRef.current])
 
+const revealMesssges = () => {
+  if(messagesRef.current && messagesRef.current.classList.contains('messages-hidden')) {
+      console.log('reveal');
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      messagesRef.current.classList.remove('messages-hidden');
+  }
+}
+
 const spawnUntilScroll = useCallback(async () => {
   const chat = messagesRef.current;
   await new Promise((r) => requestAnimationFrame(r));
-  console.log('chat:',chat.scrollHeight,chat.clientHeight);
   if(chat.scrollHeight === chat.clientHeight && !chatEndedRef.current) {
     groupsSpawner.current();
-    
+
     await new Promise((r) => requestAnimationFrame(r));
+    scrollDown('instant');
     spawnUntilScroll();
+  } else {
+    console.log('okay');
+    revealMesssges();
   }
-},[messagesRef.current?.scrollHeight])
-
-
-useEffect(() => {
-  const revealMesssges = () => {
-    if(messagesRef.current && groups.length && messagesRef.current.classList.contains('messages-hidden')) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-      messagesRef.current.classList.remove('messages-hidden');
-    }
-  }
-
-  revealMesssges();
-},[messagesRef.current,groups])
+},[messagesRef,chatEndedRef])
 
 useEffect(() => {
   if(chatData && !chatProcess.current) {
@@ -173,6 +171,7 @@ const sendMessageToChat = () => {
     socket.current!.emit('sendMessage',{room:room,
       message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
+    setTimeout(() => scrollDown('smooth'),200);
   }
 }
 

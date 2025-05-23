@@ -9,6 +9,8 @@ import '../components/styles/auth.css';
 import phoneValidation from "../components/functions/phoneValidation";
 import nameValidation from "../components/functions/nameValidation";
 import getLabelText from "../components/functions/authLabelText";
+import useDebounceEffect from "../components/functions/useDebounceEffect";
+import checkName from "../components/functions/checkingName";
 
 const AuthPage = () => {
   const [phoneCodes,setPhoneCodes] = useState<any>([]);
@@ -20,12 +22,13 @@ const AuthPage = () => {
   const [strokes,setStrokes] = useState<number>(11);
   const [currentWindow,setCurrentWindow] = useState<AuthInputs>('phone');
   const [inputError,setInputError] = useState<AuthInputs | ''>('');
-  const [register,setRegister] = useState<Boolean>(false);
+  const [register,setRegister] = useState<Boolean | null>(null);
   const [inputData,setInputData] = useState<SignData | any>({});  
   const [userInput,setInput] = useState<string>("");
   const switcher = useSwitcher(setCodeOptions);
   const [showPassword,setPassword] = useState<boolean>(false);
   const pwSwitcher = useSwitcher(setPassword);
+  const [nameCorrect,setNameCorrect] = useState<boolean | null>(null);
 
   const changeCode = (code:string) => {
     if(code) {
@@ -39,7 +42,7 @@ const AuthPage = () => {
   }
 
   useEffect(() => {
-    document.title = "Join to us";
+    document.title = "Authorization";
   },[])
 
   const changeStrokes = (currentStrokes:number) => {
@@ -67,7 +70,14 @@ const AuthPage = () => {
 
   const cursorPosition = preCaretRange.toString().length;
   return cursorPosition;
-};
+}
+
+useDebounceEffect(() => {
+  if(userInput && currentWindow === 'name') {
+    console.log('worked');
+    checkName(userInput,setNameCorrect);
+  }
+},[userInput,currentWindow],500);
 
 const restoreCursorPosition = (el:any, cursorPosition:any) => {
   const selection:any = window.getSelection();
@@ -188,7 +198,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
         finalData['password'] = userInput;
         setInputData(finalData);
         setInput('');
-        const authReq:any = await auth(register,finalData);
+        const authReq:any = await auth(register ?? false,finalData);
         if(!authReq) {
           setInputError('incorrect');
         } else {
@@ -287,6 +297,9 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
             {currentWindow !== 'phone' && <svg className="random-icon arrow-icon" onClick={BackToStart} width="64px" height="64px" viewBox="0 -6.5 36 36" version="1.1" xmlns="http://www.w3.org/2000/svg"  fill="#da5050"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>left-arrow</title> <desc>Created with Sketch.</desc> <g id="icons" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd"> <g id="ui-gambling-website-lined-icnos-casinoshunter" transform="translate(-342.000000, -159.000000)" fill="#000000"  fillRule="nonzero"> <g id="square-filled" transform="translate(50.000000, 120.000000)"> <path d="M317.108012,39.2902857 L327.649804,49.7417043 L327.708994,49.7959169 C327.889141,49.9745543 327.986143,50.2044182 328,50.4382227 L328,50.5617773 C327.986143,50.7955818 327.889141,51.0254457 327.708994,51.2040831 L327.6571,51.2479803 L317.108012,61.7097143 C316.717694,62.0967619 316.084865,62.0967619 315.694547,61.7097143 C315.30423,61.3226668 315.30423,60.6951387 315.694547,60.3080911 L324.702666,51.3738496 L292.99947,51.3746291 C292.447478,51.3746291 292,50.9308997 292,50.3835318 C292,49.8361639 292.447478,49.3924345 292.99947,49.3924345 L324.46779,49.3916551 L315.694547,40.6919089 C315.30423,40.3048613 315.30423,39.6773332 315.694547,39.2902857 C316.084865,38.9032381 316.717694,38.9032381 317.108012,39.2902857 Z M327.115357,50.382693 L316.401279,61.0089027 L327.002151,50.5002046 L327.002252,50.4963719 L326.943142,50.442585 L326.882737,50.382693 L327.115357,50.382693 Z" id="left-arrow" transform="translate(310.000000, 50.500000) scale(-1, 1) translate(-310.000000, -50.500000) "> </path> </g> </g> </g> </g></svg>
             }
               <ul className="auth-list">
+                <div>
+                  <p>{register ? 'Welcome back!' : register === null ? 'Login' : 'Join our family'}</p>
+                </div>
                { currentWindow === 'phone' &&
                 <li className="auth-window">
                   <div className="container flex-center">
@@ -316,7 +329,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
                { currentWindow === 'name' &&
                   <li className="auth-window">
                     <div className="input-container">
-                    <span className="input-cover container" data-label-text={getLabelText('Name',inputError)}>
+                    <span className="input-cover container" data-label-text={nameCorrect === false ? 'This nickname is already taken' : getLabelText('Name',inputError)}>
                       <input  autoFocus={currentWindow === 'name'}  name="name-input" onInput={WriteInput} className={`auth-input ${inputError === 'name' && 'input-error'}`} type="text"/>
                     </span>
                     {inputError === 'name' && 
@@ -353,7 +366,7 @@ const restoreCursorPosition = (el:any, cursorPosition:any) => {
                <button onClick={(event:any) => {
                   signActions();
                   triggerEffect(event);
-               }} className="auth-button hidden-container">{ currentWindow === 'password' ? 'Login' : 'Next' }
+               }} className="auth-button hidden-container flex-center">{ currentWindow === 'password' ? 'Login' : 'Next' }
                </button>
              </ul>
           </div>

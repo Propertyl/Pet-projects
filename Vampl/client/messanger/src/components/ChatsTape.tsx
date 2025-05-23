@@ -15,6 +15,8 @@ import { useNavigate } from "react-router";
 import { Socket } from "socket.io-client";
 import getLastMessage from "./functions/getLastChatMessage";
 import not from '/notification.mp3';
+import { titleSwapper } from "./functions/titleSwapper";
+import { incrementMessages } from "../store/chat";
 
 const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const router = useNavigate();
@@ -26,9 +28,10 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const [deleteId,setDeleteId] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
   const userData = useSelector((state:Store) => state.user);
-  const [unReadMessage,setUnReadMessage] = useState<number>(0);
+  const unReadMessage = useSelector((state:Store) => state.chat.unReadMessages);
   const dispatch = useDispatch();
   const notification:HTMLAudioElement = new Audio(not);
+  const handleTitleNotification = titleSwapper;
   
   const handleChangeStatus = (changedUser:statusInfo) => {
     setChats(chats => chats.map(chat => {
@@ -45,10 +48,11 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     if(document.visibilityState === 'hidden') {
       notification.currentTime = 0;
       notification.play();
+      handleTitleNotification();
     }
 
     if(room !== currentRoom) {
-      setUnReadMessage(messages => messages + 1);
+      dispatch(incrementMessages());
     }
     
     setChats(chats => {
@@ -95,7 +99,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   useEffect(() => {
     const checkChats = async () => {
       if(!chats.length) {
-        const currentChats:UserContact[] = await getUserChats();
+        const currentChats:UserContact[] = await getUserChats(dispatch);
         setChats(currentChats);
 
         dispatch(setData({field:'allChats',value:currentChats}));
@@ -129,10 +133,10 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     <>
       <section className={`contact-tape ${!contactDefault ? "default" : ""} flex-center`}>
         <UserBurger/>
-        <div style={{paddingTop:'2rem'}} className="contact-tape-container container flex-reverse">
+        <div className="contact-tape-container container flex-reverse">
         {contextMenu && <ContextMenu phrase="Delete Chat" func={(() => () => deleteChat(deleteId))} pos={contextPos} switchState={setContextMenu}/>}
           { chats.length ? chats.map((contact,index) => (
-                <a draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
+                <a draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
                   <div onClick={(event) => {
                       triggerEffect(event);
                       if(checkActiveChat(window.location.href,contact.user.name)) {

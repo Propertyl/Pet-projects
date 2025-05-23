@@ -3,7 +3,6 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   burgerOpen:false,
   userInBurger:"",
-  title:"Vampl",
   currentRoom:"",
   approve:false
 }
@@ -13,7 +12,6 @@ const useUsefulStuff = createSlice({
   initialState,
   reducers:{
     switchBurger(state) {state.burgerOpen = !state.burgerOpen },
-    changeTitle(state,action) { state.title = action.payload },
     changeRoom(state,action) {state.currentRoom = action.payload},
     switchUser(state,action) {state.userInBurger = action.payload},
     switchAccess(state,action) {
@@ -23,6 +21,6 @@ const useUsefulStuff = createSlice({
 
 });
 
-export const {switchBurger,changeTitle,changeRoom,switchUser,switchAccess} = useUsefulStuff.actions;
+export const {switchBurger,changeRoom,switchUser,switchAccess} = useUsefulStuff.actions;
 
 export default useUsefulStuff.reducer;

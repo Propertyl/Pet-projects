@@ -1,6 +1,7 @@
 import { Body, Controller, Get,Param, Post, Put, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { UserService } from "src/services/user.service";
+import { infoForUpdate } from "src/stuff/types";
 
 @Controller('user')
 export class UserController {
@@ -16,10 +17,28 @@ export class UserController {
     return res;
   }
 
+  @Get('name')
+  getUserName(@Req() req:Request) {
+    const phone = req.cookies['token'];
+
+    return this.userServices.getUserName(phone);
+  }
+
 
   @Get('getInfoByPhone/:phone')
   getUserInfoPhone(@Param('phone') phone:string) {
     return this.userServices.getUserByPhone(phone);
+  }
+
+  @Get('check-name-existing/:name')
+  async checkNameExisting(@Param('name') name:string) {
+    const coincidences = await this.userServices.getUserByName(name);
+
+    if(coincidences) {
+      return {existing:true};
+    }
+
+    return {existing:false}
   }
 
   @Get('infoByName/:name') 
@@ -38,6 +57,13 @@ export class UserController {
     return res.status(200).json({register:true});
   }
 
+  @Put('update-info')
+  updateUserInfo(@Body() info:infoForUpdate,@Req() req:Request) {
+    const phone = req.cookies['token'];
+
+    return this.userServices.updateInfo(info,phone);
+  }
+
   @Post('createAccount')
   createUser(@Body() user:{ip:string,name:string,phone:string,birthdate:string,password:string,image:string}) {
      return this.userServices.createUser(user);
@@ -51,7 +77,7 @@ export class UserController {
   }
 
   @Get('authorization')
-    checkAuthorization(@Req() req:Request,@Res() res:Response) {
+  checkAuthorization(@Req() req:Request,@Res() res:Response) {
       const token = req.cookies['token'];
 
       console.log('token:',token);
@@ -61,7 +87,7 @@ export class UserController {
       }
 
         return res.status(200).json({approve:false});
-    }
+  }
 
   @Put('setAuthorized')
   updateUserAuth(@Res({passthrough:true}) res:Response,@Body() phone:{phone:string}) {

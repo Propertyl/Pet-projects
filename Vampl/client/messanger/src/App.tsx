@@ -1,21 +1,15 @@
-import { useEffect, useLayoutEffect} from 'react'
+import {useLayoutEffect} from 'react'
 import {RouterProvider } from 'react-router';
-import { useDispatch, useSelector } from 'react-redux';
-import { Store} from './types/global';
+import { useDispatch} from 'react-redux';
 import router from './router/router';
 import checkAuthorization from './components/functions/AutoAuthorization';
 
 function App() {
   const dispatch = useDispatch();
-  const title = useSelector((state:Store) => state.stuff.title);
-
-  useEffect(() => {
-    document.title = title;
-  },[title])
   
   useLayoutEffect(() => {
     checkAuthorization(dispatch);
- },[dispatch])
+  },[dispatch])
 
   return (
     <>

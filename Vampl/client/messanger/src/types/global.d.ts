@@ -22,7 +22,7 @@ interface MessagesData {
 interface Store {
   user:UserData,
   stuff:{burgerOpen:Boolean,title:string,currentRoom:string,userInBurger:string,approve:boolean},
-  chat:{deleteArgs:MessagesData,deleteChat:string}
+  chat:{deleteArgs:MessagesData,unReadMessages:number}
 }
 
 interface UserData {

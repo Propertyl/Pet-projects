@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
-import { chatData } from "src/stuff/types";
+import { chatData, infoForUpdate } from "src/stuff/types";
 
 @Injectable()
 export class UserService {
@@ -19,6 +19,38 @@ export class UserService {
       where: {
         name:userName
       }
+    })
+  }
+
+  getUserName(phone:string) {
+    return this.prisma.user.findFirst({
+      where:{
+        phone:phone
+      },
+      select:{
+        name:true
+      }
+    })
+  }
+
+  updateInfo(info:infoForUpdate,phone:string) {
+    const data:infoForUpdate = {
+      name:info.name
+    };
+
+    if(info.birthday) {
+      data.birthday = info.birthday;
+    }
+
+    if(info.image) {
+      data.image = info.image;
+    }
+    
+    return this.prisma.user.update({
+      where:{
+        phone:phone
+      },
+      data
     })
   }
 

@@ -29,11 +29,14 @@ const MainPage = () => {
       });
 
    }
- },[access])
+  },[access])
+
+  useEffect(() => {
+    document.title = "Vampl";
+  },[])
 
 
-
- useEffect(() => {
+  useEffect(() => {
     const tryGetChat = async () => {  
       if(window.location.href.includes('@') && access && !room) {
         await chatAfterRefresh(dispatch);
