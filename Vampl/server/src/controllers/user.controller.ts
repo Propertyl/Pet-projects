@@ -112,6 +112,7 @@ export class UserController {
      await this.userServices.updateStatus(data);
   }
 
+
   @Post('create-theme')
   async createUserTheme(@Body() data:{phone:string,theme:string}) {
     return this.userServices.createUserTheme(data);

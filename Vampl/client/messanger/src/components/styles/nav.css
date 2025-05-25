@@ -191,15 +191,15 @@
 
 .burger-menu {
   position: relative;
-  width: 4rem;
+  width:3.8rem;
   height:60%;
   display: flex;
   align-items: center;
   justify-content: center;
   grid-template-rows: repeat(3,4px);
   row-gap: .5rem;
-  border-radius: 10px;
-  background-color:var(--night-color);
+  border-radius:50%;
+  background: none;
   flex-direction: column;
   cursor: pointer;
   overflow: hidden;
@@ -227,7 +227,7 @@
   position: relative;
   width: 80%;
   min-height: .2rem;
-  background-color: var(--secondary-color);
+  background-color: var(--other-text-color);
   border-radius:var(--default-border-radius);
   z-index: 1;
   pointer-events: none;

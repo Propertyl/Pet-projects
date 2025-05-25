@@ -209,6 +209,21 @@
   overflow: hidden;
 }
 
+.avatar-container {
+  width: 8rem !important;
+  height: 8rem !important;
+}
+
+.avatar-container:hover .change-avatar-icon {
+  transform: scale(1.2);
+}
+
+.change-avatar-icon {
+  width: 3rem !important;
+  height: 3rem !important;
+  right: initial;
+}
+
 .confirm-button {
   animation: bubble-appear .2s var(--appear-menu-transition) forwards;
 }

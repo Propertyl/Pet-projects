@@ -85,6 +85,7 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   const [dataCorrect,setDataCorrect] = useState<boolean | null>(null);
   const editMenu:DefaultRef = useRef(null);
   const dispatch = useDispatch();
+  const fileLoader:RefObject<HTMLInputElement | null> = useRef(null);
 
   const offMenu = () => {
     const menu = editMenu.current;
@@ -100,6 +101,20 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
       dispatch(setData({field:'userName',value:newName}));
       setSwapAnimation(true);
   }
+
+  const setupAvatar = (event:any) => {
+    const file:File = event.target.files[0];
+    const [type,fileType] = file.type.split('/');
+    if(type === 'image' && ['png','jpeg','jpg'].includes(fileType)) {
+      const formData = new FormData();
+      formData.append('file',file);
+
+      serv.put('/getData/user-avatar',
+        formData
+      );
+    }
+  }
+
 
   useDebounceEffect(() => {
     if (newName) {
@@ -117,7 +132,7 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
 
   return (
     <>
-      <input style={{display:'none'}} type="file" />
+      <input ref={fileLoader} style={{display:'none'}} onChange={setupAvatar} type="file" />
       <section ref={editMenu} className={`user-burger-menu 'user-edit-burger-menu-appear' ${mode ? 'user-edit-burger-menu-appear' : swapAnimation ? 'user-edit-burger-menu-disappear' : 'user-burger-menu-not-spawned'}`}>
         <div style={{flexDirection:'column'}} className="container">
           <button className="edit-menu-button flex-center" onClick={() => setSwapAnimation(true)}>
@@ -125,7 +140,9 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
           </button>
           <div className="head-info-container container">
             <div className="container flex-center" style={{flexDirection:'column'}}>
-              <UserAvatar image={burgerInfo.image} userName={burgerInfo.name}/>
+              <span className="edit-avatar-container flex-center">
+                <UserAvatar image={burgerInfo.image} userName={burgerInfo.name} func={() => fileLoader.current?.click()}/>
+              </span>
             </div>
           </div>
           <div className="body-info-container container">

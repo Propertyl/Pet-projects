@@ -13,7 +13,7 @@ import { DataController } from './controllers/data.controller';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath:join(__dirname,'..','/src/uploads'),
+      rootPath:join(__dirname, '..', 'src', 'uploads'),
       serveRoot:'/images'
     })
   ,HttpModule],

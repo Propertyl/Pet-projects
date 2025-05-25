@@ -52,10 +52,6 @@ export class ChatProcess {
   spawnGroup = (
     index:any,
     date: any,
-    // userData: UserData,
-    // userName: string,
-    // room: string,
-    // setUnreadMessage: any,
   ) => {
   return (
     <div className="container container-reverse group-container" key={`group-${index}`}>
@@ -77,7 +73,7 @@ export class ChatProcess {
                       )} ref={
                         isUnread && !message.seen ? this.setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,this.room,message.body) : null
                       }
-                      style={{transition:`opacity ${(arr.length - groupIdx) * .05}s ease-out`}}
+                      style={{transition:`opacity ${(arr.length - groupIdx) * .15}s ease-out`}}
                       className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.userName ? 'not-user-message' : ''}`}
                        key={`message-${groupIdx}-${index}`}>
                          {index === group.messages.length - 1 && (
@@ -101,14 +97,7 @@ export class ChatProcess {
     )
   }
 
- spawnGroups(
-  // chatData:ChatStructure,userData:UserData,userName:string,room:string,setUnreadMessage:any,setGroups:Dispatch<SetStateAction<ReactElement[]>>,
-  // setContextMenu:Dispatch<SetStateAction<boolean>>,
-  // setContextMenuPos:Dispatch<SetStateAction<{x:number,y:number}>>,
-  // chatEndedRef:RefObject<boolean>,
-  // dispatch:DispatchRedux
-  ) {
-
+ spawnGroups() {
     const currentGroups:Set<any> = new Set();
     const dateGroups = Object.entries(this.chatData);
     
@@ -116,16 +105,13 @@ export class ChatProcess {
     let start = dateGroups.length - 2;
 
     return () => {
-        const groups:any[] = [];
-        const currentSlice = dateGroups.slice(start,end);
-        console.log('start spawn:',start,end);
-
-        for(const [index,date] of currentSlice) {
-                      console.log('index:',index,date)
-          groups.push(
-            this.spawnGroup(index,date)
-          );
-
+      const groups:any[] = [];
+      const currentSlice = dateGroups.slice(start,end);
+      console.log('start spawn:',start,end);
+      for(const [index,date] of currentSlice) {
+        groups.push(
+          this.spawnGroup(index,date)
+        );
         currentGroups.add(groups);
       }
 

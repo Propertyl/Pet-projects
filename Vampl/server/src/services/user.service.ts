@@ -54,6 +54,18 @@ export class UserService {
     })
   }
 
+  updateAvatar(phone:string,imageURL:string) {
+   console.log('govno',imageURL);
+   return this.prisma.user.update({
+      where:{
+        phone:phone
+      },
+      data:{
+        image:imageURL
+      }
+    })
+  }
+
   getChatById(id:string) {
     return this.prisma.chats.findFirst({
       where: {

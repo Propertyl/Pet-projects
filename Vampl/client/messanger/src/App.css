@@ -14,6 +14,7 @@
 
   --white-color:255,255,255;
   --secondary-grey:155,155,155;
+  --black-color:0,0,0;
   --borders-bg:#3a3a3a;
   --bg-specific:#222220;
   --black-default:rgb(0,0,0);
@@ -133,6 +134,15 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
+}
+
+.bg-dimmer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color:rgba(var(--black-color),.1);
+  z-index: 100;
+  display: flex;
 }
 
 .default-svg {

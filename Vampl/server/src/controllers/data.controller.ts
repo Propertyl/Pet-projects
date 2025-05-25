@@ -1,10 +1,31 @@
-import { Controller,Get, Param, Req} from "@nestjs/common";
-import { Request } from "express";
+import { Controller,Get, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { Request, Response } from "express";
 import { UserService } from "src/services/user.service";
+import { diskStorage } from 'multer';
+import path, { extname, join } from "path";
 
 @Controller('getData')
 export class DataController {
    constructor(private readonly user:UserService) {}
+
+
+   @Put('user-avatar')
+   @UseInterceptors(FileInterceptor('file',{
+      storage:diskStorage({
+         destination:join(__dirname, '..', '..', 'src', 'uploads'),
+         filename: (req:Request, file:Express.Multer.File, callback:any) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const ext = extname(file.originalname); 
+            callback(null, `${uniqueSuffix}${ext}`);
+         },
+      }),
+   }))
+   uploadAvatar(@UploadedFile() file:Express.Multer.File,@Req() req:Request) {
+      const phone = req.cookies['token'];
+      console.log('file recieved',phone,file.path);
+      return this.user.updateAvatar(phone,`http://localhost:3000/images/${file.filename}`);
+   }
 
    @Get('phoneCodes')
    getAllPhones() {
