@@ -9,22 +9,24 @@ async function getUserInfo(phone:string) {
 }
 
 const parsingChats = async (res:any,userPhone:string) => {
-  const chats = await Promise.all(res.map(async (chat:any) => {
-    const users = chat?.chatUsers?.users || [];
-    const otherUserPhone = users.find((user:string) => user != userPhone);
- 
-    if(!otherUserPhone) return null;
- 
-    const chatUser = await getUserInfo(otherUserPhone);
- 
-    return {
-     user:chatUser,
-     messages:chat.messages,
-     id:chat.chatId
-    }
-   }));
+  if(res.length) {
+    const chats = await Promise.all(res.map(async (chat:any) => {
+      const users = chat?.chatUsers?.users || [];
+      const otherUserPhone = users.find((user:string) => user != userPhone);
+      
+      if(!otherUserPhone) return null;
+      
+      const chatUser = await getUserInfo(otherUserPhone);
+      
+      return {
+       user:chatUser,
+       messages:chat.messages,
+       id:chat.chatId
+      }
+    }));
  
    return chats.filter(Boolean);
- }
+  }  
+}
 
  export default parsingChats;

@@ -356,7 +356,7 @@ p {
   --light-black:#4d4d4d;
   --chat-bg-color:#444444;
   --secondary-color:rgb(255,255,255);
-  --bubble-color:rgba(255,255,255,.5);
+  --bubble-color:rgba(136, 136, 136, 0.5);
   --light-grey:rgb(83, 83, 83);
   --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;

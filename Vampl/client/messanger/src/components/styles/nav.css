@@ -227,7 +227,7 @@
   position: relative;
   width: 80%;
   min-height: .2rem;
-  background-color: var(--other-text-color);
+  background-color: var(--search-border);
   border-radius:var(--default-border-radius);
   z-index: 1;
   pointer-events: none;

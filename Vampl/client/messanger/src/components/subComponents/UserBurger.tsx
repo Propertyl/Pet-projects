@@ -12,6 +12,8 @@ import logOut from "../functions/logout";
 import useDebounceEffect from "../functions/useDebounceEffect";
 import { setData } from "../../store/user";
 import checkName from "../functions/checkingName";
+import AvatarResizer from "./AvatarResize";
+import { File } from "buffer";
 
 const NormalMode = ({burgerInfo,own}:{burgerInfo:BurgerInfo,own:boolean}) => {
   const [more,setMore] = useState<boolean>(false);
@@ -69,7 +71,6 @@ const NormalMode = ({burgerInfo,own}:{burgerInfo:BurgerInfo,own:boolean}) => {
       </div>
       <div className="body-info-container container">
         <InfoBlock label={"Phone"} body={burgerInfo.phone} editable={false}/>
-        <InfoBlock label={"Name"} body={burgerInfo.name} editable={false}/>
         {burgerInfo.birthDate && 
         <InfoBlock label={"Birthday"} body={`${burgerInfo.birthDate}`} editable={false}/>
         }
@@ -86,6 +87,8 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   const editMenu:DefaultRef = useRef(null);
   const dispatch = useDispatch();
   const fileLoader:RefObject<HTMLInputElement | null> = useRef(null);
+  const tempImage:RefObject<string | null> = useRef(null);
+  const tempFile:RefObject<Blob | null> = useRef(null);
 
   const offMenu = () => {
     const menu = editMenu.current;
@@ -103,22 +106,24 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   }
 
   const setupAvatar = (event:any) => {
-    const file:File = event.target.files[0];
+    const file:Blob = event.target.files[0];
     const [type,fileType] = file.type.split('/');
     if(type === 'image' && ['png','jpeg','jpg'].includes(fileType)) {
-      const formData = new FormData();
-      formData.append('file',file);
+      tempFile.current = file;
+      const reader = new FileReader;
 
-      serv.put('/getData/user-avatar',
-        formData
-      );
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+         tempImage.current = reader.result as string;
+      }
     }
   }
 
 
   useDebounceEffect(() => {
     if (newName) {
-      checkName(newName,setDataCorrect);
+      checkName(newName,setDataCorrect,burgerInfo.name);
     }
   },[newName],500);
 
@@ -133,6 +138,8 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   return (
     <>
       <input ref={fileLoader} style={{display:'none'}} onChange={setupAvatar} type="file" />
+      {tempImage.current &&
+      <AvatarResizer image={tempImage} swapAnimation={setSwapAnimation} file={tempFile}/>}
       <section ref={editMenu} className={`user-burger-menu 'user-edit-burger-menu-appear' ${mode ? 'user-edit-burger-menu-appear' : swapAnimation ? 'user-edit-burger-menu-disappear' : 'user-burger-menu-not-spawned'}`}>
         <div style={{flexDirection:'column'}} className="container">
           <button className="edit-menu-button flex-center" onClick={() => setSwapAnimation(true)}>
@@ -212,13 +219,11 @@ const UserBurger = () => {
     }
   },[isOpen,burgerInfo])
 
-  useEffect
-
   useEffect(() => {
     if(burgerInfo !== null && burgerInfo?.status === undefined) {
       const getStatus = async () => {
         if(burgerInfo) {
-          const {status}:{status:Boolean} = await serv.get(`/getData/status/${burgerInfo.phone}`);
+          const {status}:{status:boolean} = await serv.get(`/getData/status/${burgerInfo.phone}`);
           setBurgerInfo((currentInfo:null | BurgerInfo) => {
              if(currentInfo) {
                 return {...currentInfo,status:convertStatus(status)}

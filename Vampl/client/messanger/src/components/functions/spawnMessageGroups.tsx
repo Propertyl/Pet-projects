@@ -5,9 +5,11 @@ import parseMessageTime from "./parseMessageTime";
 import { Dispatch as DispatchRedux } from "@reduxjs/toolkit";
 import { setDeleteFunc } from "../../store/chat";
 import { UserData,ChatStructure } from "../types/global"
+import serv from "./interceptors";
 
 
 export class ChatProcess {
+  private phone:string;
   chatData:ChatStructure
   userData:UserData
   userName:string
@@ -39,6 +41,7 @@ export class ChatProcess {
      this.setContextMenuPos = setContextMenuPos;
      this.chatEndedRef = chatEndedRef;
      this.dispatch = dispatch;
+     this.phone = '';
    }
 
 
@@ -63,9 +66,9 @@ export class ChatProcess {
              {Object.values(date).pop()!.groups.map((groupData:any,groupIdx:number,arr:any) => {
                 const groups:any = [];
                 for(const [groupName,group] of Object.entries(groupData) as [string,any]) {
-                   const isUnread = group.sender !== this.userName;
+                   const isUnread = group.sender !== this.phone;
                    const groupElem =
-                   <div className={`message-group ${group.sender === this.userName ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
+                   <div className={`message-group ${group.sender === this.phone ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
                    {group.messages.map((message: any, index: number) => (
                      <div onContextMenu={this.spawnContextMenu(
                        Object.keys(date as any).pop() ?? "",
@@ -74,7 +77,7 @@ export class ChatProcess {
                         isUnread && !message.seen ? this.setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,this.room,message.body) : null
                       }
                       style={{transition:`opacity ${(arr.length - groupIdx) * .15}s ease-out`}}
-                      className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.userName ? 'not-user-message' : ''}`}
+                      className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.phone ? 'not-user-message' : ''}`}
                        key={`message-${groupIdx}-${index}`}>
                          {index === group.messages.length - 1 && (
                            <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail chat-message-tail">
@@ -84,7 +87,7 @@ export class ChatProcess {
                        <p className="message-body">{message.body}</p>
                        <div className="message-additional-info">
                          <p className="message-time">{parseMessageTime(message.time)}</p>
-                         {group.sender === this.userName && <MessageEyes seen={message.seen}/>}
+                         {group.sender === this.phone && <MessageEyes seen={message.seen}/>}
                        </div>
                      </div>
                    ))}
@@ -97,12 +100,21 @@ export class ChatProcess {
     )
   }
 
+ async getUserPhone() {
+    const {phone}:UserData = await serv.get('/user/info');
+
+    this.phone = phone;
+    return;
+ }
+
  spawnGroups() {
     const currentGroups:Set<any> = new Set();
     const dateGroups = Object.entries(this.chatData);
+
+    console.log('phine:',this.phone);
     
     let end = dateGroups.length;
-    let start = dateGroups.length - 2;
+    let start = Math.max(0,dateGroups.length - 2);
 
     return () => {
       const groups:any[] = [];

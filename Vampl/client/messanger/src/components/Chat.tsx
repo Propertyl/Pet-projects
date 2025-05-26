@@ -71,15 +71,24 @@ const handleUpdatingChat = (currentChat:ChatStructure) => {
   if(chatData) {
     setGroups(groups => {
     const newGroup = [...groups];
-    const all = currentChat['all'];
+    const all:any = currentChat['all'];
     const parsed = parseToDeleteGroup(all[all.length - 1]);
-    const [groupDate] = Object.keys(parsed);
-    const [currentGroupDate] = Object.keys(chatData[findLastGroup(chatData)]);
-    if(groupDate === currentGroupDate) {
-      newGroup[newGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
-    } else {
-      newGroup.push(chatProcess.current!.spawnGroup(all.length + 1,parsed));
+    const pushGroup = () => newGroup.push(chatProcess.current!.spawnGroup(all.length + 1,parsed));
+    if(groups.length) {
+      const [groupDate] = Object.keys(parsed);
+      console.log('chatDatalr:',groups);
+      const [currentGroupDate] = Object.keys(all[findLastGroup(all)]);
+      if(groupDate === currentGroupDate) {
+        newGroup[newGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
+      } else {
+        pushGroup();
+      }
+
+      return newGroup;
     }
+
+    console.log('chatData.le:',chatData.length);
+    pushGroup();
     return newGroup;
     });
   }
@@ -140,12 +149,14 @@ const spawnUntilScroll = useCallback(async () => {
 useEffect(() => {
   if(chatData && !chatProcess.current) {
     chatProcess.current = new ChatProcess(chatData,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
+    chatProcess.current.getUserPhone();
   }
 },[chatData,chatProcess.current])
 
 useEffect(() => {
   const initiateGroups = async () => {
     if(chatData && !groups.length && chatProcess.current) {
+      await chatProcess.current.getUserPhone();
       groupsSpawner.current = chatProcess.current.spawnGroups();
 
       groupsSpawner.current();
@@ -169,7 +180,7 @@ const sendMessageToChat = () => {
     const date = new Date();
     const formatter = useFormatter(userData.locale);
     socket.current!.emit('sendMessage',{room:room,
-      message:{user:userName,body:currentMessage,time:formatter.format(date),seen:false}});
+      message:{body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
     setTimeout(() => scrollDown('smooth'),200);
   }

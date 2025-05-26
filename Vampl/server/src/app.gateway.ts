@@ -70,7 +70,6 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
 
    @SubscribeMessage('joinRoom')
    addToRoom(client:Socket,room:string) {
-      console.log('roooooM:',room);
       client.join(room);
       client.emit('joinedRoom',room);
    }
@@ -78,13 +77,14 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    @SubscribeMessage('sendMessage')
    async sendMessageToChat(client:Socket,data:{room:string,message:Message}) {
       this.server.to(data.room).emit('message',data.message.body);
+      const phone = this.clients.get(client.id);
       let currentChat:any = undefined;
 
       const chat = await serv.get(`/chat/chatID/${data.room}`);
 
+      data.message['user'] = phone ?? 'unknown';
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);
-      console.log('data:room:',data.room)
       this.server.to(data.room).emit('updateChat',currentChat,
       data.room);
       this.server.to(data.room).emit('updateContactChat',currentChat,data.room);

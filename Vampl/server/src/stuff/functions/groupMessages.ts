@@ -22,7 +22,7 @@ const inSimpleView = (time:string) => {
   }
 
   return [day,month,year].join('.');
-}; 
+} 
 
 const groupSubMessages = (message:Message,chat:messageChat[]) => {
   if(!chat) return [];

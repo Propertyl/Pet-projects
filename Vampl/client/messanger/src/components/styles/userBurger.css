@@ -23,7 +23,6 @@
   height: 8rem !important;
   width: 8rem !important;
   display: flex;
-  border: .2rem solid var(--night-color);
   border-radius: 50%;
 }
 
@@ -90,7 +89,7 @@
 }
 
 .additional-actions-container .random-icon {
-  fill: var(--other-text-color);
+  fill: var(--search-border);
   right: 0%;
 }
 
@@ -118,7 +117,7 @@
 
 .log-out-icon {
   stroke: var(--secondary-color) !important;
-  fill: var(--other-text-color) !important;
+  fill: var(--search-border) !important;
   margin:0 .2rem 0 0 !important;
 }
 
@@ -270,7 +269,7 @@
 .edit-menu-button-icon {
   pointer-events: none;
   right:initial !important;
-  stroke:var(--other-text-color) !important;
+  stroke:var(--search-border) !important;
 }
 
 .edit-menu-button-icon * {
