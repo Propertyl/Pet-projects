@@ -283,6 +283,74 @@
   color:var(--other-text-color);
 }
 
+.avatar-resizing-window {
+  padding:1rem;
+  max-width:38rem;
+  border-radius: var(--default-border-radius);
+  background-color: var(--bg-main);
+  z-index: 10000000;
+}
+
+.avatar-image-container {
+  position: relative;
+  max-width:38rem;
+  max-height:38rem;
+  overflow: hidden;
+}
+
+.avatar-image-overlay {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 50%;
+  z-index: 10;
+  cursor:move;
+}
+
+.avatar-image-overlay-long {
+  max-width: inherit;
+  max-height: inherit;
+  display: block;
+}
+
+.avatar-image-overlay-long::after {
+  content: '';
+  position: absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background-color: rgba(var(--white-color),.5);
+}
+
+.image-rounded {
+  position:absolute;
+  max-width: 38rem !important;
+  max-height:38rem !important;
+}
+
+.avatar-image {
+  max-width: inherit;
+  max-height: inherit;
+  display: block;
+  object-fit: cover;
+}
+
+.resizing-window-header {
+  display: flex;
+  align-items: center;
+  max-height: 20%;
+}
+
+.resizing-dimmer {
+  position: fixed !important;
+  top:0;
+  width: 90vw !important;
+  z-index: 100;
+  background:rgba(var(--black-color),.5);
+  padding-bottom: 2rem;
+}
+
 @keyframes bubble-appear {
   0% {
     transform: scale(0);

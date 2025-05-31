@@ -1,3 +1,5 @@
+import { RefObject } from "react";
+
 interface Chat {
   name:string,
   image:string,
@@ -56,6 +58,8 @@ interface MessageGroup {
   messages:Message[]
 }
 
+type ElementRef<T> = RefObject<T | null>;
+
 type Message = {body:string,time:string,seen:boolean};
 
 interface SignData {'phone':string,'name'?:string,'password:':string}
@@ -65,4 +69,4 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 type DefaultRef = Ref<HTMLDivElement | null>;
 
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure}
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef}

@@ -14,6 +14,7 @@ import { setData } from "../../store/user";
 import checkName from "../functions/checkingName";
 import AvatarResizer from "./AvatarResize";
 import { File } from "buffer";
+import { createPortal } from "react-dom";
 
 const NormalMode = ({burgerInfo,own}:{burgerInfo:BurgerInfo,own:boolean}) => {
   const [more,setMore] = useState<boolean>(false);
@@ -87,8 +88,9 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   const editMenu:DefaultRef = useRef(null);
   const dispatch = useDispatch();
   const fileLoader:RefObject<HTMLInputElement | null> = useRef(null);
-  const tempImage:RefObject<string | null> = useRef(null);
+  const [tempImage,setTempImage] = useState<string | null>(null);
   const tempFile:RefObject<Blob | null> = useRef(null);
+  const rootElem:DefaultRef = useRef(null);
 
   const offMenu = () => {
     const menu = editMenu.current;
@@ -108,16 +110,21 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   const setupAvatar = (event:any) => {
     const file:Blob = event.target.files[0];
     const [type,fileType] = file.type.split('/');
-    if(type === 'image' && ['png','jpeg','jpg'].includes(fileType)) {
+    if(type === 'image' && ['png','jpeg','jpg','webp'].includes(fileType)) {
+      console.log('turn image');
       tempFile.current = file;
       const reader = new FileReader;
 
       reader.readAsDataURL(file);
 
       reader.onload = () => {
-         tempImage.current = reader.result as string;
+        setTempImage(reader.result as string);
       }
+    } else {
+      console.log('this is not image');
     }
+
+    event.target.value = "";
   }
 
 
@@ -128,18 +135,24 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
   },[newName],500);
 
   useEffect(() => {
+    if(!rootElem.current) {
+      rootElem.current = document.getElementById('root');
+    }
+  },[]);
+
+  useEffect(() => {
     if(swapAnimation && editMenu.current) {
       const menu = editMenu.current;
       menu.classList.add('user-edit-burger-menu-disappear');
       menu.addEventListener('animationend',offMenu);
     }
-  },[swapAnimation])
+  },[swapAnimation]);
 
   return (
     <>
       <input ref={fileLoader} style={{display:'none'}} onChange={setupAvatar} type="file" />
-      {tempImage.current &&
-      <AvatarResizer image={tempImage} swapAnimation={setSwapAnimation} file={tempFile}/>}
+      {tempImage &&
+      createPortal(<AvatarResizer imageControl={[tempImage,setTempImage]} swapAnimation={setSwapAnimation} file={tempFile}/>,rootElem.current)}
       <section ref={editMenu} className={`user-burger-menu 'user-edit-burger-menu-appear' ${mode ? 'user-edit-burger-menu-appear' : swapAnimation ? 'user-edit-burger-menu-disappear' : 'user-burger-menu-not-spawned'}`}>
         <div style={{flexDirection:'column'}} className="container">
           <button className="edit-menu-button flex-center" onClick={() => setSwapAnimation(true)}>

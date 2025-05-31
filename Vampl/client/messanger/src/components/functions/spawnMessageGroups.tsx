@@ -56,6 +56,7 @@ export class ChatProcess {
     index:any,
     date: any,
   ) => {
+    console.log('dute:',date);
   return (
     <div className="container container-reverse group-container" key={`group-${index}`}>
              <span className="date-container">
@@ -110,8 +111,6 @@ export class ChatProcess {
  spawnGroups() {
     const currentGroups:Set<any> = new Set();
     const dateGroups = Object.entries(this.chatData);
-
-    console.log('phine:',this.phone);
     
     let end = dateGroups.length;
     let start = Math.max(0,dateGroups.length - 2);

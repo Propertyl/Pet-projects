@@ -9,7 +9,7 @@
   height: 3.5rem;
   clip-path: circle();
   background-color: var(--night-color);
-  z-index: 10000;
+  z-index: 100;
   color:var(--secondary-color);
   animation: button-appear .3s ease-in forwards;
 }
@@ -30,7 +30,7 @@
   justify-content: center;
   align-self: center;
   margin: .3rem;
-  z-index: 1;
+  z-index: 100;
   user-select: none;
   --webkit-user-select: none;
 }
@@ -288,7 +288,7 @@
   scrollbar-color: var(--scrollbar-color);
   scrollbar-width: thin;
   transition: all .2s;
-  z-index: 100;
+  z-index: 1;
 }
 
 
@@ -410,6 +410,6 @@
 
 @media (prefers-color-scheme: light) {
   .chat > * {
-    z-index: 1;
+    z-index: 0;
   }
 }

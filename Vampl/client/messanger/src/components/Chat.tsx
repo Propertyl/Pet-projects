@@ -11,6 +11,7 @@ import serv from "./functions/interceptors";
 import ContextMenu from "./subComponents/ContextMenu";
 import { ChatProcess } from "./functions/spawnMessageGroups";
 import findLastGroup from "./functions/findLastGroup";
+import ReactDOMServer from 'react-dom/server';
 
 const updateChatContent = (chat:HTMLDivElement,groupsSpawner:RefObject<any>,cantUpdateRef:RefObject<boolean>) => {
     const beforePos = chat.scrollHeight - chat.scrollTop;
@@ -70,26 +71,27 @@ const searchScroll = (event: Event) => {
 const handleUpdatingChat = (currentChat:ChatStructure) => {
   if(chatData) {
     setGroups(groups => {
-    const newGroup = [...groups];
+    const newGroups:any[] = [...groups];
     const all:any = currentChat['all'];
     const parsed = parseToDeleteGroup(all[all.length - 1]);
-    const pushGroup = () => newGroup.push(chatProcess.current!.spawnGroup(all.length + 1,parsed));
+    const pushGroup = () => newGroups.push(chatProcess.current!.spawnGroup(all.length + 1,parsed));
     if(groups.length) {
       const [groupDate] = Object.keys(parsed);
-      console.log('chatDatalr:',groups);
       const [currentGroupDate] = Object.keys(all[findLastGroup(all)]);
       if(groupDate === currentGroupDate) {
-        newGroup[newGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
+        const lastGroup:any[] = newGroups[newGroups.length - 1];
+        const newLastGroup = [...lastGroup];
+        newLastGroup[lastGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
+        newGroups[newGroups.length - 1] = newLastGroup;
       } else {
         pushGroup();
       }
 
-      return newGroup;
+      return newGroups;
     }
 
-    console.log('chatData.le:',chatData.length);
     pushGroup();
-    return newGroup;
+    return newGroups;
     });
   }
 }
