@@ -177,7 +177,7 @@ const EditMode = ({burgerInfo,mode,switchMode}:{burgerInfo:BurgerInfo,mode:boole
           </div>
           <div className="footer-info-container container flex-center">
             {
-             dataCorrect && newName && <button onClick={updateUserData} title="Confirm" className="edit-button confirm-button flex-center">
+             dataCorrect && newName && <button onClick={updateUserData} title="Confirm" className="edit-button confirm-button flex-center dimmed-button">
                 <svg className="random-icon edit-icon" fill="#000000" width="64px" height="64px" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M.5 14a.5.5 0 0 0-.348.858l9.988 9.988a.5.5 0 1 0 .706-.706L.858 14.152A.5.5 0 0 0 .498 14zm28.99-9c-.13.004-.254.057-.345.15L12.163 22.13c-.49.47.236 1.197.707.707l16.982-16.98c.324-.318.077-.857-.363-.857z"></path></g></svg>
               </button>
             }
@@ -260,7 +260,7 @@ const UserBurger = () => {
           <NormalMode burgerInfo={burgerInfo} own={isOwn}/>
           { isOwn && 
             <div className="footer-info-container container flex-center">
-              <button title="Edit" className="edit-button flex-center" onClick={() => setEditMode(true)}>
+              <button title="Edit" className="edit-button flex-center dimmed-button" onClick={() => setEditMode(true)}>
                 <svg className="random-icon edit-icon"  width="64px" height="64px" viewBox="0 0 24.00 24.00" xmlns="http://www.w3.org/2000/svg" stroke="#000000"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <title></title> <g id="Complete"> <g id="edit"> <g> <path d="M20,16v4a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V6A2,2,0,0,1,4,4H8" fill="none" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path> <polygon fill="none" points="12.5 15.8 22 6.2 17.8 2 8.3 11.5 8 16 12.5 15.8" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></polygon> </g> </g> </g> </g></svg>
               </button>
             </div>

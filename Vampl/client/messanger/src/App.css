@@ -93,6 +93,20 @@ input:focus .search-button {
   transition: all .2s;
 }
 
+.button-icon {
+  right: initial;
+  fill:rgb(var(--white-color));
+}
+
+.button-icon g {
+  fill:rgb(var(--white-color));
+  stroke:rgb(var(--white-color));
+}
+
+.random-icon g {
+  transition: all .1s;
+}
+
 .random-icon:hover g {
   fill:var(--night-color) !important;
 }

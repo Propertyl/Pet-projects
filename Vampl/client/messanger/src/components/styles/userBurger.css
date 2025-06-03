@@ -227,7 +227,7 @@
   animation: bubble-appear .2s var(--appear-menu-transition) forwards;
 }
 
-.edit-button:hover::before {
+.dimmed-button:hover::before {
   position: absolute;
   content: '';
   width: 100%;
@@ -337,9 +337,43 @@
 }
 
 .resizing-window-header {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-auto-flow: column;
+  gap:1rem;
+  justify-content: space-between;
   max-height: 20%;
+  padding:.5rem;
+}
+
+.resizing-window-header > *{
+  margin: 0;
+}
+
+.resizing-header {
+  display: flex;
+  font-size: 1.3rem;
+}
+
+.resizing-button {
+  position: relative;
+  width:3.5rem;
+  height:3.5rem;
+  border-radius: 50%;
+  display: flex;
+  background: none;
+}
+
+.cancel-button:hover {
+  background-color: rgba(var(--white-color),.1);
+}
+
+.confirm-button {
+  background-color: var(--night-color);
+}
+
+
+.confirm-button:hover .button-icon g {
+  fill:var(--secondary-color) !important;
 }
 
 .resizing-dimmer {
