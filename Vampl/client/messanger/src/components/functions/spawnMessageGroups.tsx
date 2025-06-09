@@ -1,12 +1,11 @@
-import { Dispatch,ReactElement, RefObject, SetStateAction} from "react";
+import React, { Dispatch,ReactElement, RefObject, SetStateAction} from "react";
 import MessageEyes from "../subComponents/messageSeen";
 import parseDate from "./parseDate";
 import parseMessageTime from "./parseMessageTime";
 import { Dispatch as DispatchRedux } from "@reduxjs/toolkit";
 import { setDeleteFunc } from "../../store/chat";
 import { UserData,ChatStructure } from "../types/global"
-import serv from "./interceptors";
-
+import { userApi } from "../../store/api/baseApi";
 
 export class ChatProcess {
   private phone:string;
@@ -55,12 +54,12 @@ export class ChatProcess {
   spawnGroup = (
     index:any,
     date: any,
-  ) => {
+  ):ReactElement => {
     console.log('dute:',date);
   return (
     <div className="container container-reverse group-container" key={`group-${index}`}>
              <span className="date-container">
-                 <p className="group-date">{parseDate(Object.keys(date as any).pop() ?? "",this.userData.locale,this.userData.allMonth)}
+                 <p className="group-date">{parseDate(Object.keys(date as any).pop() ?? "",this.userData.allMonth)}
                  </p>
              </span>
              {/* @ts-ignore */}
@@ -102,7 +101,7 @@ export class ChatProcess {
   }
 
  async getUserPhone() {
-    const {phone}:UserData = await serv.get('/user/info');
+    const {phone}:UserData = await this.dispatch(userApi.endpoints.getUserConvenientData.initiate({url:'info'})).unwrap() as UserData;
 
     this.phone = phone;
     return;

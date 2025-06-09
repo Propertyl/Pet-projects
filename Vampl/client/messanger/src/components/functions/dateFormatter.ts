@@ -1,5 +1,5 @@
-const useFormatter = (locale:string) => {
-  return Intl.DateTimeFormat(locale,{
+const useFormatter = () => {
+  return Intl.DateTimeFormat('en-US',{
     day:'2-digit',
     month:'2-digit',
     year:'numeric',
@@ -10,4 +10,4 @@ const useFormatter = (locale:string) => {
   });
 }
 
-export default useFormatter
+export default useFormatter;

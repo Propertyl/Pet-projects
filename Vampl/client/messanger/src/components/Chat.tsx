@@ -1,4 +1,4 @@
-import {ReactElement ,RefObject, useCallback, useEffect, useRef, useState} from "react";
+import {ReactElement ,ReactNode,RefObject, useCallback, useEffect, useRef, useState} from "react";
 import {ChatStructure, DefaultRef} from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { MessagesData, Store, UserData } from "../types/global";
@@ -7,11 +7,11 @@ import parseToDeleteGroup from "./functions/parseChatGroups";
 import useFormatter from "./functions/dateFormatter";
 import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
-import serv from "./functions/interceptors";
 import ContextMenu from "./subComponents/ContextMenu";
 import { ChatProcess } from "./functions/spawnMessageGroups";
 import findLastGroup from "./functions/findLastGroup";
-import ReactDOMServer from 'react-dom/server';
+import { useGetChatDataQuery } from "../store/api/chatApi";
+import datePastCompare from "./functions/dateCompare";
 
 const updateChatContent = (chat:HTMLDivElement,groupsSpawner:RefObject<any>,cantUpdateRef:RefObject<boolean>) => {
     const beforePos = chat.scrollHeight - chat.scrollTop;
@@ -24,7 +24,10 @@ const updateChatContent = (chat:HTMLDivElement,groupsSpawner:RefObject<any>,cant
 }
 
 const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
-  const [chatData,setChatData] = useState<any | null>(null);
+  const {data:roomChat} = useGetChatDataQuery({url:'chatID',param:room},{
+    skip:!room
+  });
+  const parsedChat = roomChat?.all ? parseToDeleteGroup(roomChat['all']) : null;
   const [groups,setGroups] = useState<ReactElement[]>([])
   const messagesRef:DefaultRef = useRef(null);
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
@@ -68,33 +71,41 @@ const searchScroll = (event: Event) => {
   }
 }
 
-const handleUpdatingChat = (currentChat:ChatStructure) => {
-  if(chatData) {
-    setGroups(groups => {
-    const newGroups:any[] = [...groups];
-    const all:any = currentChat['all'];
-    const parsed = parseToDeleteGroup(all[all.length - 1]);
-    const pushGroup = () => newGroups.push(chatProcess.current!.spawnGroup(all.length + 1,parsed));
-    if(groups.length) {
-      const [groupDate] = Object.keys(parsed);
-      const [currentGroupDate] = Object.keys(all[findLastGroup(all)]);
-      if(groupDate === currentGroupDate) {
-        const lastGroup:any[] = newGroups[newGroups.length - 1];
-        const newLastGroup = [...lastGroup];
-        newLastGroup[lastGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
-        newGroups[newGroups.length - 1] = newLastGroup;
-      } else {
+const handleUpdatingChat = () => {
+  let previousChat = roomChat;
+
+  return (currentChat:ChatStructure) => {
+    if(parsedChat) {
+      setGroups(groups => {
+        const newGroups:any[] = [...groups];
+        const all:any = currentChat['all'];
+        const parsed = parseToDeleteGroup(all[all.length - 1]);
+        const pushGroup = () => newGroups.push([chatProcess.current!.spawnGroup(all.length + 1,parsed)]);
+        if(groups.length) {
+          const [groupDate] = Object.keys(parsed);
+          const [previousGroupDate] = Object.keys(previousChat.all[findLastGroup(previousChat.all)]);
+          if(groupDate === previousGroupDate) {
+            const lastGroup:any[] = newGroups[newGroups.length - 1];
+            const newLastGroup = [...lastGroup];
+            newLastGroup[lastGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
+            newGroups[newGroups.length - 1] = newLastGroup;
+          } else if(datePastCompare(groupDate,previousGroupDate)) {
+            pushGroup();
+          } else if(currentChat.all.length < previousChat.all.length) {
+            newGroups.pop();
+          }
+
+          previousChat = currentChat;
+          return newGroups;
+        }
+
+        previousChat = currentChat;
         pushGroup();
-      }
-
-      return newGroups;
+        return newGroups;
+      });
     }
-
-    pushGroup();
-    return newGroups;
-    });
   }
-}
+} 
 
 useEffect(() => {
    downButtonRef.current = downButton;
@@ -105,7 +116,7 @@ useEffect(() => {
       if(socket.current) {
         setObserver.current = useObserver({threshold:1},socket.current);
       
-        socket.current.on('updateChat',handleUpdatingChat);
+        socket.current.on('updateChat',handleUpdatingChat());
       }
   }
 
@@ -120,12 +131,12 @@ useEffect(() => {
       messagesRef.current.removeEventListener('scroll',searchScroll);
     }
 
-    socket.current?.off('updateChat',handleUpdatingChat);
+    socket.current?.off('updateChat',handleUpdatingChat());
   }
 
 },[messagesRef.current])
 
-const revealMesssges = () => {
+const revealMessages = () => {
   if(messagesRef.current && messagesRef.current.classList.contains('messages-hidden')) {
       console.log('reveal');
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -143,21 +154,20 @@ const spawnUntilScroll = useCallback(async () => {
     scrollDown('instant');
     spawnUntilScroll();
   } else {
-    console.log('okay');
-    revealMesssges();
+    revealMessages();
   }
 },[messagesRef,chatEndedRef])
 
 useEffect(() => {
-  if(chatData && !chatProcess.current) {
-    chatProcess.current = new ChatProcess(chatData,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
+  if(parsedChat && !chatProcess.current) {
+    chatProcess.current = new ChatProcess(parsedChat,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
     chatProcess.current.getUserPhone();
   }
-},[chatData,chatProcess.current])
+},[parsedChat,chatProcess.current])
 
 useEffect(() => {
   const initiateGroups = async () => {
-    if(chatData && !groups.length && chatProcess.current) {
+    if(parsedChat && !groups.length && chatProcess.current) {
       await chatProcess.current.getUserPhone();
       groupsSpawner.current = chatProcess.current.spawnGroups();
 
@@ -168,7 +178,7 @@ useEffect(() => {
   }
 
   initiateGroups();
-},[chatData,chatProcess.current]);
+},[parsedChat,chatProcess.current]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
   if(messagesRef.current) {
@@ -180,7 +190,7 @@ const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
 const sendMessageToChat = () => {
   if(currentMessage.length && socket) {
     const date = new Date();
-    const formatter = useFormatter(userData.locale);
+    const formatter = useFormatter();
     socket.current!.emit('sendMessage',{room:room,
       message:{body:currentMessage,time:formatter.format(date),seen:false}});
     setCurrentMessage('');
@@ -262,25 +272,25 @@ useEffect(() => {
    }
 },[contextMenu,messagesRef])
 
-useEffect(() => {
-   const getChat = async () => {
-      if(room) {
-        const roomChat:ChatStructure = await serv.get(`/chat/chatID/${room}`);
-        setChatData(parseToDeleteGroup(roomChat['all']));
-      }
-   }
+// useEffect(() => {
+//    const getChat = async () => {
+//       if(room) {
+//         const roomChat:ChatStructure = await serv.get(`/chat/chatID/${room}`);
+//         setChatData(parseToDeleteGroup(roomChat['all']));
+//       }
+//    }
 
-   getChat();
-},[room]);
+//    getChat();
+// },[room]);
 
   return (
     <>
-        { chatData && 
+        { parsedChat && 
           <>
             <div className="messages-container">
             <div ref={messagesRef} className="messages messages-hidden">
               <div className="messages-group-container">
-                {chatData && groups}
+                {parsedChat && groups}
               </div>
               {
                 contextMenu && <ContextMenu phrase="Delete" switchState={setContextMenu} pos={contextMenuPos} func={() => setDeletedMessage(deleteArgs)}/>

@@ -1,13 +1,22 @@
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useRef } from "react";
 import { DefaultRef } from "../../types/global";
+
+const cancelSpaces:any = (event:KeyboardEvent) => {
+  if(event.shiftKey && event.key === 'Enter') {
+    event.preventDefault();
+  }
+}
+
+const bodyContent = (body:string) => {
+  if(['undefined','null'].includes(body)) {
+    return "Not provided";
+  }
+
+  return body ?? "Not provided";
+}
 
 const InfoBlock = ({label,body,editable,setValue}:{label:string,body:string,editable:boolean,setValue?:Dispatch<SetStateAction<string>>}) => {
   const contentText:DefaultRef = useRef(null);
-  const cancelSpaces:any = (event:KeyboardEvent) => {
-      if(event.shiftKey && event.key === 'Enter') {
-          event.preventDefault();
-      }
-  }
 
   const inputFocus = () => {
     if(contentText.current) {
@@ -28,7 +37,7 @@ const InfoBlock = ({label,body,editable,setValue}:{label:string,body:string,edit
           setValue(event.target.innerText.trim());
         }
         }} onFocus={inputFocus} onBlur={inputBlur} onKeyDown={cancelSpaces} className="body-info-body" contentEditable={editable} data-label-text={label}>
-          {!editable ? body : null}
+          {!editable ? bodyContent(body) : null}
       </div>
       {editable && <span className="edit-placeholder" ref={contentText}>{body}</span>}
     </div>

@@ -1,9 +1,9 @@
 import { Controller,Get, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors} from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { UserService } from "src/services/user.service";
 import { diskStorage } from 'multer';
-import path, { extname, join } from "path";
+import { extname, join } from "path";
 
 @Controller('getData')
 export class DataController {
@@ -58,8 +58,6 @@ export class DataController {
    @Get('burger/:phone')
    isUserBurger(@Param('phone') phone:string,@Req() req:Request) {
      const tokenPhone = req.cookies['token'];
-
-     console.log('weqweqwe:',tokenPhone,phone);
 
      if(tokenPhone === phone) {
        return {isOwn:true};

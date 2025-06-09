@@ -1,6 +1,6 @@
 import useFormatter from "./dateFormatter";
 
-const dateCastling = (date:string) => {
+export const dateCastling = (date:string) => {
   let [day,month,year] = date.split(/[.,\/]/);
   if(date.includes('\/')) {
     const temp = day;
@@ -11,9 +11,9 @@ const dateCastling = (date:string) => {
   return [day,month,year];
 }
 
-const parseDate = (date:string,locale = 'en-US',allMonth:any) => {
+const parseDate = (date:string,allMonth:any) => {
 
-  const formatter = useFormatter(locale);
+  const formatter = useFormatter();
 
   const currentDate = formatter.format(new Date());
   const [day,_,year] = dateCastling(currentDate);
@@ -29,7 +29,6 @@ const parseDate = (date:string,locale = 'en-US',allMonth:any) => {
     return "Today";
   }
   
-
   const findCurrentMonth = allMonth.find((monthData:any) => monthData.numberM === clearMonth);
 
   return `${currentDay} ${findCurrentMonth.month}`;

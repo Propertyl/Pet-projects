@@ -1,20 +1,20 @@
 import getLastMessage from "./getLastChatMessage";
 import parsingChats from "./parsingChats";
-import serv from "./interceptors";
 import {MessageGroup, UserContact } from "../types/global";
-import { Dispatch } from "@reduxjs/toolkit";
 import unReadMessagesCounter from "./countUnReadMessages";
-import { AxiosResponse } from "axios";
+import { chatApi } from "../../store/api/chatApi";
+import { AppDispatch } from "../../store/store";
 
-const getUserChats = async (dispatch:Dispatch) => {
-  const userChats:UserContact[] = await serv.get(`/chat/chats`)
-  .then(({data,phone}:any) => parsingChats(data,phone))
-  .then(async (chats:MessageGroup[] | undefined) => {
+const getUserChats = async (dispatch:AppDispatch) => {
+  const userChats:UserContact[] = await dispatch(chatApi.endpoints.getChatData.initiate({url:'chats'})).unwrap()
+  .then(async ({data,phone}:any) => ({
+      chats:await parsingChats(data,phone,dispatch),
+      phone
+   }))
+  .then(async ({chats,phone}:{chats:MessageGroup[] | undefined,phone:string}) => {
      if(chats) {
-         const [userName] = await serv.get('/user/name')
-         .then((res:AxiosResponse<{name:string}>) => Object.values(res));
          const parsed = chats.map((chat:any) => {
-            unReadMessagesCounter(dispatch,chat.messages,userName);
+            unReadMessagesCounter(dispatch,chat.messages,phone);
             const currentLast = getLastMessage(chat.messages);
             delete chat.messages;
             chat.message = currentLast;
