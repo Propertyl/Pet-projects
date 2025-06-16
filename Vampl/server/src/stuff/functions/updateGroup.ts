@@ -4,7 +4,7 @@ const updateGroup = (chat:Chat,date:string,group:string,body:string,time:string 
     let all = chat['all'];
     const condition = (message:Message) => {
        if(type === 'view') {
-          return message.body === body && message.seen === false;
+          return message.body === body && message.time === time && message.seen === false;
        }
 
        return message.body === body && message.time === time;

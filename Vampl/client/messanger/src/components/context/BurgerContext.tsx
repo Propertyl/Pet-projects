@@ -1,14 +1,19 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react";
-import { BurgerInfo } from "../types/global";
+import { BurgerInfo, DateValues, SetDispatch } from "../types/global";
 
-type BurgerContextType = {burgerInfo:BurgerInfo | null,setBurgerInfo:Dispatch<SetStateAction<BurgerInfo | null>>};
+type BurgerContextType = {burgerInfo:BurgerInfo | null,setBurgerInfo:SetDispatch<BurgerInfo | null>,
+userBirthDate:DateValues | null,
+setUserBirthDate:SetDispatch<DateValues | null>
+};
 
 const BurgerContext = createContext<BurgerContextType | undefined>(undefined);
 
 const BurgerProvider = ({children}:{children:ReactNode}) => {
   const [burgerInfo,setBurgerInfo] = useState<BurgerInfo | null>(null);
+  const [userBirthDate,setUserBirthDate] = useState<DateValues | null>(null);
+
   return (
-    <BurgerContext.Provider value={{burgerInfo,setBurgerInfo}}>
+    <BurgerContext.Provider value={{burgerInfo,setBurgerInfo,userBirthDate,setUserBirthDate}}>
       {children}
     </BurgerContext.Provider>
   )

@@ -29,7 +29,7 @@
   width: 96%;
   height: 98%;
   display: flex;
-  background-color:var(--tape-bg);
+  /* background-color:var(--tape-bg); */
   overflow-y: overlay;
   padding-top: 2rem;
 }

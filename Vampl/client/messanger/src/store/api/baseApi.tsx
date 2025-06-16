@@ -26,8 +26,12 @@ export const userApi:any = createApi({
     }),
     getUserConvenientData:build.query({
       query:defaultGetQuery
-    })
+    }),
+    // getUserAccess:build.query({
+    //   query:() => 'authorization',
+      
+    // })
   })
 });
 
-export const {useGetInfoByNameQuery,useLazyGetInfoByNameQuery,useUpdateUserInfoMutation,useGetUserConvenientDataQuery} = userApi;
+export const {useGetInfoByNameQuery,useLazyGetInfoByNameQuery,useUpdateUserInfoMutation,useGetUserConvenientDataQuery,useLazyGetUserConvenientDataQuery} = userApi;

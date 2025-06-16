@@ -1,7 +1,7 @@
-import React, { Dispatch,ReactElement, RefObject, SetStateAction} from "react";
-import MessageEyes from "../subComponents/messageSeen";
-import parseDate from "./parseDate";
-import parseMessageTime from "./parseMessageTime";
+import { Dispatch,ReactElement, RefObject, SetStateAction} from "react";
+import MessageEyes from "./messageSeen";
+import parseDate from "../functions/parseDate";
+import parseMessageTime from "../functions/parseMessageTime";
 import { Dispatch as DispatchRedux } from "@reduxjs/toolkit";
 import { setDeleteFunc } from "../../store/chat";
 import { UserData,ChatStructure } from "../types/global"
@@ -14,7 +14,7 @@ export class ChatProcess {
   userName:string
   room:string
   setUnreadMessage:(...args:any) => any
-  setGroups:Dispatch<SetStateAction<ReactElement[]>>
+  setGroups:Dispatch<SetStateAction<Record<string,ReactElement>[]>>
   setContextMenu:Dispatch<SetStateAction<boolean>>
   setContextMenuPos:Dispatch<SetStateAction<{x:number,y:number}>>
   chatEndedRef:RefObject<boolean>
@@ -24,7 +24,7 @@ export class ChatProcess {
     userData:UserData,
     userName:string,
     room:string,
-    setUnreadMessage:any,setGroups:Dispatch<SetStateAction<ReactElement[]>>,
+    setUnreadMessage:any,setGroups:Dispatch<SetStateAction<Record<string,ReactElement>[]>>,
     setContextMenu:Dispatch<SetStateAction<boolean>>,
     setContextMenuPos:Dispatch<SetStateAction<{x:number,y:number}>>,
     chatEndedRef:RefObject<boolean>,
@@ -55,11 +55,10 @@ export class ChatProcess {
     index:any,
     date: any,
   ):ReactElement => {
-    console.log('dute:',date);
   return (
     <div className="container container-reverse group-container" key={`group-${index}`}>
              <span className="date-container">
-                 <p className="group-date">{parseDate(Object.keys(date as any).pop() ?? "",this.userData.allMonth)}
+                 <p className="group-date">{parseDate(Object.keys(date as any).pop() ?? "",this.userData.allMonths)}
                  </p>
              </span>
              {/* @ts-ignore */}
@@ -74,13 +73,19 @@ export class ChatProcess {
                        Object.keys(date as any).pop() ?? "",
                        groupName,this.room,message.body,message.time
                       )} ref={
-                        isUnread && !message.seen ? this.setUnreadMessage(Object.keys(date as any).pop() ?? "",groupName,this.room,message.body) : null
+                        isUnread && !message.seen ? this.setUnreadMessage({
+                          date:Object.keys(date as any).pop() ?? "",
+                          group:groupName,
+                          room:this.room,
+                          body:message.body,
+                          time:message.time
+                        }) : null
                       }
                       style={{transition:`opacity ${(arr.length - groupIdx) * .15}s ease-out`}}
                       className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.phone ? 'not-user-message' : ''}`}
                        key={`message-${groupIdx}-${index}`}>
                          {index === group.messages.length - 1 && (
-                           <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail chat-message-tail">
+                           <svg viewBox="0 0 50 50" width="30" height="30" className="message-tail chat-message-tail">
                              <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
                            </svg>
                          )}
@@ -108,27 +113,27 @@ export class ChatProcess {
  }
 
  spawnGroups() {
-    const currentGroups:Set<any> = new Set();
+    // const currentGroups:Set<any> = new Set();
     const dateGroups = Object.entries(this.chatData);
     
     let end = dateGroups.length;
     let start = Math.max(0,dateGroups.length - 2);
 
     return () => {
-      const groups:any[] = [];
-      const currentSlice = dateGroups.slice(start,end);
-      console.log('start spawn:',start,end);
+      const currentSlice = dateGroups.slice(start,end).reverse();
+      console.log('slice:',currentSlice);
       for(const [index,date] of currentSlice) {
-        groups.push(
-          this.spawnGroup(index,date)
-        );
-        currentGroups.add(groups);
+        this.setGroups(elemGroups => {
+          const [dateKey] = Object.keys(date);
+          const newGroups = [...elemGroups];
+          const group:Record<string,ReactElement> = {[dateKey]:this.spawnGroup(index,date)};
+          newGroups.unshift(group);
+          return newGroups;
+        });
       }
 
       start = Math.max(0,start - 2);
       end = Math.max(0,end - 2);
-      const elems = Array.from(currentGroups).reverse();
-      this.setGroups(elems);
 
       if(start === 0 && end === 0) {
         this.chatEndedRef.current = true;

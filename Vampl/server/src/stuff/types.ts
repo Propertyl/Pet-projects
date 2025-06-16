@@ -16,7 +16,7 @@ interface DBChat {
   messages:any
 };
 
-type infoForUpdate = {name:string,birthday?:string,image?:string}
+type infoForUpdate = {name?:string,birthday?:string,image?:string}
 
 type condition = 'view' | 'delete';
 

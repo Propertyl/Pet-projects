@@ -1,3 +1,5 @@
+import { ObserverProps } from "../types/global";
+
 const useObserver = (options:IntersectionObserverInit,socket:any) => {
   const Groups:Map<Element,{room:string,date:string,group:string,body:string}> = new Map();
   const observer = new IntersectionObserver((entries,_) => {
@@ -9,8 +11,8 @@ const useObserver = (options:IntersectionObserverInit,socket:any) => {
      });
   },options);
 
-  return (elem:HTMLDivElement,date:string,group:string,room:string,body:string) => {
-    Groups.set(elem,{room,date,group,body});
+  return (elem:HTMLDivElement,props:ObserverProps) => {
+    Groups.set(elem,props);
     observer.observe(elem);
   }
 

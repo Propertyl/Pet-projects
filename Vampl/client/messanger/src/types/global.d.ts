@@ -31,7 +31,7 @@ interface UserData {
   currentChat:ChatStructure | null,
   userName:string,
   allChats:{id:string,last:string,time:string}[],
-  allMonth:Record<number,string>,
+  allMonths:{id:number,numberM:number,month:string}[],
   changedUser:Record<string,string>,
 }
 

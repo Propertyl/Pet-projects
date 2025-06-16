@@ -6,7 +6,7 @@ const initialState = {
   phone:"",
   userName:"",
   allChats:[],
-  allMonth:{}
+  allMonths:{}
 } satisfies UserData;
 
 const useUserData = createSlice({

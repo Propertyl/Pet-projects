@@ -1,5 +1,5 @@
-import {ReactElement ,ReactNode,RefObject, useCallback, useEffect, useRef, useState} from "react";
-import {ChatStructure, DefaultRef} from "./types/global";
+import {ReactElement,RefObject, useCallback, useEffect, useRef, useState} from "react";
+import {ChatStructure, DateGroup, DefaultRef, ObserverProps} from "./types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { MessagesData, Store, UserData } from "../types/global";
 import {Socket } from "socket.io-client";
@@ -8,10 +8,12 @@ import useFormatter from "./functions/dateFormatter";
 import useObserver from "./functions/groupObserver";
 import './styles/chat.css';
 import ContextMenu from "./subComponents/ContextMenu";
-import { ChatProcess } from "./functions/spawnMessageGroups";
-import findLastGroup from "./functions/findLastGroup";
+import { ChatProcess } from "./subComponents/spawnMessageGroups";
 import { useGetChatDataQuery } from "../store/api/chatApi";
-import datePastCompare from "./functions/dateCompare";
+
+const waitTick = async () => {
+  return new Promise((r) => requestAnimationFrame(r));
+}
 
 const updateChatContent = (chat:HTMLDivElement,groupsSpawner:RefObject<any>,cantUpdateRef:RefObject<boolean>) => {
     const beforePos = chat.scrollHeight - chat.scrollTop;
@@ -27,15 +29,15 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const {data:roomChat} = useGetChatDataQuery({url:'chatID',param:room},{
     skip:!room
   });
-  const parsedChat = roomChat?.all ? parseToDeleteGroup(roomChat['all']) : null;
-  const [groups,setGroups] = useState<ReactElement[]>([])
+  const [chatData,setChatData] = useState(roomChat?.all ? parseToDeleteGroup(roomChat['all']) : null);
+  const [groups,setGroups] = useState<Record<string,ReactElement>[]>([])
   const messagesRef:DefaultRef = useRef(null);
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
   const userData:UserData = useSelector((state:Store) => state.user);
   const userName = userData.userName;
   const [currentMessage,setCurrentMessage] = useState<string>("");
   const [downButton,setDownButton] = useState<boolean>(false);
-  const downButtonRef = useRef(downButton);
+  const downButtonRef = useRef(false);
   const chatEndedRef:RefObject<boolean> = useRef(false);
   const cantUpdateRef:RefObject<boolean> = useRef(false);
   const groupsSpawner:RefObject<any> = useRef(null);
@@ -46,9 +48,9 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
   const chatProcess:RefObject<ChatProcess | null> = useRef(null);
 
-const setUnreadMessage = (date:string,groupName:string,room:string,body:string) => (el:HTMLDivElement) => {
+const setUnreadMessage = (props:ObserverProps) => (el:HTMLDivElement) => {
     if(el) {
-      setObserver.current(el,date,groupName,room,body);
+      setObserver.current(el,props);
     }
 }
 
@@ -71,41 +73,48 @@ const searchScroll = (event: Event) => {
   }
 }
 
-const handleUpdatingChat = () => {
-  let previousChat = roomChat;
-
-  return (currentChat:ChatStructure) => {
-    if(parsedChat) {
-      setGroups(groups => {
-        const newGroups:any[] = [...groups];
-        const all:any = currentChat['all'];
-        const parsed = parseToDeleteGroup(all[all.length - 1]);
-        const pushGroup = () => newGroups.push([chatProcess.current!.spawnGroup(all.length + 1,parsed)]);
-        if(groups.length) {
-          const [groupDate] = Object.keys(parsed);
-          const [previousGroupDate] = Object.keys(previousChat.all[findLastGroup(previousChat.all)]);
-          if(groupDate === previousGroupDate) {
-            const lastGroup:any[] = newGroups[newGroups.length - 1];
-            const newLastGroup = [...lastGroup];
-            newLastGroup[lastGroup.length - 1] = chatProcess.current!.spawnGroup(all.length,parsed);
-            newGroups[newGroups.length - 1] = newLastGroup;
-          } else if(datePastCompare(groupDate,previousGroupDate)) {
-            pushGroup();
-          } else if(currentChat.all.length < previousChat.all.length) {
-            newGroups.pop();
-          }
-
-          previousChat = currentChat;
-          return newGroups;
-        }
-
-        previousChat = currentChat;
-        pushGroup();
-        return newGroups;
-      });
+const handleUpdatingChat = ({currentChat,currentTime}:{currentChat:ChatStructure,currentTime:string,currentGroup?:string}) => {
+  if(chatData) {
+    const [groupDate] = currentTime.split(',');
+    const findGroup = (group:any) => {
+      const [currentDate] = Object.keys(group);
+      return currentDate === groupDate;
     }
+    setGroups(groups => {
+      const newGroups = [...groups];
+      const all:DateGroup[] = currentChat['all'];
+      const allGroup = all.find(findGroup);
+      const parsed = parseToDeleteGroup(allGroup);
+      const pushGroup = () => newGroups.push({
+        [groupDate]:chatProcess.current!.spawnGroup(all.length + 1,parsed)
+      });
+      if(groups.length) {
+        const groupToUpdate = newGroups.findIndex(findGroup);
+
+        if(groupToUpdate >= 0 && allGroup) {
+          newGroups[groupToUpdate] = {
+            [groupDate]:chatProcess.current!.spawnGroup(all.length,parsed)
+          }
+        } else if(groupToUpdate >= 0 && allGroup === undefined) {
+          newGroups.splice(groupToUpdate,1);
+        } else {
+          pushGroup();
+        }
+        setChatData(currentChat);
+        return newGroups;
+      }
+
+      pushGroup();
+      return newGroups;
+    });
   }
-} 
+}
+
+useEffect(() => {
+  if(roomChat) {
+    setChatData(roomChat['all']);
+  }
+},[roomChat]);
 
 useEffect(() => {
    downButtonRef.current = downButton;
@@ -116,7 +125,7 @@ useEffect(() => {
       if(socket.current) {
         setObserver.current = useObserver({threshold:1},socket.current);
       
-        socket.current.on('updateChat',handleUpdatingChat());
+        socket.current.on('updateChat',handleUpdatingChat);
       }
   }
 
@@ -131,14 +140,13 @@ useEffect(() => {
       messagesRef.current.removeEventListener('scroll',searchScroll);
     }
 
-    socket.current?.off('updateChat',handleUpdatingChat());
+    socket.current?.off('updateChat',handleUpdatingChat);
   }
 
-},[messagesRef.current])
+},[messagesRef.current]);
 
 const revealMessages = () => {
   if(messagesRef.current && messagesRef.current.classList.contains('messages-hidden')) {
-      console.log('reveal');
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       messagesRef.current.classList.remove('messages-hidden');
   }
@@ -146,44 +154,44 @@ const revealMessages = () => {
 
 const spawnUntilScroll = useCallback(async () => {
   const chat = messagesRef.current;
-  await new Promise((r) => requestAnimationFrame(r));
+  await waitTick();
   if(chat.scrollHeight === chat.clientHeight && !chatEndedRef.current) {
     groupsSpawner.current();
 
-    await new Promise((r) => requestAnimationFrame(r));
+    await waitTick();
     scrollDown('instant');
-    spawnUntilScroll();
-  } else {
-    revealMessages();
+    return spawnUntilScroll();
   }
+  
+  revealMessages();
 },[messagesRef,chatEndedRef])
 
 useEffect(() => {
-  if(parsedChat && !chatProcess.current) {
-    chatProcess.current = new ChatProcess(parsedChat,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
+  if(chatData && !chatProcess.current) {
+    chatProcess.current = new ChatProcess(chatData,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
     chatProcess.current.getUserPhone();
   }
-},[parsedChat,chatProcess.current])
+},[chatData,chatProcess.current])
 
 useEffect(() => {
   const initiateGroups = async () => {
-    if(parsedChat && !groups.length && chatProcess.current) {
+    if(chatData && !groups.length && chatProcess.current) {
       await chatProcess.current.getUserPhone();
       groupsSpawner.current = chatProcess.current.spawnGroups();
 
       groupsSpawner.current();
-      await new Promise((r) => requestAnimationFrame(r));
+      await waitTick();
       await spawnUntilScroll();
     }
   }
 
   initiateGroups();
-},[parsedChat,chatProcess.current]);
+},[chatData,chatProcess.current]);
 
 const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
   if(messagesRef.current) {
     messagesRef.current.scrollTo({top:messagesRef.current.scrollHeight,behavior:behavior});
-    setDownButton(false);
+    setDownButton(false)
   }
 }
 
@@ -272,25 +280,17 @@ useEffect(() => {
    }
 },[contextMenu,messagesRef])
 
-// useEffect(() => {
-//    const getChat = async () => {
-//       if(room) {
-//         const roomChat:ChatStructure = await serv.get(`/chat/chatID/${room}`);
-//         setChatData(parseToDeleteGroup(roomChat['all']));
-//       }
-//    }
-
-//    getChat();
-// },[room]);
-
   return (
     <>
-        { parsedChat && 
+        {chatData && 
           <>
             <div className="messages-container">
             <div ref={messagesRef} className="messages messages-hidden">
               <div className="messages-group-container">
-                {parsedChat && groups}
+                {chatData && groups.map((group) => {
+                  const [jsx] = Object.values(group);
+                  return jsx;
+                })}
               </div>
               {
                 contextMenu && <ContextMenu phrase="Delete" switchState={setContextMenu} pos={contextMenuPos} func={() => setDeletedMessage(deleteArgs)}/>
@@ -309,9 +309,6 @@ useEffect(() => {
                     <span style={{display:placeholder ? "flex" : "none"}} contentEditable={false} className="chat-input-area-placeholder">
                         Message
                     </span>
-                    <svg viewBox="0 0 30 30" width="30" height="30" className="message-tail">
-                      <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
-                    </svg>
                 </div>
               </div>
           </div>

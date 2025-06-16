@@ -34,17 +34,16 @@ export class UserService {
   }
 
   updateInfo(info:infoForUpdate,phone:string) {
-    const data:infoForUpdate = {
-      name:info.name
-    };
+    const data:infoForUpdate = {};
 
-    if(info.birthday) {
-      data.birthday = info.birthday;
-    }
+    console.log('info:',info);
 
-    if(info.image) {
-      data.image = info.image;
-    }
+    Object.keys(info).forEach(key => {
+      const fieldValue = info[key as keyof infoForUpdate];
+      if(fieldValue) {
+        data[key as keyof infoForUpdate] = fieldValue
+      }
+    });
     
     return this.prisma.user.update({
       where:{

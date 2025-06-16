@@ -28,7 +28,7 @@ export class ChatController {
           messages:{"all":[]}
         });
         
-        return {data:this.userServices.getChatData(phone),phone};
+        return {data:await this.userServices.getChatData(phone),phone};
      }
 
      return {data:userChatData,phone};
@@ -50,8 +50,8 @@ export class ChatController {
   }
 
   @Post('create-chat')
-  createUserChat(@Body() data:chatData) {
-    return this.userServices.createUserChat(data);
+  async createUserChat(@Body() data:chatData) {
+    return await this.userServices.createUserChat(data);
   }
 
   @Put('updateChat')

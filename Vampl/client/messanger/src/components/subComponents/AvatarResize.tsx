@@ -24,7 +24,6 @@ const AvatarResizer = ({imageControl,file,swapAnimation}:{imageControl:[string |
 
       if(ctx) {
         ctx.clearRect(0,0,canvas.width,canvas.height);
-        console.log('ima:',avatarImage.current,rect,overlayPos.x,overlayPos.y);
         const overlayRect = overlay.getBoundingClientRect();
         const imageRect = image.getBoundingClientRect();
 

@@ -39,7 +39,7 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
          id:room,
          messages:currentChat
       });
-      this.server.to(room).emit('updateChat',currentChat);
+      this.server.to(room).emit('updateChat',{currentChat,currentTime:time,currentGroup:group});
    }
 
    async handleDisconnect(client:Socket) {
@@ -65,7 +65,7 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
 
    @SubscribeMessage('messages-watch')
    async messageWatch(client:Socket,data:updateMessagesData) {
-      await this.messageAction(client,data,'view');
+      this.messageAction(client,data,'view');
    }
 
    @SubscribeMessage('joinRoom')
@@ -85,9 +85,10 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       data.message['user'] = phone ?? 'unknown';
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);
-      this.server.to(data.room).emit('updateChat',currentChat,
-      data.room);
-      this.server.to(data.room).emit('updateContactChat',currentChat,data.room);
+      this.server.to(data.room).emit('updateChat',{
+         currentChat:currentChat,currentTime:data.message.time
+      });
+      this.server.to(data.room).emit('updateContactChat',currentChat);
       
       await serv.put('/chat/updateChat',{
          headers: {

@@ -15,6 +15,7 @@
   --white-color:255,255,255;
   --secondary-grey:155,155,155;
   --black-color:0,0,0;
+  --bubble-color:rgba(var(--black-color),.5);
   --borders-bg:#3a3a3a;
   --bg-specific:#222220;
   --black-default:rgb(0,0,0);
@@ -22,7 +23,6 @@
   --search-border:rgb(141, 137, 137);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
-  --bubble-color:rgba(125,125,125,.5);
   --light-grey:rgb(155,155,155);
   --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;
@@ -49,7 +49,7 @@
   --conteneditable-text:black;
   --tile-white:rgba(255,255,255,.4);
   --appear-menu-transition:cubic-bezier(.20,.40,.50,1);
-  
+  --animation-transition:all .2s cubic-bezier(.1,.2,1,1);
 }
 
 a {
@@ -59,6 +59,10 @@ a {
 }
 a:hover {
   color: #535bf2;
+}
+
+p {
+  margin: 0;
 }
 
 *,*::after,*::before {
@@ -183,7 +187,6 @@ button {
   justify-content: center;
 }
 
-
 .icon {
   width: 100%;
   height: 100%;
@@ -223,6 +226,8 @@ button:focus-visible {
   border-radius: 50% !important;
   background-color:var(--bubble-color);
   z-index: 0;
+  pointer-events: none;
+  cursor: pointer;
   animation: bubble-pop .6s linear !important;
 }
 
@@ -341,7 +346,7 @@ p {
   --nav-bg:rgb(0, 0, 0);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
-  --bubble-color:rgba(0,0,0,1);
+  --bubble-color:rgba(var(--white-color),.3);
   --light-grey:rgb(155,155,155);
   --light-black:#4d4d4d;
   --main-grey:#787474;
@@ -370,7 +375,7 @@ p {
   --light-black:#4d4d4d;
   --chat-bg-color:#444444;
   --secondary-color:rgb(255,255,255);
-  --bubble-color:rgba(136, 136, 136, 0.5);
+  --bubble-color:rgba(var(--black-color),.3);
   --light-grey:rgb(83, 83, 83);
   --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;

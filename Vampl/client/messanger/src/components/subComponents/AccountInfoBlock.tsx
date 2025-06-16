@@ -1,5 +1,7 @@
 import { Dispatch, SetStateAction, useRef } from "react";
-import { DefaultRef } from "../../types/global";
+import { DefaultRef, Store } from "../../types/global";
+import { useSelector } from "react-redux";
+import parseBirthD from "../functions/parseBirthDay";
 
 const cancelSpaces:any = (event:KeyboardEvent) => {
   if(event.shiftKey && event.key === 'Enter') {
@@ -17,6 +19,7 @@ const bodyContent = (body:string) => {
 
 const InfoBlock = ({label,body,editable,setValue}:{label:string,body:string,editable:boolean,setValue?:Dispatch<SetStateAction<string>>}) => {
   const contentText:DefaultRef = useRef(null);
+  const months = useSelector((store:Store) => store.user.allMonths);
 
   const inputFocus = () => {
     if(contentText.current) {
@@ -37,7 +40,7 @@ const InfoBlock = ({label,body,editable,setValue}:{label:string,body:string,edit
           setValue(event.target.innerText.trim());
         }
         }} onFocus={inputFocus} onBlur={inputBlur} onKeyDown={cancelSpaces} className="body-info-body" contentEditable={editable} data-label-text={label}>
-          {!editable ? bodyContent(body) : null}
+          {!editable ? bodyContent(label === 'Birthday' ? parseBirthD(body,months) : body) : null}
       </div>
       {editable && <span className="edit-placeholder" ref={contentText}>{body}</span>}
     </div>

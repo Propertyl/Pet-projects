@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../../types/global";
 import '../styles/userBurger.css';
 import { Dispatch, RefObject, SetStateAction,useEffect,useRef,useState } from "react";
-import { BurgerInfo, DefaultRef } from "../types/global";
+import { BurgerInfo, DateValues, DefaultRef } from "../types/global";
 import { convertStatus } from "../functions/convertStatus";
 import UserAvatar from "./userAvatar";
 import InfoBlock from "./AccountInfoBlock";
@@ -18,7 +18,8 @@ import { switchUser } from "../../store/useFullStaff";
 import { useUpdateUserInfoMutation,useLazyGetInfoByNameQuery } from "../../store/api/baseApi";
 import { dataApi, useGetBurgerDataQuery } from "../../store/api/dataApi";
 import saveValue from "../functions/setThenValue";
-
+import DateOfBirthBlock from "./DateBirthPicker";
+import validateBirthDate from "../functions/validateBirthDate";
 
 const NormalMode = ({own}:{own:boolean}) => {
   const [more,setMore] = useState<boolean>(false);
@@ -69,8 +70,8 @@ const NormalMode = ({own}:{own:boolean}) => {
               }
               <UserAvatar image={burgerInfo.image} userName={burgerInfo.name}/>
               <div className="head-main-info">
-                <p className="user-burger-name">{burgerInfo.name}</p>
-                <p className="user-burger-status">
+                <p className="user-burger-name flex-center">{burgerInfo.name}</p>
+                <p className="user-burger-status flex-center">
                   {burgerInfo.status ?? 'Recently'}
                   <span className={`user-burger-status-dot status-${burgerInfo.status}`}></span>
                 </p>
@@ -79,7 +80,7 @@ const NormalMode = ({own}:{own:boolean}) => {
           </div>
           <div className="body-info-container container">
             <InfoBlock label={"Phone"} body={burgerInfo.phone} editable={false}/>
-            <InfoBlock label={"Birthday"} body={`${burgerInfo.birthDate}`} editable={false}/>
+            <InfoBlock label={"Birthday"} body={`${burgerInfo.birthData}`} editable={false}/>
           </div>
         </>
       }
@@ -89,7 +90,7 @@ const NormalMode = ({own}:{own:boolean}) => {
 
 
 const EditMode = ({mode,switchMode}:{mode:boolean | null,switchMode:Dispatch<SetStateAction<boolean | null>>}) => {
-  const {burgerInfo,setBurgerInfo} = useBurgerContext();
+  const {burgerInfo,setBurgerInfo,userBirthDate} = useBurgerContext();
   const [swapAnimation,setSwapAnimation] = useState<boolean>(false);
   const [newName,setNewName] = useState<string>('');
   const [dataCorrect,setDataCorrect] = useState<boolean | null>(null);
@@ -112,10 +113,15 @@ const EditMode = ({mode,switchMode}:{mode:boolean | null,switchMode:Dispatch<Set
   }
 
   const updateUserData = async () => {
-      await updateUserInfo({name:newName}).unwrap();
-      setSwapAnimation(true);
-      dispatch(setData({field:'userName',value:newName}));
+    const newData:{name?:string,birthData?:string} = {};
+    newData.name = newName ? newName : undefined;
+    newData.birthData = userBirthDate && validateBirthDate(userBirthDate) ? Object.values(userBirthDate).join('/') : undefined;
+    await updateUserInfo(newData).unwrap();
+    setSwapAnimation(true);
+    if(newName) {
       dispatch(switchUser(newName));
+      dispatch(setData({field:'userName',value:newName}));
+    }
   }
 
   const setupAvatar = (event:any) => {
@@ -142,6 +148,14 @@ const EditMode = ({mode,switchMode}:{mode:boolean | null,switchMode:Dispatch<Set
       checkName(newName,setDataCorrect,burgerInfo.name);
     }
   },[newName],500);
+
+  useEffect(() => {
+    if(userBirthDate && validateBirthDate(userBirthDate)) {
+      setDataCorrect(true);
+    } else {
+      setDataCorrect(null);
+    }
+  },[userBirthDate])
 
   useEffect(() => {
     if(!rootElem.current) {
@@ -177,18 +191,21 @@ const EditMode = ({mode,switchMode}:{mode:boolean | null,switchMode:Dispatch<Set
               </div>
             </div>
             <div className="body-info-container container">
-                <span>
+                <span className="edit-block-container">
                   {dataCorrect === false && 
-                   <div>
+                   <div className="nickname-exist-sign flex-center">
                       <p>This nickname is already taken</p>
                    </div>
                   }
                   <InfoBlock label={"Name"} body={burgerInfo.name} editable={true} setValue={setNewName}/>
                 </span>
+                <span className="edit-block-container">
+                  <DateOfBirthBlock/>
+                </span>
             </div>
             <div className="footer-info-container container flex-center">
               {
-               dataCorrect && newName && <button onClick={updateUserData} title="Confirm" className="edit-button confirm-button flex-center dimmed-button">
+               dataCorrect && <button onClick={updateUserData} title="Confirm" className="edit-button confirm-button flex-center dimmed-button">
                   <svg className="random-icon edit-icon" fill="#000000" width="64px" height="64px" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M.5 14a.5.5 0 0 0-.348.858l9.988 9.988a.5.5 0 1 0 .706-.706L.858 14.152A.5.5 0 0 0 .498 14zm28.99-9c-.13.004-.254.057-.345.15L12.163 22.13c-.49.47.236 1.197.707.707l16.982-16.98c.324-.318.077-.857-.363-.857z"></path></g></svg>
                 </button>
               }
@@ -217,6 +234,7 @@ const BurgerBody = () => {
   const clearData = () => {
     setEditMode(false);
     setBurgerInfo(null);
+    dispatch(switchUser(''));
   }
 
   useEffect(() => {

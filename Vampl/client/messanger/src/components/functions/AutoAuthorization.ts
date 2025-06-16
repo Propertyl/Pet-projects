@@ -7,11 +7,11 @@ import { userApi } from "../../store/api/baseApi";
 import { dataApi } from "../../store/api/dataApi";
 
 const checkAuthorization = async (dispatch:Dispatch) => {
-      const auth:{approve:boolean} = await dispatch(userApi.endpoints.getUserConvenientData.initiate({url:'authorization'})).unwrap();
+      const auth:{approve:boolean} = await dispatch(userApi.endpoints.getUserConvenientData.initiate({url:'authorization'},{ forceRefetch: true })).unwrap();
 
       const months = await dispatch(dataApi.endpoints.getBurgerData.initiate({url:'month/en'})).unwrap();
       
-      dispatch(setData({field:'allMonth',value:months}));
+      dispatch(setData({field:'allMonths',value:months}));
       dispatch(setData({field:'locale',value:navigator.language ?? 'en-US'}));
 
       if(!auth.approve && window.location.href.split('/').pop() != 'auth') {

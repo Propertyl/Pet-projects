@@ -159,7 +159,7 @@
 
 
 .chat-message-tail {
-  bottom:.2rem !important;
+  bottom:-.2rem !important;
   right:-.5rem !important;
   width: 1rem !important;
   height:1rem !important;

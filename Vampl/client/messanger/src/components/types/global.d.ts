@@ -16,7 +16,15 @@ interface UserData {
   phone:string,
   userName:string,
   allChats:{id:string,last:string,time:string}[],
-  allMonth:Record<number,string>,
+  allMonths:Record<number,string>,
+}
+
+interface ObserverProps {
+  date:string,
+  group:string,
+  room:string,
+  body:string,
+  time:string
 }
 
 type statusInfo = {phone:string,status:boolean};
@@ -27,7 +35,7 @@ interface UserInfo {
   id:number,
   name:string,
   phone:string,
-  birthDate:number,
+  birthData:number,
   image:string,
 }
 
@@ -58,6 +66,8 @@ interface MessageGroup {
   messages:Message[]
 }
 
+type SetDispatch<T> = Dispatch<SetStateAction<T>>;
+
 type ElementRef<T> = RefObject<T | null>;
 
 type Message = {body:string,time:string,seen:boolean};
@@ -68,5 +78,7 @@ type AuthInputs = 'phone' | 'name' | 'password' | 'incorrect';
 
 type DefaultRef = Ref<HTMLDivElement | null>;
 
+type DateValues = {day:number,month:number,year:number};
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef}
+
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef,ObserverProps,DateGroup,DateValues,SetDispatch}
