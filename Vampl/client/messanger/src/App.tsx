@@ -2,7 +2,7 @@ import {useLayoutEffect} from 'react'
 import {RouterProvider } from 'react-router';
 import { useDispatch} from 'react-redux';
 import router from './router/router';
-import checkAuthorization from './components/functions/AutoAuthorization';
+import checkAuthorization from './components/MainPage/functions/AutoAuthorization';
 
 function App() {
   const dispatch = useDispatch();

@@ -1,4 +1,4 @@
-import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react";
+import { createContext,ReactNode, useContext, useState } from "react";
 import { BurgerInfo, DateValues, SetDispatch } from "../types/global";
 
 type BurgerContextType = {burgerInfo:BurgerInfo | null,setBurgerInfo:SetDispatch<BurgerInfo | null>,

@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
-import AuthPage from '../pages/AuthPage';
-import MainPage from '../pages/MainPage';
+import AuthPage from '../components/AuthPage/AuthPage';
+import MainPage from '../components/MainPage/MainPage';
 
 const router:any = createBrowserRouter([
   {

@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useRef } from "react";
 import { DefaultRef, Store } from "../../types/global";
 import { useSelector } from "react-redux";
-import parseBirthD from "../functions/parseBirthDay";
+import parseBirthD from "../UserBurger/functions/parseBirthDay";
 
 const cancelSpaces:any = (event:KeyboardEvent) => {
   if(event.shiftKey && event.key === 'Enter') {

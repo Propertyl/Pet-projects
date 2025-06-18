@@ -20,7 +20,6 @@ const AvatarResizer = ({imageControl,file,swapAnimation}:{imageControl:[string |
       const ctx = canvas.getContext('2d');
       const overlay = overlayRef.current;
       const image = avatarImage.current;
-      const rect = overlayRef.current!.getBoundingClientRect();
 
       if(ctx) {
         ctx.clearRect(0,0,canvas.width,canvas.height);

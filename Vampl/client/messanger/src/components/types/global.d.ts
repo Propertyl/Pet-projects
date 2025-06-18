@@ -55,11 +55,14 @@ interface ParsedChat {
   id:string
 }
 
+
 interface UserContact {
   user:ParsedChat.user,
   message:{last:string,time:string},
   id:string
 }
+
+
 
 interface MessageGroup {
   sender:string  
@@ -80,5 +83,6 @@ type DefaultRef = Ref<HTMLDivElement | null>;
 
 type DateValues = {day:number,month:number,year:number};
 
+type queryArgs = {url:string,param?:any};
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef,ObserverProps,DateGroup,DateValues,SetDispatch}
+export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef,ObserverProps,DateGroup,DateValues,SetDispatch,queryArgs};

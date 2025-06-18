@@ -1,11 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { UserInfo } from "../../types/global";
-import defaultGetQuery from "../../components/functions/defaultGetQuery";
-
-// type QueryURL<T extends string> = T extends `/${string}` ? false : true;
-
-// type CurrentURL<T extends string> = QueryURL<T>;
-
+import defaultGetQuery from "../../components/global-functions/defaultGetQuery";
+import { queryArgs } from "../../components/types/global";
 
 export const userApi:any = createApi({
   reducerPath:'reducerUser',
@@ -27,11 +23,37 @@ export const userApi:any = createApi({
     getUserConvenientData:build.query({
       query:defaultGetQuery
     }),
-    // getUserAccess:build.query({
-    //   query:() => 'authorization',
-      
-    // })
+    updateUserTheme:build.mutation({
+      query:(data:{theme:string}) => ({
+        url:'update-theme',
+        method:'PUT',
+        body:data
+      })
+    }),
+    createUserData:build.mutation({
+      query:({url,param}:queryArgs) => ({
+        url:url,
+        method:'POST',
+        body:param
+      })
+    }),
+    setUserAuthorized:build.mutation({
+      query:({url,param}:queryArgs) => ({
+        url:'setAuthorized',
+        method:'PUT',
+        body:param
+      })
+    }),
+    setUserLogOut:build.mutation({
+      query:() => ({
+        url:'log-out',
+        method:'PUT',
+        body:{}
+      })
+    })
   })
 });
 
-export const {useGetInfoByNameQuery,useLazyGetInfoByNameQuery,useUpdateUserInfoMutation,useGetUserConvenientDataQuery,useLazyGetUserConvenientDataQuery} = userApi;
+export type someApi = typeof userApi;
+
+export const {useGetInfoByNameQuery,useLazyGetInfoByNameQuery,useUpdateUserInfoMutation,useGetUserConvenientDataQuery,useLazyGetUserConvenientDataQuery,useUpdateUserThemeMutation,useCreateUserDataMutation} = userApi;

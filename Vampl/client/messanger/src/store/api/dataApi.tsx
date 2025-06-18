@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import defaultGetQuery from "../../components/functions/defaultGetQuery";
+import defaultGetQuery from "../../components/global-functions/defaultGetQuery";
 
 export const dataApi:any = createApi({
   reducerPath:'data-reducer',
