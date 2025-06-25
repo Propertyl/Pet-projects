@@ -1,3 +1,4 @@
+import { UserData } from "../types/global";
 import useFormatter from "./dateFormatter";
 
 export const dateCastling = (date:string) => {
@@ -11,7 +12,7 @@ export const dateCastling = (date:string) => {
   return [day,month,year];
 }
 
-const parseDate = (date:string,allMonth:any) => {
+const parseDate = (lang:string,date:string,allMonth:UserData['allMonths']) => {
 
   const formatter = useFormatter();
 
@@ -29,9 +30,11 @@ const parseDate = (date:string,allMonth:any) => {
     return "Today";
   }
   
-  const findCurrentMonth = allMonth.find((monthData:any) => monthData.numberM === clearMonth);
+  const findCurrentMonth = allMonth.find((monthData:{id:number,month:string}) => monthData.id === clearMonth) ?? {month:"..."};
 
-  return `${currentDay} ${findCurrentMonth.month}`;
+  const groupDate = [findCurrentMonth.month,currentDay];
+
+  return lang === 'en' ? groupDate.join(' ') : groupDate.reverse().join(' ');
 }
 
 export default parseDate;

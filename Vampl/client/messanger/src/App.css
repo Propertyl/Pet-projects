@@ -12,20 +12,19 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  --alt-color:var(--white-color);
   --white-color:255,255,255;
   --secondary-grey:155,155,155;
   --black-color:0,0,0;
   --bubble-color:rgba(var(--black-color),.5);
   --borders-bg:#3a3a3a;
-  --bg-specific:#222220;
   --black-default:rgb(0,0,0);
   --bg-main: rgb(37, 37, 37);
   --search-border:rgb(141, 137, 137);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
   --light-grey:rgb(155,155,155);
-  --light-grey-half:rgb(155,155,155,.5);
-  --main-grey:#787474;
+  --main-grey:rgb(120, 116, 116);
   --main-grey-lighted:#949393;
   --header-height:6rem;
   --default-border-radius:20px;
@@ -94,7 +93,7 @@ input:focus .search-button {
   width:2rem;
   height:2rem;
   cursor: pointer;
-  transition: all .2s;
+  transition:var(--animation-transition);
 }
 
 .button-icon {
@@ -226,7 +225,6 @@ button:focus-visible {
   border-radius: 50% !important;
   background-color:var(--bubble-color);
   z-index: 0;
-  pointer-events: none;
   cursor: pointer;
   animation: bubble-pop .6s linear !important;
 }
@@ -303,6 +301,21 @@ p {
   height: 1.5rem;
 }
 
+.custom-scrollbar {
+  position: absolute;
+  top:2%;
+  right:2%;
+  width: .3rem;
+  border-radius: 40px;
+  background-color:rgba(var(--alt-color),.5);
+}
+
+.scrollable-component {
+  overflow: overlay;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color);
+}
+
 @keyframes bubble-pop {
   0% {
       transform: scale(0);
@@ -341,7 +354,7 @@ p {
 .night {
   --light-grey-half:rgb(0,0,0,.5);
   --black-default:rgb(0,0,0);
-  --bg-main:#252525;
+  --bg-main:rgb(37, 37, 37);
   --nav-bg:rgb(0, 0, 0);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
@@ -368,15 +381,14 @@ p {
 }
 
 .light {
-  --bg-specific:rgb(192, 192, 192);
+  --alt-color:var(--black-color);
   --black-default:rgb(0,0,0);
   --bg-main:rgb(255,255,255);
   --light-black:#4d4d4d;
-  --chat-bg-color:#444444;
+  --chat-bg-color:#dddddd;
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(var(--black-color),.3);
   --light-grey:rgb(83, 83, 83);
-  --light-grey-half:rgb(155,155,155,.5);
   --main-grey:#787474;
   --night-tilelight:hsla(276, 59%, 61%, 0.4); 
   --night-color:#ae7dd6;
@@ -386,6 +398,7 @@ p {
   --context-bg:rgba(255,255,255, .75);
   --other-text-color:var(--black-default);
   --tile-white:rgba(155,155,155,.4);
+  --scrollbar-color:rgba(0,0,0, 0.212) #14141400;
 }
 
 
@@ -397,6 +410,16 @@ p {
 @media (max-width:1920px) and (min-width:1870px) {
   :root {
     --main-rem:15px;
+  }
+}
+
+@media (max-width:1439px) {
+  #root {
+    width: 100%;
+  }
+
+  .bg-dimmer {
+    width: 100% !important;
   }
 }
 

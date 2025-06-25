@@ -1,9 +1,12 @@
 import { createContext,ReactNode, useContext, useState } from "react";
-import { BurgerInfo, DateValues, SetDispatch } from "../types/global";
+import { BurgerInfo, BurgerText, DateValues, SetDispatch } from "../types/global";
 
-type BurgerContextType = {burgerInfo:BurgerInfo | null,setBurgerInfo:SetDispatch<BurgerInfo | null>,
+type BurgerContextType = {
+burgerInfo:BurgerInfo | null,setBurgerInfo:SetDispatch<BurgerInfo | null>,
 userBirthDate:DateValues | null,
-setUserBirthDate:SetDispatch<DateValues | null>
+setUserBirthDate:SetDispatch<DateValues | null>,
+pageText:BurgerText | null,
+setPageText:SetDispatch<BurgerText | null>,
 };
 
 const BurgerContext = createContext<BurgerContextType | undefined>(undefined);
@@ -11,9 +14,10 @@ const BurgerContext = createContext<BurgerContextType | undefined>(undefined);
 const BurgerProvider = ({children}:{children:ReactNode}) => {
   const [burgerInfo,setBurgerInfo] = useState<BurgerInfo | null>(null);
   const [userBirthDate,setUserBirthDate] = useState<DateValues | null>(null);
+  const [pageText,setPageText] = useState<BurgerText | null>(null);
 
   return (
-    <BurgerContext.Provider value={{burgerInfo,setBurgerInfo,userBirthDate,setUserBirthDate}}>
+    <BurgerContext.Provider value={{burgerInfo,setBurgerInfo,userBirthDate,setUserBirthDate,pageText,setPageText}}>
       {children}
     </BurgerContext.Provider>
   )

@@ -4,11 +4,13 @@ import ChatsTape from "../ChatsTape/ChatsTape";
 import Navigation from "../Navigation/Navigation";
 import './home.css';
 import '../Chat/chat.css';
-import { Store } from "../../types/global";
 import LoadingScreen from "../subComponents/LoadingScreen";
 import { useEffect, useRef, useState } from "react";
 import chatAfterRefresh from "../global-functions/getChatAfterRefresh";
 import { io, Socket } from "socket.io-client";
+import { Store } from "../types/global";
+import useCheckUserAuthorization from "../global-functions/checkUserAuthorization";
+import { useNavigate } from "react-router";
 
 const MainPage = () => {
  const room = useSelector((state:Store) => state.stuff.currentRoom);
@@ -16,6 +18,9 @@ const MainPage = () => {
  const dispatch = useDispatch();
  const socketConnection:React.RefObject<Socket | null> = useRef(null);
  const [connection,setConnection] = useState(false);
+ const navigate = useNavigate();
+
+  useCheckUserAuthorization(dispatch,navigate);
  
   useEffect(() => {
    if(access) {
@@ -29,12 +34,11 @@ const MainPage = () => {
       });
 
    }
-  },[access])
+  },[access]);
 
   useEffect(() => {
     document.title = "Vampl";
-  },[])
-
+  },[]);
 
   useEffect(() => {
     const tryGetChat = async () => {  
@@ -44,7 +48,7 @@ const MainPage = () => {
     }
 
     tryGetChat();
-  },[access])
+  },[access]);
 
   return (
     <>

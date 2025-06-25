@@ -1,1 +1,1 @@
-export const convertStatus = (status:Boolean) => status ? "Online" : "Offline";
+export const convertStatus = (status:Boolean,onlineText:string | undefined,offlineText:string | undefined) => status ? onlineText : offlineText;

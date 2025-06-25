@@ -23,6 +23,7 @@ const auth = async (register:Boolean,inputData:SignData | any,dispatch:Dispatch)
     return createAccount(inputData,dispatch);
   }
   
+  console.log('input:',inputData);
   const req = await queryRequest(userApi,'getUserConvenientData',{url:'verifyAccount',param:inputData.phone},dispatch);
   const passwordCorrect = await bcrypt.compare(inputData['password'],req.password);
 

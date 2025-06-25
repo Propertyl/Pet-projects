@@ -1,4 +1,5 @@
-const getLabelText = (input:'Phone' | 'Name' | 'Password',inputError:string) => {
+const getLabelText = (input:string | undefined,inputError:string) => {
+    if(!input) return '...';
       if(inputError) {
         return `Wrong ${input}`;
       }

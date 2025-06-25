@@ -76,12 +76,20 @@ export class UserService {
     });
   }
 
-  getMonthUA() {
-    return this.prisma.monthUA.findMany();
+  getMonths() {
+    return this.prisma.months.findMany();
   }
 
-  getMonthEN() {
-    return this.prisma.monthEN.findMany();
+  getPageText(page:string,lang:string) {
+    return this.prisma.locales.findFirst({
+      where:{
+        page:page,
+        language:['uk','ru'].includes(lang) ? 'ua' : lang
+      },
+      select:{
+        text:true
+      }
+    });
   }
 
   getChatByLink(users:string[]) {
@@ -156,14 +164,14 @@ export class UserService {
   async createUser(user:{name:string,phone:string,birthdate?:string,password:string,image?:string}) {
     user['image'] = '';
     await this.prisma.user.create({data:user as any})
-    await this.prisma.onlineStatuses.create({data:{
+    await this.prisma.onlinestatuses.create({data:{
       phone:user.phone,
       status:false
     }});
   }
 
   async updateStatus({phone,status}:{phone:string,status:boolean}) {
-    return this.prisma.onlineStatuses.update({
+    return this.prisma.onlinestatuses.update({
       where: {
         phone:phone
       },
@@ -174,7 +182,7 @@ export class UserService {
   }
 
   async getStatus(phone:string) {
-     return this.prisma.onlineStatuses.findFirst({
+     return this.prisma.onlinestatuses.findFirst({
         where:{
           phone:phone
         },
@@ -200,7 +208,7 @@ export class UserService {
 
   async getUserTheme(phone:string) {
     console.log("THEME PHONE:",phone);
-    return this.prisma.userTheme.findFirst({
+    return this.prisma.usertheme.findFirst({
       where:{
         phone:phone
       },
@@ -211,13 +219,13 @@ export class UserService {
   }
 
   async createUserTheme(data:{phone:string,theme:string}) {
-    return this.prisma.userTheme.create({
+    return this.prisma.usertheme.create({
       data:data
     })
   }
 
   async updateUserTheme({phone,theme}:{phone:string,theme:string}) {
-    return this.prisma.userTheme.update({
+    return this.prisma.usertheme.update({
       where:{
         phone:phone
       },
@@ -227,4 +235,30 @@ export class UserService {
     })
   }
 
+  async searchOtherUsers(userPhone:string,request:string) {
+    return this.prisma.user.findMany({
+      where:{
+        phone:{
+          not:userPhone,
+        },
+        OR:[
+          {
+            name:{
+              contains:request,
+            }
+          },
+          {
+            phone:{
+              contains:request
+            }
+          }
+        ]
+      },
+      select:{
+        name:true,
+        image:true,
+        phone:true
+      }
+    })
+  }
 }

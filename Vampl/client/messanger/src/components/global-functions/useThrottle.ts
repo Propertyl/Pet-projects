@@ -1,11 +1,9 @@
 const useThrottle = (callback:Function,delay:number) => {
   let execute:boolean = false;
-  let interval:any = null;
+  let interval:NodeJS.Timer | null = null;
 
   return (event:Event) => {
     if(!interval) interval = setInterval(() => execute = !execute,delay);
-
-    console.log('try it:',execute,interval);
 
     if(execute) {
       execute = false;

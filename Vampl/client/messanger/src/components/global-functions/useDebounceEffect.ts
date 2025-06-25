@@ -11,7 +11,7 @@ const useDebounceEffect = (
     return () => {
       clearTimeout(timer);
     }
-  },[...deps,delay])
+  },[...deps,delay]);
 }
 
 export default useDebounceEffect;

@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import defaultGetQuery from "../../components/global-functions/defaultGetQuery";
+import { queryArgs } from "../../components/types/global";
 
 export const dataApi:any = createApi({
   reducerPath:'data-reducer',
@@ -8,7 +9,7 @@ export const dataApi:any = createApi({
     credentials:'include'
   }),
   endpoints:(build) => ({
-      getBurgerData:build.query({
+      getSomeData:build.query({
         query:defaultGetQuery
       }),
       updateAvatarData:build.mutation({
@@ -18,8 +19,11 @@ export const dataApi:any = createApi({
           body:avatarData
         })
       }),
+      getPageText:build.query({
+        query:({url,param}:queryArgs) => `${url}/${param[0]}/${param[1]}`
+      })
   })
 });
 
-export const {useGetBurgerDataQuery,useUpdateAvatarDataMutation} = dataApi;
+export const {useGetSomeDataQuery,useUpdateAvatarDataMutation,useGetPageTextQuery} = dataApi;
 

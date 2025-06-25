@@ -1,9 +1,9 @@
-import { Dispatch, SetStateAction, useRef } from "react";
-import { DefaultRef, Store } from "../../types/global";
+import { Dispatch, KeyboardEventHandler, SetStateAction, useRef } from "react";
 import { useSelector } from "react-redux";
 import parseBirthD from "../UserBurger/functions/parseBirthDay";
+import { DefaultRef,Store } from "../types/global";
 
-const cancelSpaces:any = (event:KeyboardEvent) => {
+const cancelSpaces:KeyboardEventHandler<HTMLDivElement> = (event:React.KeyboardEvent) => {
   if(event.shiftKey && event.key === 'Enter') {
     event.preventDefault();
   }
@@ -27,17 +27,19 @@ const InfoBlock = ({label,body,editable,setValue}:{label:string,body:string,edit
     }
   }
 
-  const inputBlur = (event:any) => {
-    if(!event.target.innerText.trim().length && contentText.current) {
+  const inputBlur = (event:React.FocusEvent) => {
+    const target = event.target as HTMLDivElement;
+    if(!target.innerText.trim().length && contentText.current) {
       contentText.current.style.display = 'flex';
     }
   }
 
   return (
     <div className="body-info-block flex-center">
-      <div onInput={(event:any) => {
+      <div onInput={(event:React.FormEvent) => {
+        const target = event.target as HTMLDivElement;
         if(setValue) {
-          setValue(event.target.innerText.trim());
+          setValue(target.innerText.trim());
         }
         }} onFocus={inputFocus} onBlur={inputBlur} onKeyDown={cancelSpaces} className="body-info-body" contentEditable={editable} data-label-text={label}>
           {!editable ? bodyContent(label === 'Birthday' ? parseBirthD(body,months) : body) : null}

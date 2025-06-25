@@ -1,15 +1,16 @@
 const triggerEffect = () => {
     let bubbleExist = false;
 
-    return (event:any) => {
-        if(event.target && !bubbleExist) {
+    return (event:React.MouseEvent) => {
+        const target = event.target as HTMLDivElement;
+        if(target && !bubbleExist) {
             const ripple = document.createElement('span');
             bubbleExist = true;
-            const buttonRect = event.target.getBoundingClientRect();
+            const buttonRect = target.getBoundingClientRect();
             ripple.classList.add('ripple-btn');
             ripple.style.left = `${(event.clientX - buttonRect.left) - 16}px`;
             ripple.style.top = `${(event.clientY - buttonRect.top) - 16}px`;
-            event.target.appendChild(ripple);
+            target.appendChild(ripple);
 
             setTimeout(() => {
                 ripple.remove();

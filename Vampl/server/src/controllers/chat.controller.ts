@@ -50,7 +50,16 @@ export class ChatController {
   }
 
   @Post('create-chat')
-  async createUserChat(@Body() data:chatData) {
+  async createUserChat(@Body() data:chatData,@Req() req:Request) {
+    if(!data.chatId) {
+      data.chatId = this.userServices.genChatID();
+    }
+
+    if(data.chatUsers.users.length === 1) {
+      const phone = req.cookies['token'];
+      data.chatUsers.users.push(phone);
+    }
+
     return await this.userServices.createUserChat(data);
   }
 

@@ -1,22 +1,13 @@
 import { useSelector } from "react-redux";
-import { Store } from "../../types/global";
+import { Store } from "../types/global";
 import { useState } from "react";
 import { DateValues, SetDispatch } from "../types/global";
 import { useBurgerContext } from "../context/BurgerContext";
+import zeroIssue from "../global-functions/zeroIssue";
 
 type ValueList<T> = {
   valueList:T[],
   field:string 
-}
-
-const zeroIssue = (value:number | undefined) => {
-  if(!value) return;
-
-  if(value < 10) {
-    return `0${value}`;
-  }
-  
-  return value;
 }
 
 const createDaysList = () => {
@@ -29,6 +20,15 @@ const createYearsList = () => {
 
 const switchList = (setList:SetDispatch<string>,type:string) => {
   setList((value:string) => value === type ? '' : type);
+}
+
+const parseMonths = (months:{id:number,month:string}[]) => {
+  const lang = navigator.language;
+    return months.map(({ id, month }) => {
+    const newMonth = ['ru','uk'].includes(lang) ? month.charAt(0).toUpperCase() + month.slice(1) : month;
+
+    return [id, newMonth];
+  });
 }
 
 const ValueSelector = <T,>({valueList,field}:ValueList<T>) => {
@@ -57,15 +57,16 @@ const ValueSelector = <T,>({valueList,field}:ValueList<T>) => {
   )
 }
 
-const DateOfBirthBlock = () => {
+
+const DateOfBirthBlock = ({labelText}:{labelText:string | undefined}) => {
   const months = useSelector((store:Store) => store.user.allMonths);
   const [openedList,setOpenedList] = useState<string>('');
-  const parsedMonths = months.map((month:{id:number,numberM:number,month:string}) => [month.id,month.month]);
+  const parsedMonths = parseMonths(months);
   const {userBirthDate} = useBurgerContext();
 
   return (
       <div className="date-pick-container container flex-center">
-        <div className="date-pick" data-label-text="Birthday">
+        <div className="date-pick" data-label-text={labelText}>
           <span onClick={() => switchList(setOpenedList,'days')} className={`date-block ${openedList === 'days' ? 'block-active' : ''} flex-center`}>
             {zeroIssue(userBirthDate?.day)}
             { openedList === 'days' &&<ValueSelector valueList={createDaysList()} field="day"/> }

@@ -1,7 +1,7 @@
 import useFormatter from "../../global-functions/dateFormatter";
 import { dateCastling } from "../../global-functions/parseDate";
 
-const parseBirthD = (date:string,months:{id:number,numberM:number,month:string}[]) => {
+const parseBirthD = (date:string,months:{id:number,month:string}[]) => {
   if(['null',undefined].includes(date)) return 'Not provided';
 
   const formatter = useFormatter();

@@ -16,22 +16,43 @@
 
 .contact-tape {
   position: relative;
-  width:30rem;
   height: 100%;
   background-color:var(--bg-main);
-  transition: all .2s;
-  display: flex;
-  /* padding-top: .5rem; */
+  transition:var(--animation-transition);
+  display: inline-flex;
+  justify-content:flex-start !important;
+  scroll-behavior: smooth;
+}
+
+.contact-tape-full {
+  min-width: 25rem;
+}
+
+.contact-tape-short {
+  min-width: 12rem;
+}
+
+.contact-hidden {
+  overflow-y: initial;
+}
+
+.contact-hidden .contact-tape-container {
+  opacity: 0;
+}
+
+.contact-scrollable {
+  overflow-y:overlay;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color);
 }
 
 .contact-tape-container {
-  border-radius: 40px;
-  width: 96%;
-  height: 98%;
+  position: absolute;
+  width: 100%;
+  min-height: 100%;
   display: flex;
-  /* background-color:var(--tape-bg); */
-  overflow-y: overlay;
-  padding-top: 2rem;
+  /* padding-bottom: 1rem; */
+  transition: opacity .2s cubic-bezier(0,.2,1,1);
 }
 
 
@@ -46,9 +67,8 @@
 
 .unknown-image {
   position: relative;
-  width: 5rem !important;
+  width: 5.5rem !important;
   background-color:#5472d7;
-  height: 5rem !important;
   border-radius: 50%;
 }
 
@@ -59,8 +79,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size:1.7rem;
+  font-weight:500;
   content: attr(data-unknown-name);
   color: var(--secondary-color);
 
@@ -91,13 +111,13 @@
   padding-left: 1rem;
 }
 
-.default {
-  background: var(--secondary-color);
-  width: 10rem;
-}
 
 .contact-bubble {
   display: flex;
+}
+
+.contact-chat-inActive {
+  background-color: var(--main-grey);
 }
 
 .contact-chat-active {
@@ -109,7 +129,7 @@
   border-color: var(--night-color);
 }
 
-.shortContact .with-padding {
+.contact-container-shortContact .with-padding {
   padding-left:0;
 }
 .contact-chat-active .contact-name {
@@ -117,6 +137,10 @@
 }
 
 .contact-chat-active .contact-chat-last-message {
+  color:var(--secondary-color);
+}
+
+.contact-chat-active .contact-chat-message-time {
   color:var(--secondary-color);
 }
 
@@ -145,11 +169,11 @@
 }
 
 .contact-chat-last-message {
-  font-size: .9rem;
   color:var(--black-default);
   width: 80%;
   overflow: hidden;
   max-height: 50%;
+  font-weight:500;
 }
 
 .contact-chat-message-time {
@@ -157,22 +181,22 @@
   top:2%;
   right:2%;
   font-size: .7rem;
-  color:var(--secondary-color);
+  color:var(--black-default);
 }
 
 .contact-container {
   width: 95%;
-  height: 7rem;
+  height: 7rem !important;
   align-items: center;
   user-select: none;
   border-radius: 10px;
-  transition: all .3s;
-  background: var(--main-grey);
+  transition:var(--animation-transition);
   margin: .2rem 0;
+  box-sizing: content-box;
 }
 
 .contact-container * {
-   transition: all .3s;
+   transition:inherit;
 }
 
 .contact-container:hover {
@@ -185,6 +209,10 @@
 }
 
 .contact-container:hover .contact-chat-last-message {
+  color:var(--secondary-color);
+}
+
+.contact-container:hover .contact-chat-message-time {
   color:var(--secondary-color);
 }
 
@@ -239,19 +267,19 @@
   justify-content: center;
 }
 
-.shortContact {
+.contact-container-shortContact {
   flex-direction: column;
   align-items: center;
   justify-content: center; 
   border-radius: 10%;
 }
 
-.shortContact .container {
+.contact-container-shortContact .container {
   justify-content: center;
-  transition: all .2s;
+  transition:var(--animation-transition);
 }
 
-.shortContact .contact-info-container {
+.contact-container-shortContact .contact-info-container {
   display: none;
 }
 

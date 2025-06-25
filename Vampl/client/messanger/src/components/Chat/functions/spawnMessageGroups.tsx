@@ -4,28 +4,27 @@ import parseDate from "../../global-functions/parseDate";
 import parseMessageTime from "./parseMessageTime";
 import { Dispatch as DispatchRedux } from "@reduxjs/toolkit";
 import { setDeleteFunc } from "../../../store/chat";
-import { UserData,ChatStructure, SetDispatch } from "../../types/global"
-import { userApi } from "../../../store/api/baseApi";
-import queryRequest from "../../global-functions/queryRequest";
+import { UserData, SetDispatch, DateGroup, ObserverProps, Message } from "../../types/global"
+import getUserPhone from "../../global-functions/getUserPhone";
 
 export class ChatProcess {
   private phone:string;
-  chatData:ChatStructure
+  chatData:DateGroup[]
   userData:UserData
   userName:string
   room:string
-  setUnreadMessage:(...args:any) => any
+  setUnreadMessage:(props: ObserverProps) => (el: HTMLDivElement) => void
   setGroups:SetDispatch<Record<string,ReactElement>[]>
   setContextMenu:SetDispatch<boolean>
   setContextMenuPos:SetDispatch<{x:number,y:number}>
   chatEndedRef:RefObject<boolean>
   dispatch:DispatchRedux;
    constructor(
-    chatData:ChatStructure,
+    chatData:DateGroup[],
     userData:UserData,
     userName:string,
     room:string,
-    setUnreadMessage:any,
+    setUnreadMessage:(props: ObserverProps) => (el: HTMLDivElement) => void,
     setGroups:SetDispatch<Record<string,ReactElement>[]>,
     setContextMenu:SetDispatch<boolean>,
     setContextMenuPos:SetDispatch<{x:number,y:number}>,
@@ -54,64 +53,60 @@ export class ChatProcess {
    }
 
   spawnGroup = (
-    index:any,
-    date: any,
+    index:number,
+    date: DateGroup,
   ):ReactElement => {
-  return (
-    <div className="container container-reverse group-container" key={`group-${index}`}>
-             <span className="date-container">
-                 <p className="group-date">{parseDate(Object.keys(date as any).pop() ?? "",this.userData.allMonths)}
-                 </p>
-             </span>
-             {/* @ts-ignore */}
-             {Object.values(date).pop()!.groups.map((groupData:any,groupIdx:number,arr:any) => {
-                const groups:any = [];
-                for(const [groupName,group] of Object.entries(groupData) as [string,any]) {
-                   const isUnread = group.sender !== this.phone;
-                   const groupElem =
-                   <div className={`message-group ${group.sender === this.phone ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
-                   {group.messages.map((message: any, index: number) => (
-                     <div onContextMenu={this.spawnContextMenu(
-                       Object.keys(date as any).pop() ?? "",
-                       groupName,this.room,message.body,message.time
-                      )} ref={
-                        isUnread && !message.seen ? this.setUnreadMessage({
-                          date:Object.keys(date as any).pop() ?? "",
-                          group:groupName,
-                          room:this.room,
-                          body:message.body,
-                          time:message.time
-                        }) : null
-                      }
-                      style={{transition:`opacity ${(arr.length - groupIdx) * .15}s ease-out`}}
-                      className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.phone ? 'not-user-message' : ''}`}
-                       key={`message-${groupIdx}-${index}`}>
-                         {index === group.messages.length - 1 && (
-                           <svg viewBox="0 0 50 50" width="30" height="30" className="message-tail chat-message-tail">
-                             <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
-                           </svg>
-                         )}
-                       <p className="message-body">{message.body}</p>
-                       <div className="message-additional-info">
-                         <p className="message-time">{parseMessageTime(message.time)}</p>
-                         {group.sender === this.phone && <MessageEyes seen={message.seen}/>}
+    return (
+      <div className="container container-reverse group-container" key={`group-${index}`}>
+               <span className="date-container">
+                   <p className="group-date">{parseDate(navigator.language.split('-')[0],Object.keys(date).pop() ?? "",this.userData.allMonths)}
+                   </p>
+               </span>
+               {Object.values(date).pop()!.groups.map((groupData:DateGroup,groupIdx:number,arr:DateGroup[]) => {
+                  const groups:ReactElement[] = [];
+                  for(const [groupName,group] of Object.entries(groupData) as [string,any]) {
+                     const isUnread = group.sender !== this.phone;
+                     const groupElem =
+                     <div className={`message-group ${group.sender === this.phone ? 'group-right' : 'group-left'}`} key={`group-${groupIdx}`}>
+                     {group.messages.map((message:Message, index: number) => (
+                       <div onContextMenu={this.spawnContextMenu(
+                         Object.keys(date as DateGroup).pop() ?? "",
+                         groupName,this.room,message.body,message.time
+                        )} ref={
+                          isUnread && !message.seen ? this.setUnreadMessage({
+                            date:Object.keys(date as DateGroup).pop() ?? "",
+                            group:groupName,
+                            room:this.room,
+                            body:message.body,
+                            time:message.time
+                          }) : null
+                        }
+                        style={{transition:`opacity ${(arr.length - groupIdx) * .15}s ease-out`}}
+                        className={`message ${index === 0 ? 'rounded-message' : ''} ${group.sender !== this.phone ? 'not-user-message' : ''}`}
+                         key={`message-${groupIdx}-${index}`}>
+                           {index === group.messages.length - 1 && (
+                             <svg viewBox="0 0 30 30"  className="message-tail chat-message-tail">
+                               <path xmlns="http://www.w3.org/2000/svg" id="Vector 1" d="M1 1C4.68182 6.06135 15.8364 16 31 15.2638C20.1818 17.5474 1 27.0736 2.96364 31" />
+                             </svg>
+                           )}
+                         <p className="message-body">{message.body}</p>
+                         <div className="message-additional-info">
+                           <p className="message-time">{parseMessageTime(navigator.language.split('-')[0],message.time)}</p>
+                           {group.sender === this.phone && <MessageEyes seen={message.seen}/>}
+                         </div>
                        </div>
-                     </div>
-                   ))}
-                 </div>
-                 groups.push(groupElem);
-                }
-                return groups;
-             })}
-           </div>
+                     ))}
+                   </div>
+                   groups.push(groupElem);
+                  }
+                  return groups;
+               })}
+             </div>
     )
   }
 
  async getUserPhone() {
-    const {phone}:UserData = await queryRequest(userApi,'getUserConvenientData',{url:'info'},this.dispatch) as UserData;
-
-    this.phone = phone;
-    return;
+    this.phone = await getUserPhone(this.dispatch);
  }
 
  spawnGroups() {
@@ -126,7 +121,7 @@ export class ChatProcess {
         this.setGroups((elemGroups:Record<string,ReactElement>[]) => {
           const [dateKey] = Object.keys(date);
           const newGroups = [...elemGroups];
-          const group:Record<string,ReactElement> = {[dateKey]:this.spawnGroup(index,date)};
+          const group:Record<string,ReactElement> = {[dateKey]:this.spawnGroup(Number(index),date)};
           newGroups.unshift(group);
           return newGroups;
         });

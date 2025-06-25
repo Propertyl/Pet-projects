@@ -34,13 +34,27 @@ export class DataController {
    }
 
    @Get('month/:lang')
-   getCurrentMonth(@Param('lang') lang:string) {
-      if(lang === 'en') {
-         return this.user.getMonthEN();
-      }
-      if(lang === 'ua') {
-         return this.user.getMonthUA();
-      }
+   async getCurrentMonth(@Param('lang') lang:string) {
+      const months = await this.user.getMonths()
+      .then((value:{id:bigint,month_en:string,month_uk:string}[]) => {
+         return value.map(month => {
+          const newMonth:{id:number,month:string} = {id:Number(month.id),month:''}
+            if(['uk','ru'].includes(lang)) {
+               newMonth['month'] = month.month_uk;
+            } else {
+               newMonth['month'] = month.month_en;
+            }
+          
+            return newMonth;
+         })
+      });
+      
+      return months;
+   }
+
+   @Get('getText/:page/:lang')
+   getAuthText(@Param('page') page:string,@Param('lang') lang:string) {
+      return this.user.getPageText(page,lang);
    }
 
    @Get('status/:phone')
@@ -64,5 +78,12 @@ export class DataController {
      }
 
      return {isOwn:false}
+   }
+
+   @Get('search-users/:request')
+   searchUsers(@Param('request') request:string,@Req() req:Request) {
+      const phone = req.cookies['token'];
+
+      return this.user.searchOtherUsers(phone,request)
    }
 }

@@ -1,15 +1,23 @@
 .user-burger-menu {
-  position: absolute;
+  position: sticky;
+  top:0%;
   display: flex;
   width:100%;
+  min-width:25rem;
   height: 100%;
   background-color:var(--bg-main);
   overflow: hidden;
   z-index: 10;
+  pointer-events: all;
+}
+
+.user-edit-burger-menu {
+  position: absolute;
+  z-index: 100 !important;
 }
 
 .head-info-container {
-  height: 40% !important;
+  height: 30% !important;
   flex-direction: column;
   user-select: none;
 }
@@ -17,6 +25,11 @@
 .body-info-container {
   flex-direction: column;
   padding: 0 1.2rem;
+  max-height: 30%;
+}
+
+.body-info-container-edit {
+  max-height:45%;
 }
 
 .user-burger-avatar {
@@ -27,23 +40,27 @@
   border: .1rem solid var(--bubble-color);
 }
 
+.user-burger-avatar .unknown-image::before {
+  font-size: 2rem !important;
+}
+
 .user-burger-menu-appear {
   display: flex !important;
-  animation: menu-appear .2s var(--appear-menu-transition) forwards;
+  animation: menu-appear .25s var(--appear-menu-transition) forwards;
 }
 
 .user-burger-menu-disappear {
-  animation: menu-disappear .2s var(--appear-menu-transition) forwards;
+  animation: menu-disappear .25s var(--appear-menu-transition) forwards;
 }
 
 .user-edit-burger-menu-appear {
   display: flex !important;
-  animation: edit-menu-appear .2s var(--appear-menu-transition) forwards;
+  animation: edit-menu-appear .25s var(--appear-menu-transition) forwards;
 }
 
 .user-edit-burger-menu-disappear {
   display: flex !important;
-  animation: edit-menu-disappear .2s var(--appear-menu-transition) forwards;
+  animation: edit-menu-disappear .25s var(--appear-menu-transition) forwards;
 }
 
 .user-burger-menu-not-spawned {
@@ -202,8 +219,8 @@
 
 .edit-button {
   position: relative;
-  width: 4.5rem;
-  height: 4.5rem;
+  width:5rem;
+  height:5rem;
   border-radius: 50%;
   display: flex;
   background-color: var(--night-color);
@@ -355,7 +372,8 @@
 .resizing-header {
   display: flex;
   font-size: 1.3rem;
-  color:var(--other-text-color)
+  font-weight:500;
+  color:var(--main-grey);
 }
 
 .resizing-button {
@@ -369,8 +387,8 @@
 }
 
 .cancel-button .button-icon * {
-  fill:var(--other-text-color) !important;
-  stroke:var(--other-text-color) !important;
+  fill:var(--main-grey) !important;
+  stroke:var(--main-grey) !important;
 }
 
 .cancel-button:hover {
@@ -389,7 +407,7 @@
 .resizing-dimmer {
   position: fixed !important;
   top:0;
-  width: 90vw !important;
+  width: 90vw ;
   z-index: 100;
   background:rgba(var(--black-color),.5);
   padding-bottom: 2rem;

@@ -6,18 +6,23 @@ import { UserInfo } from "../../types/global";
 import { userApi } from "../../../store/api/baseApi";
 import { dataApi } from "../../../store/api/dataApi";
 import queryRequest from "../../global-functions/queryRequest";
+import { NavigateFunction } from "react-router";
 
-const checkAuthorization = async (dispatch:Dispatch) => {
-      const auth:{approve:boolean} = await dispatch(userApi.endpoints.getUserConvenientData.initiate({url:'authorization'},{ forceRefetch: true })).unwrap();
+const checkAuthorization = async (dispatch:Dispatch,navigate:NavigateFunction) => {
+      const auth:{approve:boolean} = await queryRequest(userApi,'getUserConvenientData',{url:'authorization'},dispatch,true);
 
-      const months = await queryRequest(dataApi,'getBurgerData',{url:'month/en'},dispatch);
+      const months = await queryRequest(dataApi,'getSomeData',{url:'month',param:navigator.language},dispatch);
       
       dispatch(setData({field:'allMonths',value:months}));
       dispatch(setData({field:'locale',value:navigator.language ?? 'en-US'}));
 
-      if(!auth.approve && window.location.href.split('/').pop() != 'auth') {
-        window.location.href = '/auth';
+      if(!auth.approve) {
+        navigate('/auth');
       } else if(auth.approve) {
+        const currentLink = window.location.href;
+        if(!/[#@]/g.test(currentLink)) {
+          navigate('/');
+        }
         const {name} = await queryRequest(userApi,'getUserConvenientData',{url:'info'},dispatch) as UserInfo;
         const userTheme = await queryRequest(userApi,'getUserConvenientData',{url:'get-theme'},dispatch) as {theme:string};
 

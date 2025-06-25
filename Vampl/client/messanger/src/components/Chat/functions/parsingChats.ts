@@ -1,19 +1,19 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { userApi } from "../../../store/api/baseApi";
 import { dataApi } from "../../../store/api/dataApi";
-import { UserInfo } from "../../types/global";
+import { ChatStructure, UserChats, UserInfo } from "../../types/global";
 import queryRequest from "../../global-functions/queryRequest";
 
 async function getUserInfo(phone:string,dispatch:Dispatch) {
-  const data:UserInfo = await queryRequest(userApi,'getUserConvenientData',{url:'getInfoByPhone',param:phone},dispatch);
-  const {status}:{status:boolean} = await queryRequest(dataApi,'getBurgerData',{url:'status',param:phone},dispatch);
+  const data:UserInfo = await queryRequest(userApi,'getUserConvenientData',{url:'getInfoByPhone',param:phone},dispatch,true);
+  const {status}:{status:boolean} = await queryRequest(dataApi,'getSomeData',{url:'status',param:phone},dispatch,true);
 
   return {name:data.name,image:data.image,status:status,phone:data.phone};
 }
 
-const parsingChats = async (res:any,userPhone:string,dispatch:Dispatch) => {
+const parsingChats = async (res:ChatStructure[],userPhone:string,dispatch:Dispatch) => {
   if(res.length) {
-    const chats = await Promise.all(res.map(async (chat:any) => {
+    const chats = await Promise.all(res.map(async (chat:UserChats | any) => {
       const users = chat?.chatUsers?.users || [];
       const otherUserPhone = users.find((user:string) => user != userPhone);
       

@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
+import { SetDispatch } from "../types/global";
 
-const saveValue = (setValue:Dispatch<SetStateAction<any>>) => (data:any) => {
+const saveValue = <T,>(setValue:SetDispatch<T>) => (data:T) => {
   if(data) {
     setValue(data);
   } else {

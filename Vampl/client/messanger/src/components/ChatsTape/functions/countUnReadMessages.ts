@@ -1,8 +1,8 @@
 import { Dispatch } from "@reduxjs/toolkit";
-import { ChatStructure} from "../../types/global";
+import { ChatStructure, Message} from "../../types/global";
 import { incrementMessages } from "../../../store/chat";
 
-const unReadMessagesCounter = (dispatch:Dispatch,chatMessages:ChatStructure,userPhone:string) => {
+const unReadMessagesCounter = (dispatch:Dispatch,chatMessages:ChatStructure,userPhone:string,chatId:string) => {
   const chat = chatMessages.all;
   let needToStop:boolean = false;
 
@@ -12,12 +12,12 @@ const unReadMessagesCounter = (dispatch:Dispatch,chatMessages:ChatStructure,user
       break;
     }
     for(let j:number = groups.length - 1; j >= 0; j--) {
-      const [{sender,messages}] = Object.values<{sender:string,messages:any}>(groups[j]);
+      const [{sender,messages}] = Object.values<{sender:string,messages:Message[]}>(groups[j]);
       for(let d:number = messages.length - 1; d >= 0; d--) {
         const message = messages[d];
         if(!message.seen && sender != userPhone) {
           console.log('sender:',sender);
-          dispatch(incrementMessages());
+          dispatch(incrementMessages(chatId));
         } else {
           needToStop = true;
           break;

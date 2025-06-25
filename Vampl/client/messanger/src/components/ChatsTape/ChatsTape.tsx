@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import {ChatStructure, statusInfo, UserContact} from "../types/global";
+import {ChatStructure, SetDispatch, statusInfo, UserContact,Store} from "../types/global";
 import { useDispatch, useSelector } from "react-redux";
-import { Store } from "../../types/global";
 import getUserChats from "./functions/getUserChats";
 import { setData } from "../../store/user";
 import triggerEffect from "../global-functions/bubbleEffect";
@@ -16,14 +15,27 @@ import { Socket } from "socket.io-client";
 import getLastMessage from "../global-functions/getLastChatMessage";
 import not from '/notification.mp3';
 import { titleSwapper } from "./functions/titleSwapper";
-import { incrementMessages } from "../../store/chat";
+import { incrementMessages, switchRefreshChatsTape } from "../../store/chat";
+import getUserPhone from "../global-functions/getUserPhone";
+import useThrottle from "../global-functions/useThrottle";
+import textChanger from "../Navigation/functions/textChanger";
+
+const makeShortVersion = (setContactDefault:SetDispatch<boolean>) => () => {
+  const size = window.innerWidth;
+  console.log('size:',size);
+  if(size < 1440) {
+    setContactDefault(false);
+  } else if (size > 1440) {
+    setContactDefault(true);
+  }
+}
 
 
 const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const router = useNavigate();
   const bubbleSpawner = useRef(triggerEffect());
   const [chats,setChats] = useState<UserContact[]>([]);
-  const [contactDefault] = useState<boolean>(true);
+  const [contactDefault,setContactDefault] = useState<boolean | null>(null);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextPos,setContextPos] = useState<{x:number,y:number}>({x:0,y:0});
   const [connectedToRooms,setConnectedToRooms] = useState<boolean>(false);
@@ -32,9 +44,11 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const userData = useSelector((state:Store) => state.user);
   const burgerUser = useSelector((state:Store) => state.stuff.userInBurger);
   const unReadMessage = useSelector((state:Store) => state.chat.unReadMessages);
+  const refreshChatsTape = useSelector((state:Store) => state.chat.refreshChatsTape);
   const dispatch = useDispatch();
   const notification:HTMLAudioElement = new Audio(not);
   const handleTitleNotification = titleSwapper;
+  const contactChanger = useThrottle(makeShortVersion(setContactDefault),300);
   
   const handleChangeStatus = (changedUser:statusInfo) => {
     setChats(chats => chats.map(chat => {
@@ -47,15 +61,17 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     }))
   }
 
-  const handleUpdateContacts = (currentChat:ChatStructure,room:string) => {
+  const handleUpdateContacts = async (currentChat:ChatStructure,room:string,sendFromPhone:string) => {
     if(document.visibilityState === 'hidden') {
       notification.currentTime = 0;
       notification.play();
       handleTitleNotification();
     }
 
-    if(room !== currentRoom) {
-      dispatch(incrementMessages());
+    const userPhone = await getUserPhone(dispatch);
+    
+    if(sendFromPhone !== userPhone) {
+      dispatch(incrementMessages(room));
     }
     
     setChats(chats => {
@@ -80,6 +96,10 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
 
         socket.current.on('userUpdates',handleChangeStatus);
       }
+
+      makeShortVersion(setContactDefault)();
+
+      window.addEventListener('resize',contactChanger);
     }
     
     setupPage();
@@ -87,31 +107,34 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     return () => {
       socket.current!.off('userUpdates',handleChangeStatus);
       socket.current!.off('updateContactChat',handleUpdateContacts);
+      window.removeEventListener('resize',contactChanger);
     }
   },[]);
 
   useEffect(() => {
     if(userData.allChats.length && !connectedToRooms) {
       setConnectedToRooms(true);
-      userData.allChats.map(chat => {
-        socket.current?.emit('joinRoom',chat.id);
-      });
+      socket.current?.emit('joinRooms',userData.allChats);
     }
   },[userData.allChats,connectedToRooms]);
   
   useEffect(() => {
     const checkChats = async () => {
-      if(!chats.length) {
+      if(!chats.length || refreshChatsTape) {
         const currentChats:UserContact[] = await getUserChats(dispatch);
         if(currentChats.length) {
+          const rooms = currentChats.map(chat => chat.id);
           setChats(currentChats);
-          dispatch(setData({field:'allChats',value:currentChats}));
+          dispatch(
+            setData({field:'allChats',value:rooms})
+          );
+          dispatch(switchRefreshChatsTape(false));
         }
       }
     }
 
     checkChats();
-  },[userData]);
+  },[refreshChatsTape]);
     
   const openChat = (contact:UserContact) => {
     dispatch(changeRoom(contact.id));
@@ -119,7 +142,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
 
   const deleteChat = async (chatId:string) => {
     socket.current!.emit('delete-chat',chatId);
-    setChats(chats.filter(contact => contact.id != chatId));
+    dispatch(switchRefreshChatsTape(true));
     if(currentRoom === chatId) {
       router('/');
       dispatch(changeRoom(''));
@@ -135,13 +158,13 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
 
   return (
     <>
-      <section className={`contact-tape ${!contactDefault ? "default" : ""} flex-center`}>
+      <section className={`contact-tape ${contactDefault ? "contact-tape-full" : "contact-tape-short"} ${burgerUser ? 'contact-hidden' : 'contact-scrollable'}`}>
         {burgerUser && <UserBurger/>}
-        <div className="contact-tape-container container flex-reverse">
-        {contextMenu && <ContextMenu phrase="Delete Chat" func={(() => () => deleteChat(deleteId))} pos={contextPos} switchState={setContextMenu}/>}
+        <div className="contact-tape-container  flex-reverse">
+        {contextMenu && <ContextMenu phrase={textChanger('Видалити Чат','Delete Chat')} func={(() => () => deleteChat(deleteId))} pos={contextPos} switchState={setContextMenu}/>}
           { chats.length ? chats.map((contact,index) => (
-                <a draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container container ${!contactDefault ? 'shortContact' : ''} ${currentRoom === contact.id && 'contact-chat-active'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
-                  <div onClick={(event:any) => {
+                <a draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container container ${contactDefault ? 'contact-container-fullContact' : 'contact-container-shortContact'} ${currentRoom === contact.id ? 'contact-chat-active' : 'contact-chat-inActive'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
+                  <div onClick={(event:React.MouseEvent) => {
                       bubbleSpawner.current(event);
                       if(checkActiveChat(window.location.href,contact.user.name)) {
                         openChat(contact);
@@ -165,12 +188,12 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
                   <div className="contact-info-container">
                     <p  className="contact-name">{contact.user.name}</p>
                     <p className="contact-chat-last-message">{contact.message.last}</p>
-                    <p className="contact-chat-message-time">{parseMessageTime(contact.message.time)}</p>
+                    <p className="contact-chat-message-time">{parseMessageTime(navigator.language.split('-')[0],contact.message.time)}</p>
                   </div>
                 </div>
-                  {unReadMessage != 0 && currentRoom !== contact.id &&
+                  {unReadMessage[contact.id] > 0 &&
                     <span className="contact-unread-messages-container">
-                      <p className="contact-unread-messages-count">   {unReadMessage}</p>
+                      <p className="contact-unread-messages-count">   {unReadMessage[contact.id]}</p>
                     </span>
                   }
             </a>

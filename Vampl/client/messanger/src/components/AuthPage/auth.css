@@ -2,9 +2,19 @@
   position: relative;
   width: 100%;
   height: 100%;
-  transition: all .2s;
+  transition: var(--animation-transition);
   cursor: pointer;
   z-index: 0;
+}
+
+
+.pass-icon * {
+  fill:var(--main-grey);
+  transition: var(--animation-transition);
+}
+
+.pass-icon:hover * {
+  fill: var(--night-color);
 }
 
 .arrow-icon {
@@ -18,7 +28,7 @@
   position: absolute;
   width: .2rem;
   height: 2rem;
-  background: var(--black-default);
+  background: var(--main-grey);
   transition: all .2s;
   animation: stick-rotate .3s ease-in-out forwards;
   transform:rotate(45deg);
@@ -91,7 +101,7 @@
   align-items: center;
   background: none !important;
   border-radius: var(--default-border-radius);
-  color:var(--black-default) !important;
+  color:var(--other-text-color) !important;
   padding-left: .5rem;
   height: 100%;
   width:100%;
@@ -121,7 +131,7 @@
   overflow-y: scroll;
   height:16rem;
   z-index: 1;
-  background-color: var(--chat-bg-color);
+  background-color: var(--main-grey);
   backdrop-filter: blur(.5rem);
   border-radius: var(--default-border-radius);
   pointer-events: all !important;
@@ -200,8 +210,8 @@
   font-size: 1.5rem;
 }
 
-
 .auth-list-container {
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -237,7 +247,7 @@
   height: 6rem;
   display:flex;
   align-items: center;
-  background-color: var(--chat-bg-color);
+  background-color: var(--main-grey);
   padding: .5rem;
   outline: none;
   border-color: none;
@@ -328,7 +338,31 @@ border-radius: 4px;
   align-items: center;
   flex-direction: column;
   padding: 1rem;
-  animation: box-up .3s ease-out forwards;
+  z-index: 1000000000000000;
+  animation: box-up .3s cubic-bezier(0,.2,1,1) forwards;
+}
+
+.auth-greetings-container {
+  height:auto !important;
+}
+
+.auth-greetings-text::before {
+  content: '';
+  position: absolute;
+  width: 130%;
+  height: 130%;
+  background-color: var(--night-color);
+  border-radius: 30px;
+  z-index: -1;
+}
+
+.auth-greetings-text {
+  position: relative;
+  color:rgb(var(--white-color));
+  font-size: 3rem;
+  margin:0;
+  display: flex;
+  z-index: 10;
 }
 
 @keyframes box-up {

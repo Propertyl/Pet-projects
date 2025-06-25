@@ -1,23 +1,23 @@
-import {ReactElement,RefObject, useCallback, useEffect, useRef, useState} from "react";
-import {ChatStructure, DateGroup, DefaultRef, ObserverProps} from "../types/global";
+import {ReactElement,RefObject,useEffect, useRef, useState} from "react";
+import {ChatStructure, ChatText, DateGroup, DefaultRef,ObserverProps, RefFunc} from "../types/global";
 import { useDispatch, useSelector } from "react-redux";
-import { MessagesData, Store, UserData } from "../../types/global";
+import { MessagesData, Store, UserData } from "../types/global";
 import {Socket } from "socket.io-client";
 import parseToDeleteGroup from "./functions/parseChatGroups";
 import useFormatter from "../global-functions/dateFormatter";
 import './chat.css';
 import ContextMenu from "../subComponents/ContextMenu";
 import { ChatProcess } from "./functions/spawnMessageGroups";
-import { useGetChatDataQuery } from "../../store/api/chatApi";
+import { chatApi } from "../../store/api/chatApi";
 import useObserver from "./functions/groupObserver";
 import waitTick from "./functions/waitTick";
 import updateChatContent from "./functions/updateChatContent";
+import queryRequest from "../global-functions/queryRequest";
+import useGetPageText from "../global-functions/getPageText";
 
 const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
-  const {data:roomChat} = useGetChatDataQuery({url:'chatID',param:room},{
-    skip:!room
-  });
-  const [chatData,setChatData] = useState(roomChat?.all ? parseToDeleteGroup(roomChat['all']) : null);
+  const [roomChat,setRoomChat] = useState<ChatStructure | null>(null);
+  const [chatData,setChatData] = useState<DateGroup[] | null>(null);
   const [groups,setGroups] = useState<Record<string,ReactElement>[]>([])
   const messagesRef:DefaultRef = useRef(null);
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
@@ -28,16 +28,17 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const downButtonRef = useRef(false);
   const chatEndedRef:RefObject<boolean> = useRef(false);
   const cantUpdateRef:RefObject<boolean> = useRef(false);
-  const groupsSpawner:RefObject<any> = useRef(null);
+  const groupsSpawner:RefObject<RefFunc<[]>> = useRef(null);
   const dispatch = useDispatch();
-  const setObserver:RefObject<any> = useRef(null);
+  const setObserver:RefObject<RefFunc<[HTMLDivElement,ObserverProps]>> = useRef(null);
   const [placeholder,setPlaceholder] = useState<boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
   const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
+  const [pageText,setPageText] = useState<ChatText | null>(null);
   const chatProcess:RefObject<ChatProcess | null> = useRef(null);
 
   const setUnreadMessage = (props:ObserverProps) => (el:HTMLDivElement) => {
-    if(el) {
+    if(el && setObserver.current) {
       setObserver.current(el,props);
     }
   }
@@ -64,9 +65,11 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const handleUpdatingChat = ({currentChat,currentTime}:{currentChat:ChatStructure,currentTime:string,currentGroup?:string}) => {
     if(chatData) {
       const [groupDate] = currentTime.split(',');
-      const findGroup = (group:any) => {
-        const [currentDate] = Object.keys(group);
-        return currentDate === groupDate;
+      const findGroup = <T,>(group:T) => {
+        if(group) {
+          const [currentDate] = Object.keys(group);
+          return currentDate === groupDate;
+        }
       }
       setGroups(groups => {
         const newGroups = [...groups];
@@ -88,7 +91,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
           } else {
             pushGroup();
           }
-          setChatData(currentChat);
+          setChatData(currentChat.all);
           return newGroups;
         }
 
@@ -98,20 +101,55 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
     }
   }
 
+  useGetPageText<ChatText>(setPageText,'chat',dispatch);
+
+  useEffect(() => {
+    const getRoomChat = async () => {
+      if(room) {
+        await queryRequest(chatApi,'getChatData',{url:'chatID',param:room},dispatch,true);
+        const chid = await queryRequest(chatApi,'getChatData',{url:'chatID',param:room},dispatch,true);
+        setRoomChat(chid);
+      }
+    }
+
+    getRoomChat();
+  },[room])
+
   useEffect(() => {
     if(roomChat) {
-      setChatData(roomChat['all']);
+      chatProcess.current = null;
+      setGroups([]);
+      groupsSpawner.current = null;
+      setChatData(null);
     }
   },[roomChat]);
 
   useEffect(() => {
-     downButtonRef.current = downButton;
+    if(messagesRef.current && roomChat) {
+      messagesRef.current.classList.add('messages-hidden');
+    }
+  },[messagesRef,roomChat])
+
+  useEffect(() => {
+    if(roomChat) {
+      setChatData(roomChat.all);
+    }
+  },[roomChat]);
+
+  useEffect(() => {
+    downButtonRef.current = downButton;
   },[downButton]);
+
+  useEffect(() => {
+    if(pageText) {
+      console.log('page:',pageText);
+    }
+  },[pageText])
 
   useEffect(() => {
     const setupPage = async () => {  
         if(socket.current) {
-          setObserver.current = useObserver({threshold:1},socket.current);
+          setObserver.current = useObserver({threshold:1},socket.current,dispatch);
         
           socket.current.on('updateChat',handleUpdatingChat);
         }
@@ -135,16 +173,18 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
 
   const revealMessages = () => {
     if(messagesRef.current && messagesRef.current.classList.contains('messages-hidden')) {
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-        messagesRef.current.classList.remove('messages-hidden');
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      messagesRef.current.classList.remove('messages-hidden');
     }
   }
 
-  const spawnUntilScroll = useCallback(async () => {
+  const spawnUntilScroll = async () => {
     const chat = messagesRef.current;
     await waitTick();
     if(chat.scrollHeight === chat.clientHeight && !chatEndedRef.current) {
-      groupsSpawner.current();
+      if(groupsSpawner.current) {
+        groupsSpawner.current();
+      }
 
       await waitTick();
       scrollDown('instant');
@@ -152,14 +192,13 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
     }
 
     revealMessages();
-  },[messagesRef,chatEndedRef]);
+  }
 
   useEffect(() => {
     if(chatData && !chatProcess.current) {
-      chatProcess.current = new ChatProcess(chatData,userData as any,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
-      chatProcess.current.getUserPhone();
+      chatProcess.current = new ChatProcess(chatData,userData,userName,room,setUnreadMessage,setGroups,setContextMenu,setContextMenuPos,chatEndedRef,dispatch);
     }
-  },[chatData,chatProcess.current])
+  },[chatData,chatProcess]);
 
   useEffect(() => {
     const initiateGroups = async () => {
@@ -169,17 +208,18 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
 
         groupsSpawner.current();
         await waitTick();
+        scrollDown('instant');
         await spawnUntilScroll();
       }
     }
 
     initiateGroups();
-  },[chatData,chatProcess.current]);
+  },[chatData,chatProcess]);
 
   const scrollDown = (behavior:'smooth' | 'instant' = 'instant') => {
     if(messagesRef.current) {
       messagesRef.current.scrollTo({top:messagesRef.current.scrollHeight,behavior:behavior});
-      setDownButton(false)
+      setDownButton(false);
     }
   }
 
@@ -223,23 +263,25 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
       }
   }
 
-  const messageWriting = (event:any) => {
-    if(event.target.innerText.trim().length) {
+  const messageWriting = (event:React.FormEvent) => {
+    const target = event.target as HTMLDivElement;
+    if(target.innerText.trim().length) {
         setPlaceholder(false);
     } else {
         setPlaceholder(true);
     }
 
-    setCurrentMessage(event.target.innerText);
+    setCurrentMessage(target.innerText);
   }
 
-  const blurInput = (event:any) => {
-      if(!event.target.innerText.trim().length) {
+  const blurInput = (event:React.FocusEvent) => {
+    const target = event.target as HTMLDivElement;
+      if(!target.innerText.trim().length) {
           setPlaceholder(true);
       }
   }
 
-  const messagePaste = (event:ClipboardEvent | any) => {
+  const messagePaste = (event:React.ClipboardEvent) => {
       event.preventDefault();
       const pasted = event.clipboardData?.getData('text/plain');
 
@@ -266,7 +308,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
         messagesRef.current.classList.remove('hidden');
       }
      }
-  },[contextMenu,messagesRef]);
+  },[contextMenu,messagesRef,roomChat]);
 
   return (
     <>
@@ -281,13 +323,13 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
                 })}
               </div>
               {
-                contextMenu && <ContextMenu phrase="Delete" switchState={setContextMenu} pos={contextMenuPos} func={() => setDeletedMessage(deleteArgs)}/>
+                contextMenu && <ContextMenu phrase={pageText?.context_menu.delete ?? '...'} switchState={setContextMenu} pos={contextMenuPos} func={() => setDeletedMessage(deleteArgs)}/>
               }
             </div>
             <div className="messages-input">
               {downButton && 
                 <button className="classic-button down-button" onClick={() => scrollDown()}>
-                  <i className="arrow-icon icon"></i>
+                  <i className="arrow-icon button-icon"></i>
                 </button>
               }
               <div className="type-message-container">
@@ -295,7 +337,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
                     <div onPaste={messagePaste} autoFocus contentEditable={true} onInput={messageWriting} onBlur={blurInput} onKeyDown={(event) => startSending(event)}  className="chat-input-area">
                     </div>
                     <span style={{display:placeholder ? "flex" : "none"}} contentEditable={false} className="chat-input-area-placeholder">
-                        Message
+                      {pageText?.message_input ?? '...'}
                     </span>
                 </div>
               </div>

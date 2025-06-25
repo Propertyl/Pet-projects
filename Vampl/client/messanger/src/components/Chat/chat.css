@@ -159,17 +159,17 @@
 
 
 .chat-message-tail {
-  bottom:-.2rem !important;
-  right:-.5rem !important;
-  width: 1rem !important;
+  bottom:0 !important;
+  right:-0.6rem !important;
+  width:1rem !important;
   height:1rem !important;
-  transform: rotate(20deg);
+  transform: rotate(5deg);
   z-index: 0;
 }
 
 .message-tail {
   position: absolute;
-  right: -.8rem;
+  right: -0.8rem;
   bottom: 0rem;
   width: 2rem;
   height: 2rem;
@@ -222,6 +222,7 @@
   justify-content: center;
   padding: .2rem;
   padding-left: 1rem;
+  box-shadow: 0 0 .1rem .05rem rgba(var(--alt-color),.2);
 }
 
 .chat-input-area {
@@ -291,8 +292,6 @@
   z-index: 1;
 }
 
-
-
 .type-message-container .message-tail {
   fill: var(--input-color) !important;
 }
@@ -300,7 +299,7 @@
 .messages-input {
   position: relative;
   display: flex;
-  width:50%;
+  width:47%;
   max-height:10rem;
   align-items: center;
   justify-content: center;
@@ -353,10 +352,10 @@
   padding:.5rem .2rem;
   border-radius:10px;
   background-color:var(--context-bg);
-  backdrop-filter: blur(50px);
+  backdrop-filter: blur(10px);
   animation: context-menu-appear .1s ease-out forwards;
   transform-origin:right;
-  box-shadow: .1rem .1rem .4rem .1rem rgba(var(--black-color),.3);
+  box-shadow: .1rem .1rem .4rem .1rem rgba(var(--black-color),.2);
 }
 
 .context-menu-reverse {
@@ -381,7 +380,6 @@
 }
 
 .hidden {
-  /* overflow-y: hidden; */
   pointer-events: none;
 }
 

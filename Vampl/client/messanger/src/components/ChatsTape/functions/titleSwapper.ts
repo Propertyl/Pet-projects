@@ -1,5 +1,5 @@
 const handleTitleSwap = () => {
-    let timer:any = null;
+    let timer:NodeJS.Timeout | null = null;
     let prevTitle = document.title;
 
     return function swap() {

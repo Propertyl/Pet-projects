@@ -1,4 +1,4 @@
-const useDebounce = (func:any,delay:number) => {
+const useDebounce = (func:() => any,delay:number) => {
   let timer:any = null;
 
   return function() {

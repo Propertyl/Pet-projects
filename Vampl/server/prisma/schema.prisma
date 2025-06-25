@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,48 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  phone String @unique
-  password String 
-  birthData String?
-  image String? 
-}
-
-model Chats {
-  id Int @id @default(autoincrement())
-  chatId String @unique 
+model chats {
+  id        Int    @id @default(autoincrement())
+  chatId    String @unique(map: "Chats_chatId_key")
   chatUsers Json
-  messages Json
+  messages  Json
 }
 
-model MonthUA {
-  id Int @id @default(autoincrement())
-  numberM Int @unique
-  month String
+model locales {
+  page     String @db.VarChar(20)
+  language String @db.VarChar(2)
+  text     Json
+  id       Int    @id @default(autoincrement())
 }
 
-model MonthEN {
-  id Int @id @default(autoincrement())
-  numberM Int @unique
-  month String
-}
-
-model OnlineStatuses {
-  id Int @id @default(autoincrement())
-  phone String @unique
+model onlinestatuses {
+  id     Int     @id @default(autoincrement())
   status Boolean
+  phone  String  @unique(map: "OnlineStatuses_phone_key")
 }
 
-model UserTheme {
-  id Int @id @default(autoincrement())
-  phone String @unique
+model user {
+  id        Int     @id @default(autoincrement())
+  name      String
+  image     String?
+  phone     String  @unique(map: "User_phone_key")
+  birthData String?
+  password  String
+}
+
+model usertheme {
+  id    Int    @id @default(autoincrement())
   theme String @default("light")
+  phone String @unique(map: "UserTheme_phone_key")
 }
 
-model Locales {
-  page String  @unique
-  language String
-  text Json
+model months {
+  id       BigInt @id @unique(map: "id") @default(autoincrement()) @db.UnsignedBigInt
+  month_en String @db.VarChar(20)
+  month_uk String @db.VarChar(20)
+}
+
+model monthen {
+  id      Int    @id @default(autoincrement())
+  numberM Int    @unique(map: "MonthEN_numberM_key")
+  month   String
 }
