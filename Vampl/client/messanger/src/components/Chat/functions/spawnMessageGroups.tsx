@@ -56,7 +56,6 @@ export class ChatProcess {
     dateGroupIndex:number,
     date: DateGroup,
   ):ReactElement {
-    const generalLength = Object.keys(this.chatData).length;
     return (
       <div className="container container-reverse group-container" key={`group-${dateGroupIndex}-${randomKey()}`}>
                 <span className="date-container">
