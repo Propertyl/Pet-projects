@@ -1,8 +1,32 @@
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import '../Chat/chat.css';
-import { DefaultRef } from "../types/global";
+import { defaultCoords, DefaultRef } from "../types/global";
+import touchOutOfMenu from "../global-functions/touchOutOfMenu";
+
+const makeOutOfBounds = (extremePoint:number,windowBound:number,menuCoord:number) => {
+  if(extremePoint > windowBound) {
+    menuCoord -= (extremePoint - windowBound);
+  }
+
+  return menuCoord;
+}
+
+const controlOutOfBoundsSpawn = (pos:defaultCoords,menu:DefaultRef):defaultCoords => {
+  const newPos = {...pos};
+  const rect = menu.current.getBoundingClientRect();
+
+  console.log('before:',newPos);
+
+  newPos.x = makeOutOfBounds(rect.right,window.innerWidth,newPos.x);
+  newPos.y = makeOutOfBounds(rect.bottom,window.innerHeight,newPos.y);
+
+  console.log('after all:',newPos);
+
+  return newPos;
+}
 
 const ContextMenu = ({func,pos,switchState,phrase}:{func:any,pos:{x:number,y:number},switchState:Dispatch<SetStateAction<boolean>>,phrase:string}) => {
+  const [fixatedPos,setFixatedPos] = useState<defaultCoords>({x:pos.x,y:pos.y});
   const contextMenuRef:DefaultRef = useRef(null);
   const offContextMenu = () => switchState(false);
   const contextUnFocus = () => {
@@ -10,21 +34,43 @@ const ContextMenu = ({func,pos,switchState,phrase}:{func:any,pos:{x:number,y:num
      menu.addEventListener('animationend',animationOff);
      menu.classList.add('context-menu-reverse');
   }
+
+  const checkTouch = touchOutOfMenu(contextMenuRef,contextUnFocus);
+
   const animationOff = () => {
      const menu = contextMenuRef.current;
      offContextMenu();
      menu.removeEventListener('animationend',animationOff);
   }
+
   useEffect(() => {
      if(contextMenuRef.current) {
        contextMenuRef.current.focus();
+       setFixatedPos(fixated => controlOutOfBoundsSpawn(fixated,contextMenuRef));
+       if(window.innerWidth < 1100) {
+          document.addEventListener('touchstart',checkTouch);
+
+          return () => {
+            document.removeEventListener('touchstart',checkTouch);
+          }
+       }
      }
   },[contextMenuRef]);
+
+  useEffect(() => {
+    const rootElem = document.documentElement;
+    rootElem.classList.add('hidden');
+
+    return () => {
+      rootElem.classList.remove('hidden');
+    }
+  },[]);
+
    return (
-     <div onMouseLeave={contextUnFocus} style={{top:pos.y - 16,left:pos.x - 16}} className="context-menu">
+     <div onMouseLeave={contextUnFocus} style={{top:fixatedPos.y - 16,left:fixatedPos.x - 16}} className="context-menu">
        <div ref={contextMenuRef} className="context-menu-container flex-center container">
          <div className="container context-menu-option flex-center error-option" onClick={() => {
-           switchState(false);
+           contextUnFocus();
            func()();
          }}>
            <p className="delete-text">{phrase}</p>

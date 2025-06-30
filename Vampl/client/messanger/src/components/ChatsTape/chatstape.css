@@ -15,11 +15,11 @@
 }
 
 .contact-tape {
-  position: relative;
+  position:inherit;
   height: 100%;
   background-color:var(--bg-main);
   transition:var(--animation-transition);
-  display: inline-flex;
+  display: inherit;
   justify-content:flex-start !important;
   scroll-behavior: smooth;
 }
@@ -29,7 +29,7 @@
 }
 
 .contact-tape-short {
-  min-width: 12rem;
+  min-width: 13rem;
 }
 
 .contact-hidden {
@@ -51,18 +51,16 @@
   width: 100%;
   min-height: 100%;
   display: flex;
-  /* padding-bottom: 1rem; */
   transition: opacity .2s cubic-bezier(0,.2,1,1);
 }
 
 
 .status-picture-container {
   position: relative;
-  display: flex;
+  display: inherit;
   flex-direction: column;
   height: 80%;
-  width: 5.5rem;
-  margin-right: .5rem;
+  width:100%;
 }
 
 .unknown-image {
@@ -95,7 +93,7 @@
   border-radius: 50%;
   border:.2rem solid var(--light-black);
   clip-path: circle();
-  z-index: 1;
+  z-index: 100;
   animation: bubble-appear .3s ease-in-out forwards;
 }
 
@@ -129,9 +127,6 @@
   border-color: var(--night-color);
 }
 
-.contact-container-shortContact .with-padding {
-  padding-left:0;
-}
 .contact-chat-active .contact-name {
   color:var(--secondary-color);
 }
@@ -148,20 +143,7 @@
   overflow: hidden;
 }
 
-.contact-bubble::after {
-  content: '';
-  position: absolute;
-  top:30%;
-  left:30%;
-  width: 10rem;
-  height: 10rem;
-  display: flex;
-  border-radius: 50%;
-  background-color:var(--bubble-color);
-  transform-origin: center;
-  z-index: 0;
-  animation: bubble-pop .3s ease-out;
-}
+
 
 .contact-name {
   font-size: 1.5rem;
@@ -193,6 +175,7 @@
   transition:var(--animation-transition);
   margin: .2rem 0;
   box-sizing: content-box;
+  overflow: hidden;
 }
 
 .contact-container * {
@@ -220,8 +203,14 @@
   background-color: var(--main-grey);
 }
 
+.contact-user-container {
+  width: 30%;
+  height: 100%;
+  display: flex;
+}
 
 .contact-info-container {
+  max-width: 70%;
   height: 100%;
   display: flex;
   flex-grow: 1;
@@ -230,20 +219,22 @@
   font-size: 1rem;
   text-wrap: nowrap;
   z-index: 1;
-  pointer-events: none;
+  cursor: pointer;
 }
 
 .contact-info-container p {
   margin: .1rem;
+  pointer-events: none;
 }
 
 .contact-image {
-  width: 100%;
+  width:5.5rem;
   height: 100%;
-  z-index: 1;
+  z-index: 100;
   background-repeat: no-repeat;
   border-radius: 50%;
   object-fit: cover;
+  cursor: pointer;
 }
 
 .contact-unread-messages-container {
@@ -271,7 +262,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center; 
-  border-radius: 10%;
+  border-radius:5px;
+}
+
+.contact-container-shortContact .contact-user-container {
+  width:50%;
 }
 
 .contact-container-shortContact .container {

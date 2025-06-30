@@ -8,7 +8,9 @@ import { useGetUserConvenientDataQuery, useUpdateUserThemeMutation } from '../..
 import { MoonIcon, SunIcon } from '../subComponents/Icons';
 import SearchResults from '../subComponents/searchResults';
 import textChanger from './functions/textChanger';
-import { Store } from '../types/global';
+import { GeneralThemes, Store } from '../types/global';
+
+  const alternateTheme = (currentTheme:GeneralThemes) => currentTheme === 'light' ? 'night' : 'light';
 
 const Navigation = () => {
   const bubbleSpawner = useRef(triggerEffect());
@@ -17,37 +19,33 @@ const Navigation = () => {
   const dispatch = useDispatch();
   const [searchRequest,setSearchRequest] = useState<string>('');
   const {data:userTheme} = useGetUserConvenientDataQuery({url:'get-theme'});
-  const [currentTheme,setCurrentTheme] = useState<"night" | "light" | ''>('');
+  const [currentTheme,setCurrentTheme] = useState<GeneralThemes>('');
   const [updateUserTheme] = useUpdateUserThemeMutation();
 
-  const switchTheme = async (theme:"night" | "light") => {
+  const switchTheme = async (theme:GeneralThemes) => {
     await updateUserTheme({theme:theme}).unwrap();
 
     changeTheme(theme);
     setCurrentTheme(theme);
   }
 
-  const alternateTheme = () => {
-    return currentTheme === 'light' ? 'night' : 'light';
-  }
-
   useEffect(() => {
     if(userTheme) {
       setCurrentTheme(userTheme.theme);
     }
-  },[userTheme])
+  },[userTheme]);
 
     return (
       <nav className="navigation">
       <div className="container nav-container">
           <div className="burger-menu-container nav-section">
             <button onClick={(event) => {
-            bubbleSpawner.current(event);
+            bubbleSpawner.current(event,false);
             dispatch(switchBurger());
             if(!burgerOpen) {
               dispatch(switchUser(name));
             }
-            }} className={`${burgerOpen && 'close-burger'} burger-menu`}>
+            }} className={`${burgerOpen ? 'close-burger' : ''} burger-menu`}>
               <span className="burger-line"></span>
               <span className="burger-line"></span>
               <span className="burger-line"></span>
@@ -64,12 +62,12 @@ const Navigation = () => {
                     {searchRequest && <svg onClick={() => setSearchRequest('')} className='erase-icon random-icon' viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" strokeWidth="3" stroke="#000000" fill="none"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><line x1="8.06" y1="8.06" x2="55.41" y2="55.94"></line><line x1="55.94" y1="8.06" x2="8.59" y2="55.94"></line></g></svg>
                     }
                   </div>
-                  {searchRequest && <SearchResults request={searchRequest}/>}
+                  {searchRequest && <SearchResults request={searchRequest} changeRequest={setSearchRequest}/>}
               </div>
             </div>
           </div>
           <div className='theme-switcher-container nav-section'>
-            <div onClick={() => switchTheme(alternateTheme())} className='theme-switcher flex-center'>
+            <div onClick={() => switchTheme(alternateTheme(currentTheme))} className='theme-switcher flex-center'>
               { userTheme && 
               <span className={`current-theme ${currentTheme ? 'theme-active' : ''} ${currentTheme}-icon`}>
                 {currentTheme && currentTheme === 'light' ? <SunIcon/> : <MoonIcon/>}

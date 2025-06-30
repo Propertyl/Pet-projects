@@ -1,5 +1,5 @@
-import {ReactElement,RefObject,useEffect, useRef, useState} from "react";
-import {ChatStructure, ChatText, DateGroup, DefaultRef,ObserverProps, RefFunc} from "../types/global";
+import {RefObject,useEffect, useRef, useState} from "react";
+import {ChatStructure, ChatText, DateGroup, defaultCoords, DefaultRef,MessageJSXGroups,ObserverProps, RefFunc} from "../types/global";
 import { useDispatch, useSelector } from "react-redux";
 import { MessagesData, Store, UserData } from "../types/global";
 import {Socket } from "socket.io-client";
@@ -18,7 +18,7 @@ import useGetPageText from "../global-functions/getPageText";
 const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>}) => {
   const [roomChat,setRoomChat] = useState<ChatStructure | null>(null);
   const [chatData,setChatData] = useState<DateGroup[] | null>(null);
-  const [groups,setGroups] = useState<Record<string,ReactElement>[]>([])
+  const [groups,setGroups] = useState<MessageJSXGroups>([])
   const messagesRef:DefaultRef = useRef(null);
   const deleteArgs = useSelector((state:Store) => state.chat.deleteArgs);
   const userData:UserData = useSelector((state:Store) => state.user);
@@ -33,7 +33,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const setObserver:RefObject<RefFunc<[HTMLDivElement,ObserverProps]>> = useRef(null);
   const [placeholder,setPlaceholder] = useState<boolean>(true);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
-  const [contextMenuPos,setContextMenuPos] = useState<{x:number,y:number}>({x:0,y:0});
+  const [contextMenuPos,setContextMenuPos] = useState<defaultCoords>({x:0,y:0});
   const [pageText,setPageText] = useState<ChatText | null>(null);
   const chatProcess:RefObject<ChatProcess | null> = useRef(null);
 
@@ -43,7 +43,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
     }
   }
 
-  const searchScroll = (event: Event) => {
+  const searchScroll = (event:Event) => {
     if (event.target) {
       const chat = event.target as HTMLDivElement;
       const currentScrollTop = chat.scrollTop;
@@ -110,25 +110,30 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
         const chid = await queryRequest(chatApi,'getChatData',{url:'chatID',param:room},dispatch,true);
         setRoomChat(chid);
       }
-    }
 
-    getRoomChat();
-  },[room])
-
-  useEffect(() => {
-    if(roomChat) {
       chatProcess.current = null;
       setGroups([]);
       groupsSpawner.current = null;
       setChatData(null);
     }
-  },[roomChat]);
+
+    getRoomChat();
+  },[room]);
+
+  // useEffect(() => {
+  //   if(roomChat) {
+  //     chatProcess.current = null;
+  //     setGroups([]);
+  //     groupsSpawner.current = null;
+  //     setChatData(null);
+  //   }
+  // },[roomChat]);
 
   useEffect(() => {
     if(messagesRef.current && roomChat) {
       messagesRef.current.classList.add('messages-hidden');
     }
-  },[messagesRef,roomChat])
+  },[messagesRef,roomChat]);
 
   useEffect(() => {
     if(roomChat) {
@@ -139,12 +144,6 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   useEffect(() => {
     downButtonRef.current = downButton;
   },[downButton]);
-
-  useEffect(() => {
-    if(pageText) {
-      console.log('page:',pageText);
-    }
-  },[pageText])
 
   useEffect(() => {
     const setupPage = async () => {  
@@ -208,7 +207,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
 
         groupsSpawner.current();
         await waitTick();
-        scrollDown('instant');
+        scrollDown();
         await spawnUntilScroll();
       }
     }
@@ -266,9 +265,9 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const messageWriting = (event:React.FormEvent) => {
     const target = event.target as HTMLDivElement;
     if(target.innerText.trim().length) {
-        setPlaceholder(false);
+      setPlaceholder(false);
     } else {
-        setPlaceholder(true);
+      setPlaceholder(true);
     }
 
     setCurrentMessage(target.innerText);
@@ -277,7 +276,7 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
   const blurInput = (event:React.FocusEvent) => {
     const target = event.target as HTMLDivElement;
       if(!target.innerText.trim().length) {
-          setPlaceholder(true);
+        setPlaceholder(true);
       }
   }
 
@@ -300,21 +299,21 @@ const Chat = ({room,socket}:{room:string,socket:React.RefObject<Socket | null>})
     socket.current!.emit('message-delete',deleteArgs);
   }
 
-  useEffect(() => {
-     if(messagesRef.current) {
-      if(contextMenu) {
-        messagesRef.current.classList.add('hidden');
-      } else if(messagesRef.current.classList.contains('hidden')) {
-        messagesRef.current.classList.remove('hidden');
-      }
-     }
-  },[contextMenu,messagesRef,roomChat]);
+  // useEffect(() => {
+  //    if(messagesRef.current) {
+  //     if(contextMenu) {
+  //       messagesRef.current.classList.add('hidden');
+  //     } else if(messagesRef.current.classList.contains('hidden')) {
+  //       messagesRef.current.classList.remove('hidden');
+  //     }
+  //    }
+  // },[contextMenu,messagesRef,roomChat]);
 
   return (
     <>
         {chatData && 
           <>
-            <div className="messages-container">
+            <div className="messages-container container">
             <div ref={messagesRef} className="messages messages-hidden">
               <div className="messages-group-container">
                 {chatData && groups.map((group) => {

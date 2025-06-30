@@ -1,9 +1,9 @@
-import { RefObject } from "react";
+import { ReactElement, RefObject } from "react";
 
 interface Chat {
-  name:string,
-  image:string,
-  chat:ChatStructure,
+  name:string;
+  image:string;
+  chat:ChatStructure;
   id:string
 }
 
@@ -12,29 +12,31 @@ interface ChatStructure {
 }
 
 interface UserData {
-  locale:string,
-  phone:string,
-  userName:string,
-  allChats:{id:string,last:string,time:string}[],
-  allMonths:{id:number,month:string}[],
-  changedUser:Record<string,string>,
+  locale:string;
+  phone:string;
+  userName:string;
+  allChats:{id:string,last:string,time:string}[];
+  allMonths:{id:number,month:string}[];
+  changedUser:Record<string,string>
 }
 
 interface ObserverProps {
-  date:string,
-  group:string,
-  room:string,
-  body:string,
+  date:string;
+  group:string;
+  room:string;
+  body:string;
   time:string
 }
 
 interface MessagesData {
-  date:string,
-  group:string,
-  room:string,
-  body:string,
+  date:string;
+  group:string;
+  room:string;
+  body:string;
   time:string
 }
+
+type EventType = 'touchstart' | 'touchend' | 'mousedown' | 'mouseup' | 'touchmove' | 'mousemove';
 
 type statusInfo = {phone:string,status:boolean};
 
@@ -175,4 +177,12 @@ type DateValues = {day:number,month:number,year:number};
 
 type queryArgs = {url:string,param?:any};
 
-export {Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef,ObserverProps,DateGroup,DateValues,SetDispatch,queryArgs,UserChats,AuthText,dialogText,BurgerText,ChatText,MessagesData,Store,RefFunc,Message};
+type defaultCoords = {x:number,y:number};
+
+type GeneralThemes = 'light' | 'night' | '';
+
+type MessageJSXGroups = Record<string,ReactElement>[];
+
+export {
+  Chat,UserData,ParsedChat,MessageGroup,UserInfo,AuthInputs,SignData,lastMessage,statusInfo,DefaultRef,chatData,UserContact,BurgerInfo,ChatStructure,ElementRef,ObserverProps,DateGroup,DateValues,SetDispatch,queryArgs,UserChats,AuthText,dialogText,BurgerText,ChatText,MessagesData,Store,RefFunc,Message,chatStates,EventType,defaultCoords,GeneralThemes,MessageJSXGroups
+};

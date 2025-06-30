@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import {ChatStructure, SetDispatch, statusInfo, UserContact,Store} from "../types/global";
+import {ChatStructure, SetDispatch, statusInfo, UserContact,Store, DefaultRef, defaultCoords} from "../types/global";
 import { useDispatch, useSelector } from "react-redux";
 import getUserChats from "./functions/getUserChats";
 import { setData } from "../../store/user";
 import triggerEffect from "../global-functions/bubbleEffect";
-import checkActiveChat from "./functions/checkActiveChat";
 import parseMessageTime from "../Chat/functions/parseMessageTime";
 import './chatstape.css';
 import { changeRoom, switchBurger, switchUser } from "../../store/useFullStaff";
@@ -17,27 +16,25 @@ import not from '/notification.mp3';
 import { titleSwapper } from "./functions/titleSwapper";
 import { incrementMessages, switchRefreshChatsTape } from "../../store/chat";
 import getUserPhone from "../global-functions/getUserPhone";
-import useThrottle from "../global-functions/useThrottle";
 import textChanger from "../Navigation/functions/textChanger";
 
 const makeShortVersion = (setContactDefault:SetDispatch<boolean>) => () => {
   const size = window.innerWidth;
-  console.log('size:',size);
-  if(size < 1440) {
+
+  if(size < 1440 && size > 800) {
     setContactDefault(false);
-  } else if (size > 1440) {
+  } else {
     setContactDefault(true);
   }
 }
 
-
 const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const router = useNavigate();
-  const bubbleSpawner = useRef(triggerEffect());
+  const bubbleSpawner:DefaultRef = useRef(triggerEffect());
   const [chats,setChats] = useState<UserContact[]>([]);
   const [contactDefault,setContactDefault] = useState<boolean | null>(null);
   const [contextMenu,setContextMenu] = useState<boolean>(false);
-  const [contextPos,setContextPos] = useState<{x:number,y:number}>({x:0,y:0});
+  const [contextPos,setContextPos] = useState<defaultCoords>({x:0,y:0});
   const [connectedToRooms,setConnectedToRooms] = useState<boolean>(false);
   const [deleteId,setDeleteId] = useState<string>("");
   const currentRoom = useSelector((state:Store) => state.stuff.currentRoom);
@@ -48,7 +45,8 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
   const dispatch = useDispatch();
   const notification:HTMLAudioElement = new Audio(not);
   const handleTitleNotification = titleSwapper;
-  const contactChanger = useThrottle(makeShortVersion(setContactDefault),300);
+  const contactChanger = makeShortVersion(setContactDefault);
+  const navigate = useNavigate();
   
   const handleChangeStatus = (changedUser:statusInfo) => {
     setChats(chats => chats.map(chat => {
@@ -58,7 +56,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
       }
       
       return chat;
-    }))
+    }));
   }
 
   const handleUpdateContacts = async (currentChat:ChatStructure,room:string,sendFromPhone:string) => {
@@ -77,7 +75,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     setChats(chats => {
        const newChats = [...chats];
        
-       for(let i:number = 0; i < newChats.length; i++) {
+       for(let i = 0; i < newChats.length; i++) {
           if(newChats[i].id === room) {
             newChats[i] = {...newChats[i],message:getLastMessage({...currentChat})};
             break;
@@ -97,7 +95,7 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
         socket.current.on('userUpdates',handleChangeStatus);
       }
 
-      makeShortVersion(setContactDefault)();
+      contactChanger();
 
       window.addEventListener('resize',contactChanger);
     }
@@ -136,8 +134,10 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
     checkChats();
   },[refreshChatsTape]);
     
-  const openChat = (contact:UserContact) => {
+  const openChat = (contact:UserContact) => (event:React.MouseEvent) => {
+    navigate(`#@${contact.user.name}`);
     dispatch(changeRoom(contact.id));
+    bubbleSpawner.current(event,true);
   }
 
   const deleteChat = async (chatId:string) => {
@@ -162,33 +162,27 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
         {burgerUser && <UserBurger/>}
         <div className="contact-tape-container  flex-reverse">
         {contextMenu && <ContextMenu phrase={textChanger('Видалити Чат','Delete Chat')} func={(() => () => deleteChat(deleteId))} pos={contextPos} switchState={setContextMenu}/>}
-          { chats.length ? chats.map((contact,index) => (
-                <a draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container container ${contactDefault ? 'contact-container-fullContact' : 'contact-container-shortContact'} ${currentRoom === contact.id ? 'contact-chat-active' : 'contact-chat-inActive'}`} href={`#@${contact.user.name}`} key={`contact-${index}`}>
-                  <div onClick={(event:React.MouseEvent) => {
-                      bubbleSpawner.current(event);
-                      if(checkActiveChat(window.location.href,contact.user.name)) {
-                        openChat(contact);
-                      }
-                  }} className="container with-padding hidden-container">
-                  <div className="status-picture-container">
-                    { 
-                    contact.user.image ?
-                    <img onClick={() => {
-                      dispatch(switchBurger());
-                      dispatch(switchUser(contact.user.name))
-                    }} className="contact-image" src={`${contact.user.image}`} alt="avatar" />
-                    :
+          {chats.length ? chats.map((contact,index) => (
+                <div draggable="false" onContextMenu={openContextMenu(contact.id)} className={`contact-container container ${contactDefault ? 'contact-container-fullContact' : 'contact-container-shortContact'} ${currentRoom === contact.id ? 'contact-chat-active' : 'contact-chat-inActive'}`} onClick={!contactDefault ? openChat(contact) : undefined} key={`contact-${index}`}>
+                  <div className="container hidden-container">
                     <div onClick={() => {
-                      dispatch(switchBurger());
-                      dispatch(switchUser(contact.user.name));
-                    }} className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}/> 
-                    }
-                  <span className={`contact-status ${contact.user.status ? 'online' : 'offline'}`}></span>
-                </div>
-                  <div className="contact-info-container">
-                    <p  className="contact-name">{contact.user.name}</p>
-                    <p className="contact-chat-last-message">{contact.message.last}</p>
-                    <p className="contact-chat-message-time">{parseMessageTime(navigator.language.split('-')[0],contact.message.time)}</p>
+                        dispatch(switchBurger());
+                        dispatch(switchUser(contact.user.name));
+                      }} className="contact-user-container flex-center">
+                      <div className="status-picture-container flex-center">
+                      { 
+                        contact.user.image ?
+                        <img className="contact-image" src={`${contact.user.image}`} alt="avatar" />
+                        :
+                        <div className="contact-image unknown-image" data-unknown-name={contact.user.name.split('').shift()}></div> 
+                      }
+                      <span className={`contact-status ${contact.user.status ? 'online' : 'offline'}`}></span>
+                      </div>
+                  </div>
+                  <div onClick={openChat(contact)} className="contact-info-container">
+                      <p className="contact-name">{contact.user.name}</p>
+                      <p className="contact-chat-last-message">{contact.message.last}</p>
+                      <p className="contact-chat-message-time">{parseMessageTime(navigator.language.split('-')[0],contact.message.time)}</p>
                   </div>
                 </div>
                   {unReadMessage[contact.id] > 0 &&
@@ -196,12 +190,12 @@ const ChatsTape = ({socket}:{socket:React.RefObject<Socket | null>}) => {
                       <p className="contact-unread-messages-count">   {unReadMessage[contact.id]}</p>
                     </span>
                   }
-            </a>
+            </div>
         ))
         :
         <div className="contact-loading-container flex-center">
             <svg className="contact-line-loading" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none">
-            <path d="M20.0001 12C20.0001 13.3811 19.6425 14.7386 18.9623 15.9405C18.282 17.1424 17.3022 18.1477 16.1182 18.8587C14.9341 19.5696 13.5862 19.9619 12.2056 19.9974C10.825 20.0328 9.45873 19.7103 8.23975 19.0612"  strokeWidth="3.55556" strokeLinecap="round"/>
+              <path d="M20.0001 12C20.0001 13.3811 19.6425 14.7386 18.9623 15.9405C18.282 17.1424 17.3022 18.1477 16.1182 18.8587C14.9341 19.5696 13.5862 19.9619 12.2056 19.9974C10.825 20.0328 9.45873 19.7103 8.23975 19.0612"  strokeWidth="3.55556" strokeLinecap="round"/>
             </svg>
         </div>
       }

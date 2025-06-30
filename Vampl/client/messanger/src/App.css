@@ -49,6 +49,7 @@
   --tile-white:rgba(255,255,255,.4);
   --appear-menu-transition:cubic-bezier(.20,.40,.50,1);
   --animation-transition:all .2s cubic-bezier(.1,.2,1,1);
+  --pop-up-menu-shadow:.1rem .1rem .4rem .1rem rgba(var(--black-color),.2);
 }
 
 a {
@@ -226,7 +227,7 @@ button:focus-visible {
   background-color:var(--bubble-color);
   z-index: 0;
   cursor: pointer;
-  animation: bubble-pop .6s linear !important;
+  animation: bubble-pop .4s linear forwards !important;
 }
 
 .nav-section {
@@ -273,6 +274,10 @@ p {
   align-items: center;
 }
 
+.hidden {
+  pointer-events: none;
+}
+
 .hidden-container {
   overflow: hidden;
 }
@@ -285,6 +290,7 @@ p {
 .context-menu-option {
   width: 80%;
   display: flex;
+  color:rgb(var(--alt-color));
   justify-content: center;
   align-items: center;
   transition: all .2s;
@@ -318,16 +324,16 @@ p {
 
 @keyframes bubble-pop {
   0% {
-      transform: scale(0);
+      transform: scale(1);
       opacity: .5;
   }
   70% {
-      transform: scale(2);
-      opacity: .3;
+    transform: scale(2);
+    opacity: .3;
   }
   100% {
-      transform: scale(3);
-      opacity: 0;
+    transform: scale(3);
+    opacity: 0;
   }
 }
 
@@ -354,8 +360,9 @@ p {
 .night {
   --light-grey-half:rgb(0,0,0,.5);
   --black-default:rgb(0,0,0);
-  --bg-main:rgb(37, 37, 37);
+  --bg-main:rgb(33, 33, 33);
   --nav-bg:rgb(0, 0, 0);
+  --chat-background:linear-gradient(90deg, #1d1d1d 20%, #393939 98%);
   --chat-bg-color:rgb(29, 28, 28);
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(var(--white-color),.3);
@@ -363,8 +370,6 @@ p {
   --light-black:#4d4d4d;
   --main-grey:#787474;
   --header-height:6rem;
-  --footer-height:10rem;
-  --foter-space:-10rem;
   --default-border-radius:20px;
   --error-color:rgb(205,0,0);
   --menu-color:rgb(73,73,73);
@@ -385,7 +390,8 @@ p {
   --black-default:rgb(0,0,0);
   --bg-main:rgb(255,255,255);
   --light-black:#4d4d4d;
-  --chat-bg-color:#dddddd;
+  --chat-background:linear-gradient(-90deg, #494949 0%, #a6a6a6 100%);
+  --chat-bg-color:#474747;
   --secondary-color:rgb(255,255,255);
   --bubble-color:rgba(var(--black-color),.3);
   --light-grey:rgb(83, 83, 83);
@@ -406,14 +412,49 @@ p {
   color:var(--black-default);
 }
 
-
-@media (max-width:1920px) and (min-width:1870px) {
-  :root {
-    --main-rem:15px;
+@media (hover:none) and (pointer:coarse) {
+  button, a, div {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-@media (max-width:1439px) {
+@media only screen and (max-width:2440px) and (min-width:2001px) {
+  :root {
+    --main-rem:18px;
+  }
+  #root {
+    width: 85%;
+  }
+}
+
+@media only screen and (max-width:2840px) and (min-width:2441px) {
+  :root {
+    --main-rem:20px;
+  }
+  #root {
+    width: 75%;
+  }
+}
+
+@media only screen and (max-width:3440px) and (min-width:2841px) {
+  :root {
+    --main-rem:21px;
+  }
+  #root {
+    width: 70%;
+  }
+}
+
+@media only screen and (max-width:3840px) and (min-width:3441px) {
+  :root {
+    --main-rem:22px;
+  }
+  #root {
+    width: 65%;
+  }
+}
+
+@media only screen and (max-width:1439px) {
   #root {
     width: 100%;
   }
@@ -423,80 +464,10 @@ p {
   }
 }
 
-/* @media (max-width:1869px) and (min-width:1770px) {
+@media only screen and (max-width:389px) {
   :root {
-    --main-rem:13px;
+    --main-rem:14px;
   }
 }
 
-@media (max-width:1769px) and (min-width:1670px) {
-  :root {
-    --main-rem:12px;
-  }
-}
 
-@media (max-width:1669px) and (min-width:1570px) {
-  :root {
-    --main-rem:11px;
-  }
-}
-
-@media (max-width:1569px) and (min-width:1470px) {
-  :root {
-    --main-rem:10px;
-  }
-}
-
-@media (max-width:1469px) and (min-width:1370px) {
-  :root {
-    --main-rem:9px;
-  }
-}
-
-@media (max-width:1369px) and (min-width:1270px) {
-  :root {
-    --main-rem:8px;
-  }
-}
-
-@media (max-width:1269px) and (min-width:1170px) {
-  :root {
-    --main-rem:7px;
-  }
-}
-
-@media (max-width:1169px) and (min-width:1070px) {
-  :root {
-    --main-rem:6px;
-  }
-}
-
-@media (max-width:1069px) and (min-width:970px) {
-  :root {
-    --main-rem:5px;
-  }
-}
-
-@media (max-width:969px) and (min-width:870px) {
-  :root {
-    --main-rem:4px;
-  }
-}
-
-@media (max-width:869px) and (min-width:770px) {
-  :root {
-    --main-rem:3px;
-  }
-}
-
-@media (max-width:769px) and (min-width:670px) {
-  :root {
-    --main-rem:2px;
-  }
-}
-
-@media (max-width:669px) and (min-width:570px) {
-  :root {
-    --main-rem:1px;
-  }
-} */

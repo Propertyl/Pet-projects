@@ -1,20 +1,23 @@
 import { useGetSomeDataQuery } from "../../store/api/dataApi";
 import useDebounceEffect from "../global-functions/useDebounceEffect";
 import {useRef, useState } from "react";
-import { DefaultRef, UserInfo } from "../types/global";
+import { DefaultRef, SetDispatch, UserInfo } from "../types/global";
 import { useDispatch } from "react-redux";
 import openRequestUser from "../Navigation/functions/openRequestUser";
 import textChanger from "../Navigation/functions/textChanger";
 
 
 
-const SearchList = ({users}:{users:UserInfo[]}) => {
+const SearchList = ({users,changeRequest}:{users:UserInfo[],changeRequest:SetDispatch<string>}) => {
   const dispatch = useDispatch();
 
   return (
     <>
       {users.map(({name,image,phone},index) => (
-        <div className="search-input-request-list-item" onClick={() => openRequestUser(name,phone,dispatch)} key={`result-response-${index}`}>
+        <div className="search-input-request-list-item" onClick={() => {
+          openRequestUser(name,phone,dispatch);
+          changeRequest('');
+        }} key={`result-response-${index}`}>
           {image ? 
             <img className="search-input-request-list-item-image" src={`${image}`} alt="avatar" />
             :
@@ -30,7 +33,7 @@ const SearchList = ({users}:{users:UserInfo[]}) => {
   )
 }
 
-const SearchResults = ({request}:{request:string}) => {
+const SearchResults = ({request,changeRequest}:{request:string,changeRequest:SetDispatch<string>}) => {
   const [sendRequest,setSendRequest] = useState<string>('');
   const {data:users}:{data:UserInfo[]} = useGetSomeDataQuery({url:'search-users',param:sendRequest},{
     skip:!sendRequest
@@ -47,7 +50,7 @@ const SearchResults = ({request}:{request:string}) => {
     <>
       {users && 
         <div  ref={searchListRef} className="search-input-request-list scrollable-component">
-          {users.length ? <SearchList users={users}/> : <p className="search-input-request-list-notFound">{textChanger('Нічого не знайдено','Not found anything')}</p>}
+          {users.length ? <SearchList changeRequest={changeRequest} users={users}/> : <p className="search-input-request-list-notFound">{textChanger('Нічого не знайдено','Not found anything')}</p>}
         </div>
       }
     </>

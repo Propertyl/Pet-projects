@@ -1,8 +1,14 @@
+const takeMain = (isNecessary:boolean,elem:HTMLDivElement):HTMLElement => {
+    if(isNecessary) return elem.parentElement || elem;
+
+    return elem;
+};
+
 const triggerEffect = () => {
     let bubbleExist = false;
 
-    return (event:React.MouseEvent) => {
-        const target = event.target as HTMLDivElement;
+    return (event:React.MouseEvent,parentNecessary:boolean) => {
+        const target = takeMain(parentNecessary,event.target as HTMLDivElement);
         if(target && !bubbleExist) {
             const ripple = document.createElement('span');
             bubbleExist = true;

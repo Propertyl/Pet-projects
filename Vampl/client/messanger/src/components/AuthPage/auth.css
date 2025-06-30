@@ -17,11 +17,23 @@
   fill: var(--night-color);
 }
 
-.arrow-icon {
+.arrow-restart-icon {
   left:1%;
   top:1%;
   width: 3rem;
   height: 3rem;
+}
+
+.arrow-restart-icon * {
+  transition: inherit;
+}
+
+.arrow-restart-icon * {
+  fill:rgb(var(--alt-color)) !important;
+}
+
+.arrow-restart-icon:hover * {
+  fill:var(--night-color) !important;
 }
 
 .pass-visibility {

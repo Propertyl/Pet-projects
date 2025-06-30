@@ -1,6 +1,3 @@
-  // const dispatch = useDispatch();
-  // const navigate = useNavigate();
-
 import { useLayoutEffect } from "react";
 import checkAuthorization from "../MainPage/functions/AutoAuthorization";
 import { Dispatch } from "@reduxjs/toolkit";

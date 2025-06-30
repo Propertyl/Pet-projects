@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { chatStates } from "../types/global";
+import { chatStates } from "../components/types/global";
+
 
 
 const initialState:chatStates = {

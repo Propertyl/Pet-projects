@@ -13,7 +13,7 @@
 
 .user-edit-burger-menu {
   position: absolute;
-  z-index: 100 !important;
+  z-index: 1000000 !important;
 }
 
 .head-info-container {
@@ -99,7 +99,7 @@
   position:absolute;
   display: flex;
   top:1%;
-  right:1%;
+  right:2%;
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
@@ -128,7 +128,7 @@
   border-radius: 10px;
   background-color:var(--context-bg);
   backdrop-filter: blur(50px);
-  box-shadow: 0 0 .5rem var(--light-grey-half);
+  box-shadow:var(--pop-up-menu-shadow);
   transform-origin: right;
   animation: context-menu-appear .1s ease-out forwards;
 }
@@ -580,4 +580,18 @@
   } to {
     transform: translateX(0%);
   }
+}
+
+@media only screen and (max-width:633px) {
+   .avatar-resizing-window {
+      max-width:25rem;
+   }
+
+   .avatar-image-container {
+      max-width:25rem;
+   }
+
+   .image-rounded {
+      max-width:25rem !important;
+   }
 }

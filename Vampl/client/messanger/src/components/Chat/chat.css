@@ -59,7 +59,7 @@
   display: flex;
   justify-content: center;
   height:100%;
-  background-color: var(--bg-color);
+  background:var(--chat-background);
 }
 
 
@@ -129,6 +129,7 @@
   text-wrap: wrap;
   white-space: normal; 
   transform-origin: 100% 100%;
+  user-select: none;
 }
 
 @keyframes message-appear {
@@ -150,7 +151,7 @@
 }
 
 .messages-hidden .message {
-  opacity: 0;
+  transform: scale(0);
 }
 
 .messages-hidden .date-container {
@@ -177,12 +178,9 @@
 }
 
 .messages-container {
-  position: relative;
-  display: flex;
   flex-direction: column;
   justify-content:flex-start;
   align-items: center;
-  width: 100%;
   max-height: 100%;
   padding-bottom:1rem ;
 }
@@ -355,7 +353,7 @@
   backdrop-filter: blur(10px);
   animation: context-menu-appear .1s ease-out forwards;
   transform-origin:right;
-  box-shadow: .1rem .1rem .4rem .1rem rgba(var(--black-color),.2);
+  box-shadow:var(--pop-up-menu-shadow);
 }
 
 .context-menu-reverse {
@@ -379,12 +377,25 @@
   color:var(--light-night);
 }
 
-.hidden {
-  pointer-events: none;
-}
-
 .hidden .context-menu {
   pointer-events: all;
+}
+
+.chat-hide-button {
+  position: absolute;
+  left:3%;
+  width:3rem;
+  height:3rem;
+  display: flex;
+  transition:var(--animation-transition);
+  border-radius: 50%;
+  z-index: 1000000;
+  background:none;
+}
+
+
+.chat-hide-button:hover {
+  background-color: rgba(var(--alt-color),.2);
 }
 
 @keyframes button-appear {
@@ -410,5 +421,20 @@
 @media (prefers-color-scheme: light) {
   .chat > * {
     z-index: 0;
+  }
+}
+
+@media only screen and (max-width:1023px) {
+  .messages-group-container {
+    width:99%;
+  }
+
+  .messages-input {
+    width: 90%;
+  }
+
+  .down-button {
+    bottom: 105%;
+    left:1%;
   }
 }

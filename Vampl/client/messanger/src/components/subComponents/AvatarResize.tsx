@@ -1,6 +1,10 @@
 import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from "react";
-import { ElementRef } from "../types/global";
+import { ElementRef, EventType } from "../types/global";
 import { useUpdateAvatarDataMutation } from "../../store/api/dataApi";
+
+const isMobile = () => window.innerWidth < 1100;
+const currentEvent = (mobile:EventType,pc:EventType):any => isMobile() ? mobile : pc;
+
 
 const AvatarResizer = ({imageControl,file,swapAnimation}:{imageControl:[string | null,Dispatch<SetStateAction<string | null>>],file:ElementRef<Blob>,swapAnimation:Dispatch<SetStateAction<boolean>>
 }) => {
@@ -84,22 +88,33 @@ const AvatarResizer = ({imageControl,file,swapAnimation}:{imageControl:[string |
     }
   }
 
-  const dragMove = (event:MouseEvent) => {
+  const dragMove = (event:MouseEvent & TouchEvent) => {
     if(imageContainer.current) {
+      let pageX = 0;
+      let pageY = 0;
+
+      if(isMobile() && event.touches.length) {
+        const touch = event.touches[0];
+        pageX = touch.pageX;
+        pageY = touch.pageY;
+      } else {
+        pageX = event.pageX;
+        pageY = event.pageY;
+      }
+
       const overlayRect =  overlayRef.current!.getBoundingClientRect();
       const containerRect = imageContainer.current.getBoundingClientRect();
       const cursorShift = shift.current;
       setOverlayPos(pos => {
         const newPos = {...pos};
 
-        const newX = Math.max(0,event.pageX - cursorShift.X - containerRect.left);
-        const newY = Math.max(0,event.pageY - cursorShift.Y - containerRect.top);
+        const newX = Math.max(0,pageX - cursorShift.X - containerRect.left);
+        const newY = Math.max(0,pageY - cursorShift.Y - containerRect.top);
         newPos.x = Math.min(newX,containerRect.width - overlayRect.width);
         newPos.y = Math.min(newY,containerRect.height - overlayRect.height);
 
         return newPos;
       });
-
     }
   }
 
@@ -113,34 +128,45 @@ const AvatarResizer = ({imageControl,file,swapAnimation}:{imageControl:[string |
 
   useEffect(() => {
     if(overlayRef.current) {
-      const dragStart = (event:MouseEvent) => {
+      const dragStart = (event:TouchEvent & MouseEvent) => {
         if(overlayRef.current && imageContainer.current) {
           const overlayCoords = getCoords(overlayRef.current);
+          let pageX = 0;
+          let pageY = 0;
+
+          if(isMobile()) {
+            const touch = event.touches[0];
+            pageX = touch.pageX;
+            pageY = touch.pageY;
+          } else {
+            pageX = event.pageX;
+            pageY = event.pageY;
+          }
 
           shift.current = {
-              X:event.pageX - overlayCoords.left,
-              Y:event.pageY - overlayCoords.top
-          };
+            X:pageX - overlayCoords.left,
+            Y:pageY - overlayCoords.top
+          }
 
-          document.addEventListener('mousemove',dragMove);
-          document.addEventListener('mouseup',dragEnd);
+          document.addEventListener(currentEvent('touchmove','mousemove'),dragMove);
+          document.addEventListener(currentEvent('touchend','mouseup'),dragEnd);
         }
       }
 
       const dragEnd = () => {
-        document.removeEventListener('mousemove',dragMove);
-        document.removeEventListener('mouseup',dragEnd);
+        document.removeEventListener(currentEvent('touchmove','mousemove'),dragMove);
+        document.removeEventListener(currentEvent('touchend','mouseup'),dragEnd);
       }
 
-       overlayRef.current.addEventListener('wheel',resizeOverlay);
-       overlayRef.current.addEventListener('mousedown',dragStart);
+      overlayRef.current.addEventListener('wheel',resizeOverlay);
+      overlayRef.current.addEventListener(currentEvent('touchstart','mousedown'),dragStart);
 
-       return () => {
+      return () => {
         if(overlayRef.current) {
           overlayRef.current.removeEventListener('wheel',resizeOverlay);
-          overlayRef.current.removeEventListener('mousedown',dragStart);
+          overlayRef.current.removeEventListener(currentEvent('touchstart','mousedown'),dragStart);
         }
-       }
+      }
     }
   },[overlayRef])
 
