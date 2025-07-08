@@ -1,13 +1,13 @@
 import axios from "axios";
 
-const serv = axios.create({
+const server = axios.create({
   baseURL:'http://localhost:3000',
   withCredentials:true
 });
 
-serv.interceptors.response.use(
+server.interceptors.response.use(
   res => res.data,
   error => Promise.reject(error),
 );
 
-export default serv;
+export default server;

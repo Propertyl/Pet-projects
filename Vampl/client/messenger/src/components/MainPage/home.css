@@ -1,0 +1,60 @@
+.chats-tape {
+  position: relative;
+  display: inline-flex;
+}
+
+.chats-tape-mobile {
+  width: 100% !important;
+}
+
+.chats-tape-mobile .contact-tape {
+  width: 100% !important;
+}
+
+.chats-tape-mobile .contact-container {
+  border-radius: 10px;
+}
+
+.chats-tape-mobile .contact-tape-container {
+  padding-right: .1rem;
+  align-items: center;
+}
+
+.chats-tape-mobile .contact-scrollable {
+  scrollbar-width: none;
+}
+
+.chats-tape-mobile .contact-scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-hide-icon {
+  pointer-events: none;
+}
+
+.chat-main {
+  position: relative;
+  background-color:var(--chat-bg-color);
+  width: 100%;
+  height: calc(100% - var(--header-height));
+  display: flex;
+  transition: all .2s;
+}
+
+.chat-mobile {
+  position:fixed;
+  top:0;
+  transform: translateX(100%);
+  width: 100%;
+  z-index: 100;
+  transition:all .2s cubic-bezier(0,.1,1,.5);
+  background-color: var(--chat-bg-color);
+}
+
+.chat-mobile-active {
+  transform: translateX(0%);
+}
+
+
+
+

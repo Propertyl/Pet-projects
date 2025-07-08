@@ -1,7 +1,8 @@
 import { Body, Controller, Get,Param, Post, Put, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
-import { UserService } from "src/services/user.service";
-import { infoForUpdate } from "src/stuff/types";
+import { UserService } from '../services/user.service';
+import { infoForUpdate, User } from "src/stuff/types";
+import throwServerError from "../stuff/functions/throwError";
 
 @Controller('user')
 export class UserController {
@@ -33,12 +34,11 @@ export class UserController {
   @Get('check-name-existing/:name')
   async checkNameExisting(@Param('name') name:string) {
     const coincidences = await this.userServices.getUserByName(name);
+    let existing = false;
 
-    if(coincidences) {
-      return {existing:true};
-    }
+    if(coincidences) existing = true;
 
-    return {existing:false}
+    return {existing};
   }
 
   @Get('infoByName/:name') 
@@ -47,14 +47,13 @@ export class UserController {
   }
 
   @Get('phone/:userPhone')
-  async getUserPhone(@Param('userPhone') userPhone:string, @Res() res:Response) {
+  async getUserPhone(@Param('userPhone') userPhone:string) {
     const data = await this.userServices.getUserByPhone(userPhone);
+    let register = true;
 
-    if(!data) {
-      return res.status(200).json({register:false});
-    }
+    if(!data) register = false;
 
-    return res.status(200).json({register:true});
+    return {register};
   }
 
   @Put('update-info')
@@ -65,33 +64,35 @@ export class UserController {
   }
 
   @Post('createAccount')
-  createUser(@Body() user:{ip:string,name:string,phone:string,birthdate:string,password:string,image:string}) {
-     return this.userServices.createUser(user);
+  createUser(@Body() user:User) {
+    return this.userServices.createUser(user);
   }
 
   @Get('verifyAccount/:phone')
-  async signIn(@Param('phone') phone:string, @Res() response:Response) {
+  async signIn(@Param('phone') phone:string) {
     const user = await this.userServices.getUserByPhone(phone);
      
-    return response.status(200).json({password:user!.password});
+    if(user?.password) {
+      return {password:user!.password};
+    }
+
+    return throwServerError();
   }
 
   @Get('authorization')
-  checkAuthorization(@Req() req:Request,@Res() res:Response) {
-      const token = req.cookies['token'];
+  checkAuthorization(@Req() req:Request) {
+    const token = req.cookies['token'];
+    let approve = false;
 
-      console.log('token:',token);
+    if(token) approve = true;
 
-      if(token) {
-        return res.status(200).json({approve:true});
-      }
-
-        return res.status(200).json({approve:false});
+    return {approve};
   }
 
   @Put('setAuthorized')
   updateUserAuth(@Res({passthrough:true}) res:Response,@Body() phone:{phone:string}) {
-    const life:number = 7 * 24 * 60 * 3600;
+    const life = 7 * 24 * 60 * 3600;
+
     res.cookie('token',phone.phone, {
       maxAge:life,
       httpOnly:true,
@@ -109,9 +110,8 @@ export class UserController {
   
   @Put('update-status')
   async updateUserStatus(@Body() data:any) {
-     await this.userServices.updateStatus(data);
+    await this.userServices.updateStatus(data);
   }
-
 
   @Post('create-theme')
   async createUserTheme(@Body() data:{phone:string,theme:string}) {

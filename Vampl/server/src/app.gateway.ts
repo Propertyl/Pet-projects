@@ -1,8 +1,8 @@
 import {OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway,WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io';
-import { Chat,condition,Message, updateMessagesData } from "./stuff/types";
+import { Chat, ChatStructure, condition,Message, updateMessagesData } from "./stuff/types";
 import groupMessages from "./stuff/functions/groupMessages";
-import serv from "./stuff/functions/interceptor";
+import server from "./stuff/functions/interceptor";
 import parseCookies from "./stuff/functions/parseCookie";
 import updateGroup from "./stuff/functions/updateGroup";
 
@@ -15,9 +15,9 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    private clients = new Map<string,string>();
 
    async updateUserStatus(phone:string,status:Boolean) {
-      const rooms = await serv.get(`/getData/user/rooms/${phone}`)
+      const rooms = await server.get(`/getData/user/rooms/${phone}`)
       .then((rooms:any) => rooms.map(({chatId}:{chatId:string}) => chatId));
-      await serv.put('/user/update-status',{
+      await server.put('/user/update-status',{
         phone:phone,
         status:status
       });
@@ -33,13 +33,16 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
    }
 
    async messageAction(client:Socket,{date,group,room,body,time}:updateMessagesData,condition:condition) {
-      let currentChat:any = await serv.get(`/chat/chatID/${room}`);
+      const phone:string = this.clients.get(client.id) ?? "";
+      let currentChat:any = await server.get(`/chat/chatID/${room}`);
       currentChat = updateGroup(currentChat,date,group,body,time,condition);
-      await serv.put('/chat/update-messages',{
+      await server.put('/chat/update-messages',{
          id:room,
          messages:currentChat
       });
+      
       this.server.to(room).emit('updateChat',{currentChat,currentTime:time,currentGroup:group});
+      this.server.to(room).emit('updateContactChat',currentChat,room,phone);
    }
 
    async handleDisconnect(client:Socket) {
@@ -50,11 +53,10 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
 
    @SubscribeMessage('delete-chat')
    async chatDelete(client:Socket,chatID:string) {
-      await serv.put('/chat/delete-chat',{
+      await server.delete(`/chat/delete-chat/${chatID}`,{
          headers:{
             'Content-Type':'application/json'
-         },
-         id:chatID
+         }
       });
    }
 
@@ -78,11 +80,11 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(data.room).emit('message',data.message.body);
             
       const phone = this.clients.get(client.id);
-      let currentChat:any = undefined;
+      let currentChat:Chat | undefined = undefined;
 
-      const chat = await serv.get(`/chat/chatID/${data.room}`);
+      const chat:Chat = await server.get(`/chat/chatID/${data.room}`);
 
-      data.message['user'] = phone ?? 'unknown';
+      data.message.user = phone ?? 'unknown';
       currentChat = chat;
       currentChat = groupMessages(data.message,currentChat);
       this.server.to(data.room).emit('updateChat',{
@@ -90,7 +92,7 @@ export class ChatGetAway implements OnGatewayConnection, OnGatewayDisconnect {
       });
       this.server.to(data.room).emit('updateContactChat',currentChat,data.room,phone);
       
-      await serv.put('/chat/updateChat',{
+      await server.put('/chat/updateChat',{
          headers: {
             'Content-Type':'application/json'
          },

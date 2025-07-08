@@ -1,0 +1,294 @@
+.contact-line-loading {
+  position: relative;
+  width: 50%;
+  height: 50%;
+  stroke: var(--night-color);
+  animation: spinning 1s ease-in-out infinite;
+}
+
+.contact-loading-container {
+  position:absolute;
+  top:40%;
+  width: 100%;
+  height:10rem;
+  display: flex;
+}
+
+.contact-tape {
+  position:inherit;
+  height: 100%;
+  background-color:var(--bg-main);
+  transition:var(--animation-transition);
+  display: inherit;
+  justify-content:flex-start !important;
+  scroll-behavior: smooth;
+}
+
+.contact-tape-full {
+  min-width: 25rem;
+}
+
+.contact-tape-short {
+  min-width: 13rem;
+}
+
+.contact-hidden {
+  overflow-y: initial;
+}
+
+.contact-hidden .contact-tape-container {
+  opacity: 0;
+}
+
+.contact-scrollable {
+  overflow-y:overlay;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color);
+}
+
+.contact-tape-container {
+  position: absolute;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  transition: opacity .2s cubic-bezier(0,.2,1,1);
+}
+
+
+.status-picture-container {
+  position: relative;
+  display: inherit;
+  flex-direction: column;
+  height: 80%;
+  width:100%;
+}
+
+.unknown-image {
+  position: relative;
+  width: 5.5rem !important;
+  background-color:#5472d7;
+  border-radius: 50%;
+}
+
+.unknown-image::before {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size:1.7rem;
+  font-weight:500;
+  content: attr(data-unknown-name);
+  color: var(--secondary-color);
+
+}
+
+.contact-status {
+  position: absolute;
+  bottom:15%;
+  right:10%;
+  width:1rem;
+  height:1rem;
+  border-radius: 50%;
+  border:.2rem solid var(--light-black);
+  clip-path: circle();
+  z-index: 100;
+  animation: bubble-appear .3s ease-in-out forwards;
+}
+
+.online {
+  background-color:var(--night-color);
+}
+
+.offline {
+  display: none;
+}
+
+.with-padding {
+  padding-left: 1rem;
+}
+
+
+.contact-bubble {
+  display: flex;
+}
+
+.contact-chat-inactive {
+  background-color: var(--main-grey);
+}
+
+.contact-chat-active {
+  background-color: var(--night-color) !important;
+}
+
+.contact-chat-active .online {
+  background-color: var(--secondary-color);
+  border-color: var(--night-color);
+}
+
+.contact-chat-active .contact-name {
+  color:var(--secondary-color);
+}
+
+.contact-chat-active .contact-chat-last-message {
+  color:var(--secondary-color);
+}
+
+.contact-chat-active .contact-chat-message-time {
+  color:var(--secondary-color);
+}
+
+.contact-bubble .contact-container {
+  overflow: hidden;
+}
+
+
+
+.contact-name {
+  font-size: 1.5rem;
+  color:var(--secondary-color);
+}
+
+.contact-chat-last-message {
+  color:var(--black-default);
+  width: 80%;
+  overflow: hidden;
+  max-height: 50%;
+  font-weight:500;
+}
+
+.contact-chat-message-time {
+  position: absolute;
+  top:2%;
+  right:2%;
+  font-size: .7rem;
+  color:var(--black-default);
+}
+
+.contact-container {
+  width: 95%;
+  height: 7rem !important;
+  align-items: center;
+  user-select: none;
+  border-radius: 10px;
+  transition:var(--animation-transition);
+  margin: .2rem 0;
+  box-sizing: content-box;
+  overflow: hidden;
+}
+
+.contact-container * {
+   transition:inherit;
+}
+
+.contact-container:hover {
+  background-color: var(--night-color);
+}
+
+.contact-container:hover .online {
+  background-color: var(--secondary-color);
+  border-color: var(--night-color);
+}
+
+.contact-container:hover .contact-chat-last-message {
+  color:var(--secondary-color);
+}
+
+.contact-container:hover .contact-chat-message-time {
+  color:var(--secondary-color);
+}
+
+.contact-container:hover .contact-unread-messages-container {
+  background-color: var(--main-grey);
+}
+
+.contact-user-container {
+  width: 30%;
+  height: 100%;
+  display: flex;
+}
+
+.contact-info-container {
+  max-width: 70%;
+  height: 100%;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  padding-top: 1rem;
+  font-size: 1rem;
+  text-wrap: nowrap;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.contact-info-container p {
+  margin: .1rem;
+  pointer-events: none;
+}
+
+.contact-image {
+  width:5.5rem;
+  height: 100%;
+  z-index: 100;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.contact-unread-messages-container {
+  position: absolute;
+  right:3%;
+  display: flex;
+  justify-content: center;
+  width:1.5rem;
+  height:1.5rem;
+  border-radius: 50%;
+  background-color:var(--night-color);
+}
+
+.contact-unread-messages-count {
+  color:var(--message-color);
+  margin:0;
+  height:100%;
+  width:100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-container-shortContact {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+  border-radius:5px;
+}
+
+.contact-container-shortContact .contact-user-container {
+  width:50%;
+}
+
+.contact-container-shortContact .container {
+  justify-content: center;
+  transition:var(--animation-transition);
+}
+
+.contact-container-shortContact .contact-info-container {
+  display: none;
+}
+
+
+@keyframes bubble-appear {
+  from {
+    transform: scale(0);
+  } to {
+    transform: scale(1);
+  }
+}
+
+@keyframes spinning {
+  to {
+    transform: rotate(360deg);
+  }
+}

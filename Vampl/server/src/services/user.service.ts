@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
-import { chatData, infoForUpdate } from "src/stuff/types";
+import { chatData, ChatStructure, infoForUpdate, User } from "src/stuff/types";
 
 @Injectable()
 export class UserService {
@@ -36,8 +36,6 @@ export class UserService {
   updateInfo(info:infoForUpdate,phone:string) {
     const data:infoForUpdate = {};
 
-    console.log('info:',info);
-
     Object.keys(info).forEach(key => {
       const fieldValue = info[key as keyof infoForUpdate];
       if(fieldValue) {
@@ -54,7 +52,6 @@ export class UserService {
   }
 
   updateAvatar(phone:string,imageURL:string) {
-   console.log('govno',imageURL);
    return this.prisma.user.update({
       where:{
         phone:phone
@@ -136,20 +133,9 @@ export class UserService {
     });
   }
 
-  genChatID() {
-    let id = "";
-    for(let i:number = 0; i < 6; i++) {
-      const symbol = String.fromCharCode(Math.floor(Math.random() * (91 - 65)) + 65);
-      id += symbol;
-    }
-
-    return `chat-${id}`;
-  }
-
   async createUserChat(userChats:chatData) {
-     return this.prisma.chats.create({data:userChats})
+     return this.prisma.chats.create({data:userChats});
   }
-
 
   async checkUser(data:{phone:string,password:string}) {
     console.log('data:',data);
@@ -158,12 +144,12 @@ export class UserService {
         phone:data.phone,
         password:data.password
       }
-    })
+    });
   }
 
-  async createUser(user:{name:string,phone:string,birthdate?:string,password:string,image?:string}) {
+  async createUser(user:User) {
     user['image'] = '';
-    await this.prisma.user.create({data:user as any})
+    await this.prisma.user.create({data:user});
     await this.prisma.onlinestatuses.create({data:{
       phone:user.phone,
       status:false
@@ -178,7 +164,7 @@ export class UserService {
       data: {
         status:status
       }
-    })
+    });
   }
 
   async getStatus(phone:string) {
@@ -189,7 +175,7 @@ export class UserService {
         select: {
           status:true
         }
-     })
+     });
   }
 
   async getAllUserRooms(phone:string) {
@@ -203,11 +189,10 @@ export class UserService {
       select: {
         chatId:true
       }
-    })
+    });
   }
 
   async getUserTheme(phone:string) {
-    console.log("THEME PHONE:",phone);
     return this.prisma.usertheme.findFirst({
       where:{
         phone:phone
@@ -215,13 +200,13 @@ export class UserService {
       select:{
         theme:true
       }
-    })
+    });
   }
 
   async createUserTheme(data:{phone:string,theme:string}) {
     return this.prisma.usertheme.create({
       data:data
-    })
+    });
   }
 
   async updateUserTheme({phone,theme}:{phone:string,theme:string}) {
@@ -232,7 +217,7 @@ export class UserService {
       data:{
         theme:theme
       }
-    })
+    });
   }
 
   async searchOtherUsers(userPhone:string,request:string) {
@@ -259,6 +244,6 @@ export class UserService {
         image:true,
         phone:true
       }
-    })
+    });
   }
 }

@@ -1,11 +1,11 @@
 {
-  "name": "trynest",
+  "name": "Vampl",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "project": "concurrently \"npm run back\" \"npm run front\"",
     "back": "cd server && npm run start",
-    "front": "cd client/messanger && npm run dev"
+    "front": "cd client/messenger && npm run dev"
   },
   "keywords": [],
   "author": "",

@@ -1,8 +1,11 @@
-import { Controller, Get, Param, Put,Body, Post, Req } from "@nestjs/common";
+import { Controller, Get, Param, Put,Body, Post, Req, Delete } from "@nestjs/common";
+import { AxiosResponse } from "axios";
 import { Request } from "express";
 import { UserService } from "src/services/user.service";
-import serv from "src/stuff/functions/interceptor";
-import { chatData, ChatStructure, MessageGroup ,updateChatData } from "src/stuff/types";
+import genChatID from "src/stuff/functions/generateChatID";
+import server from "src/stuff/functions/interceptor";
+import throwServerError from "src/stuff/functions/throwError";
+import { chatData, ChatStructure,Message,updateChatData, User } from "src/stuff/types";
 
 
 @Controller('chat')
@@ -11,22 +14,26 @@ export class ChatController {
 
   @Get('chatID/:id')
   async getChatByID(@Param('id') id:string) {
-    const {messages}:{messages:ChatStructure} = await this.userServices.getChatById(id) as any;
+    const chat = await this.userServices.getChatById(id) as {messages:ChatStructure} | null;
    
-    return messages;
+    if(chat) {
+      return chat.messages;
+    } else {
+      return throwServerError();
+    }
   }
 
   @Get('chats')
   async getUserChats(@Req() req:Request) {
      const phone = req.cookies['token'];
-     const userChatData:any = await this.userServices.getChatData(phone);
+     const userChatData = await this.userServices.getChatData(phone);
      
      if(!userChatData.length) {
-        await serv.post('/chat/create-chat',{
-          chatId:this.userServices.genChatID(),
+        await this.createUserChat({
+          chatId:genChatID(),
           chatUsers:{users:[phone,'+380000000000']},
           messages:{"all":[]}
-        });
+        },req);
         
         return {data:await this.userServices.getChatData(phone),phone};
      }
@@ -35,24 +42,23 @@ export class ChatController {
   }
 
   @Put('update-messages')
-  async updateMessageView(@Body() data:{id:string,messages:any}) {
-      return this.userServices.updateChat(data);
+  async updateMessageView(@Body() data:{id:string,messages:Message[]}) {
+    return this.userServices.updateChat(data);
   }
 
   @Get('openChat/:user')
   async getUserChat(@Req() req:Request,@Param('user') user:string) {
-    const chatter:any = await serv.get(`/user/infoByName/${user}`)
-    .then((res:any) => res.phone);
+    const {phone}:User = await server.get(`/user/infoByName/${user}`);
 
-    const phone = req.cookies['token'];
+    const userPhone = req.cookies['token'];
 
-    return this.userServices.getChatByLink([phone,chatter]);
+    return this.userServices.getChatByLink([userPhone,phone]);
   }
 
   @Post('create-chat')
   async createUserChat(@Body() data:chatData,@Req() req:Request) {
     if(!data.chatId) {
-      data.chatId = this.userServices.genChatID();
+      data.chatId = genChatID();
     }
 
     if(data.chatUsers.users.length === 1) {
@@ -68,9 +74,8 @@ export class ChatController {
      return this.userServices.updateChat({id,messages});
   }
 
-  @Put('delete-chat')
-  async deleteUserChat(@Body() {id}:{id:string}) {
-    console.log('volna:',id);
+  @Delete('delete-chat/:id')
+  async deleteUserChat(@Param('id') id:string) {
     return this.userServices.deleteChat(id);
   }
 }

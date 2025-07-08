@@ -1,7 +1,7 @@
 import { Controller,Get, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors} from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Request } from "express";
-import { UserService } from "src/services/user.service";
+import { UserService } from "../services/user.service";
 import { diskStorage } from 'multer';
 import { extname, join } from "path";
 
@@ -14,7 +14,8 @@ export class DataController {
    @UseInterceptors(FileInterceptor('file',{
       storage:diskStorage({
          destination:join(__dirname, '..', '..', 'src', 'uploads'),
-         filename: (req:Request, file:Express.Multer.File, callback:any) => {
+         filename: (_, file:Express.Multer.File,
+            callback:(error:Error | null,fileName:string) => void) => {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
             const ext = extname(file.originalname); 
             callback(null, `${uniqueSuffix}${ext}`);
@@ -23,12 +24,12 @@ export class DataController {
    }))
    uploadAvatar(@UploadedFile() file:Express.Multer.File,@Req() req:Request) {
       const phone = req.cookies['token'];
-      console.log('file recieved',phone,file.path);
+
       return this.user.updateAvatar(phone,`http://localhost:3000/images/${file.filename}`);
    }
 
    @Get('phoneCodes')
-   getAllPhones() {
+   getAllPhoneCodes() {
     const phones = require('../../src/uploads/data/phones.json');
     return phones;
    }
@@ -71,19 +72,18 @@ export class DataController {
 
    @Get('burger/:phone')
    isUserBurger(@Param('phone') phone:string,@Req() req:Request) {
-     const tokenPhone = req.cookies['token'];
+      const tokenPhone = req.cookies['token'];
+      let isOwn = false;
 
-     if(tokenPhone === phone) {
-       return {isOwn:true};
-     }
+     if(tokenPhone === phone) isOwn = true;
 
-     return {isOwn:false}
+     return {isOwn};
    }
 
    @Get('search-users/:request')
    searchUsers(@Param('request') request:string,@Req() req:Request) {
       const phone = req.cookies['token'];
 
-      return this.user.searchOtherUsers(phone,request)
+      return this.user.searchOtherUsers(phone,request);
    }
 }

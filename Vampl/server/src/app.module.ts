@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppService } from './services/app.service';
 import { ChatGetAway } from './app.gateway';
 import { UserService } from './services/user.service';
 import { PrismaService } from './services/prisma.service';
@@ -18,7 +17,7 @@ import { DataController } from './controllers/data.controller';
     })
   ,HttpModule],
   controllers: [UserController,ChatController,DataController],
-  providers: [AppService,ChatGetAway,UserService,PrismaService],
+  providers: [ChatGetAway,UserService,PrismaService],
   exports: [UserService]
 })
 export class AppModule {}
