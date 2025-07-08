@@ -4,14 +4,10 @@ import { incrementMessages } from "../../../store/chat";
 
 const unReadMessagesCounter = (dispatch:Dispatch,chatMessages:ChatStructure,userPhone:string,chatId:string) => {
   const chat = chatMessages.all;
-  let needToStop:boolean = false;
 
-  for(let i = chat.length - 1; i >= 0; i--) {
+  done:for(let i = chat.length - 1; i >= 0; i--) {
     const [{groups}] = Object.values(chat[i]);
-    if(needToStop) {
-      break;
-    }
-
+    
     for(let j = groups.length - 1; j >= 0; j--) {
       const [{sender,messages}] = Object.values<{sender:string,messages:Message[]}>(groups[j]);
 
@@ -23,8 +19,7 @@ const unReadMessagesCounter = (dispatch:Dispatch,chatMessages:ChatStructure,user
           continue;
         }
         
-        needToStop = true;
-        break;
+        break done;
       }
     }
   }
