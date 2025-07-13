@@ -1,1 +1,0 @@
-export {LazyHome as Home} from './Home/Home.lazy';
