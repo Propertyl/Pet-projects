@@ -1,4 +1,4 @@
-import {buildPaths, buildWebpack, EnVariables} from 'build-config';
+import {buildPaths, buildWebpack, EnVariables} from '@packages/build-config';
 import path from 'path';
 import webpack from 'webpack';
 import packageJson from './package.json';
