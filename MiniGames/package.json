@@ -1,0 +1,13 @@
+{
+  "name": "monorepo-module-federation",
+  "version": "1.0.0",
+  "scripts": {
+    "start": " concurrently \"npm run start:home\" \"npm run start:spy\" ",
+    "start:home": "cd minigames/Home && npm start",
+    "start:spy": "cd minigames/SpyGame && npm start"
+  },
+  "workspaces": [
+    "packages/*",
+    "minigames/*"
+  ]
+}
