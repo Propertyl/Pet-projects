@@ -19,10 +19,12 @@ declare module "*.svg" {
   export default SVG;
 }
 
-declare module '*.png'
-declare module '*.jpg'
-declare module '*.jpeg'
-declare module '*.svg'
-declare module '*.gif'
+declare module '*.png';
+declare module '*.jpg';
+declare module '*.jpeg';
+declare module '*.svg';
+declare module '*.gif';
+declare module '*.mp3';
+declare module '*.tsx';
 
-declare const __PLATFORM__:"mobile" | "desktop"
+declare const __PLATFORM__:"mobile" | "desktop";

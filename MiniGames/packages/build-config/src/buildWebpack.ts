@@ -14,7 +14,7 @@ export function buildWebpack(options:BuildOptions):webpack.Configuration {
     entry:paths.entry,
     output:{
       path:paths.output,
-      filename: '[name].[hash].js',
+      filename: '[name].[fullhash].js',
       clean:true
     },
     module:{
@@ -23,6 +23,11 @@ export function buildWebpack(options:BuildOptions):webpack.Configuration {
     plugins:buildPlugins(options),
     resolve:buildResolvers(options),
     devServer:buildDevServer(options),
-    devtool:isDev && 'inline-source-map'
+    devtool:isDev && 'inline-source-map',
+    performance:{
+      hints:'warning',
+      maxAssetSize:5520000,
+      maxEntrypointSize:5520000
+    }
   }
 }

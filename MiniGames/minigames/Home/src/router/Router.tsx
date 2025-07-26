@@ -1,9 +1,10 @@
 import { createBrowserRouter } from "react-router-dom"
-import { App } from "@/components/App";
+import { App } from "@/components/App/App";
 import { Suspense } from "react";
 import { Home } from "@/pages";
 //@ts-ignore
 import spyRoutes from 'spy/Router';
+import { LoadingScreen } from "@packages/shared";
 
 const routes = [{
   path:'/',
@@ -11,11 +12,7 @@ const routes = [{
   children:[
     {
        path:'/',
-       element:<Suspense fallback={<div>Loading...</div>}><Home/></Suspense>
-    },
-    {
-      path:'/second',
-      element:<Suspense fallback={<div>Loading...</div>}>SECOND</Suspense>
+       element:<Suspense fallback={<LoadingScreen/>}><Home/></Suspense>
     },
     ...spyRoutes
   ]

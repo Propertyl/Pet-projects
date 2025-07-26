@@ -1,7 +1,14 @@
+import BgEyes from '@/components/Bg-Eyes/Bg-Eyes';
+import './Home.scss';
+import WindowGrid from '@/components/Window-grid/Window-grid';
+
 const Home = () => {
   return ( 
     <>
-      <div>HOMMMMMEEEEEE</div>
+      <main className='window-main'>
+        <WindowGrid/>
+        <BgEyes/>
+      </main>
     </>
    );
 }

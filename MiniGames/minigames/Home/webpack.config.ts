@@ -16,10 +16,10 @@ export default (env:HostEnVariable) => {
     public:path.resolve(__dirname,'public')
   };
 
-  const spyUrl = env.SPY_GAME_URL ?? 'http://localhost:3001';
+  const spyUrl = env.SPY_GAME_URL ?? 'http://localhost:5001';
 
   const config:webpack.Configuration = buildWebpack({
-    port:env.port ?? 3000,
+    port:env.port ?? 5000,
     mode:env.mode ?? 'development',
     paths:paths,
     analyzer:env.analyzer,

@@ -2,12 +2,16 @@
   "name": "monorepo-module-federation",
   "version": "1.0.0",
   "scripts": {
-    "start": " concurrently \"npm run start:home\" \"npm run start:spy\" ",
+    "start": " concurrently \"npm run start:home\" \"npm run start:spy\" \"npm run start:server\" ",
     "start:home": "cd minigames/Home && npm start",
-    "start:spy": "cd minigames/SpyGame && npm start"
+    "start:spy": "cd minigames/SpyGame && npm start",
+    "start:server": "cd server/monorepo-server && npm start"
   },
   "workspaces": [
     "packages/*",
     "minigames/*"
-  ]
+  ],
+  "dependencies": {
+    "zustand": "^5.0.6"
+  }
 }

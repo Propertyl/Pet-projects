@@ -1,0 +1,151 @@
+@use '../../globals/mixins';
+@use '../../globals/variables';
+@use 'sass:color';
+
+@font-face {
+  font-family: 'Entity';
+  src: url('../../assets/fonts/CoralPixels-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Default';
+  src:url('../../assets//fonts/PixelifySans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  font-size: variables.$main-rem;
+}
+
+html * {
+  box-sizing: border-box;
+} 
+
+html *::before,::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin:0;
+  padding: 0;
+  display: flex;
+  @include mixins.container();
+  cursor: url('http://www.rw-designer.com/cursor-extern.php?id=168297'), auto;
+  overflow: hidden;
+}
+
+p {
+  margin:0;
+}
+
+.root-container { 
+  @include mixins.container();
+  flex-direction: column;
+  background-color:variables.$bg-color;
+}
+
+#root {
+  @include mixins.container();
+}
+
+.user-selection {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  display: flex;
+  background-color: variables.$selection-color;
+  border: .2rem solid color.scale(variables.$selection-color,$lightness:50%);
+  z-index: 10000000000000000;
+}
+
+.window-main {
+  @include mixins.container();
+}
+
+.loading-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+}
+
+
+.loading-circle {
+  position:absolute;
+  margin: auto;
+  display: flex;
+  width: 30%;
+  height: 50%;
+  border-radius: 50%;
+  border: 1px dashed variables.$light-color;
+  overflow: hidden;
+  animation: spin 2s linear infinite;
+}
+
+.loading-circle-layer-two {
+  position:absolute;
+  margin: auto;
+  display: flex;
+  width: 40%;
+  height: 60%;
+  border-radius: 50%;
+  border: .1rem solid variables.$light-color;
+  overflow: hidden;
+  animation: spin 2s linear infinite;
+}
+
+.loading-text {
+  @include mixins.centered();
+  position: absolute;
+  margin: auto;
+  display: flex;
+  color:variables.$light-color;
+  font-family: 'Default';
+  font-size: variables.$main-rem * 2;
+  z-index: 100;
+}
+
+.loading-text::before {
+  content: '';
+  position: absolute;
+  left:-25%;
+  width: 25%;
+  height: 100%;
+  display: flex;
+  background-color: variables.$bg-color;
+  animation: infinity-slide 2s ease-out infinite;
+}
+
+.circle-reverse {
+  animation: reverse-spin 2s linear infinite !important;
+}
+
+@keyframes infinity-slide {
+  0% {
+    transform: skew(-20deg);
+  } 100% {
+    transform: skew(-20deg) translateX(150px);
+  }
+}
+
+@keyframes reverse-spin {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+

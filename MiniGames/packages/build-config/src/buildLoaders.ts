@@ -1,6 +1,5 @@
 import {ModuleOptions} from 'webpack';
 import { BuildOptions } from "./types/types";
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 export function buildLoaders({mode}:BuildOptions):ModuleOptions['rules'] {
   const isDev = mode === 'development';
@@ -32,29 +31,20 @@ export function buildLoaders({mode}:BuildOptions):ModuleOptions['rules'] {
     }],
   }
 
-  const cssLoaderModules = {
-    loader: 'css-loader',
-    options: {
-      modules: {
-        localIdentName:isDev ? '[path][name]__[local]' : '[hash:base64:8]'
-      },
-    }
-  }
-
   const scssLoader = {
     test: /\.s[ac]ss$/i,
     use: [
       // Creates `style` nodes from JS strings
-      "style-loader",
+      'style-loader',
       // Translates CSS into CommonJS
-      cssLoaderModules,
+      'css-loader',
       // Compiles Sass to CSS
       "sass-loader",
     ]
   }
 
   const assetsLoader = {
-    test:/\.(png|jpeg|jpg|gif|webp)/,
+    test:/\.(png|jpeg|jpg|gif|webp|mp3)/i,
     type:'asset/resource'
   }
 
@@ -71,17 +61,11 @@ export function buildLoaders({mode}:BuildOptions):ModuleOptions['rules'] {
     ]
   }
 
-  const cssLoader =  {
-    test: /\.css$/i,
-    use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, "css-loader"],
-  }
-
   return [
-    scssLoader,
-    cssLoader,
     assetsLoader,
-    fontsLoader,
-    svgLoader,
+    scssLoader,
     tsLoader,
+    svgLoader,
+    fontsLoader
   ]
 }

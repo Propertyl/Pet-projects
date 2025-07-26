@@ -1,0 +1,55 @@
+@use '../../globals/mixins';
+
+.eyes-container {
+  @include mixins.container();
+  @include mixins.centered();
+  width: 40%;
+  height: 50%;
+  margin: auto;
+  user-select: none;
+}
+
+.bg-eye {
+  @include mixins.centered();
+  position: relative;
+  width: 30%;
+  height: 20%;
+  border-radius:50%;
+  background-color:mixins.$white-color;
+  margin: 0 1rem;
+  box-shadow: 0 0 1rem mixins.$white-color;
+  overflow: hidden;
+}
+
+.eye-pupil {
+  position: absolute;
+  @include mixins.centered();
+  width: 30%;
+  height: 90%;
+  border-radius: 50%;
+  border: .2rem solid mixins.$dark-color;
+  background-color:mixins.$eye-color;
+}
+
+.eye-pupil::before {
+  content: '';
+  width:inherit;
+  height:inherit;
+  border-radius: 50%;
+  background-color:mixins.$dark-color;
+}
+
+.eyes-phrase-container {
+  position: absolute;
+  top:100%;
+  width: 100%;
+  @include mixins.centered;
+}
+
+.eyes-phrase {
+  color:mixins.$white-color;
+  font-size: 3rem;
+  font-family: 'Entity';
+  text-align: center;
+}
+

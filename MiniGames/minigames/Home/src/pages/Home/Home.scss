@@ -1,0 +1,20 @@
+$fill-container:100%;
+
+@mixin default-area {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-grow: 1;
+}
+
+.main-header {
+  @include default-area();
+}
+
+.main-body {
+  @include default-area();
+}
+
+.main-footer {
+  @include default-area();
+}
