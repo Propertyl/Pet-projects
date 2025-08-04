@@ -9,8 +9,6 @@ import { _2dCoords_ } from "@/types/valueTypes";
 import { addActiveIcon, changeCellSize, changeIconPosition, getCellSize, getClickedIcon, getIconsPosition, removeIconPosition, setDeletedIcons } from "@/globals/global-selectors/icons-selectors";
 import useIconStatesStore from "@/stores/iconStates";
 
-let originalPosition = 0;
-
 const WindowIcon = ({icon,name,link,iconId,active}:WindowIconProps) => {
   const navigate = useNavigate();
   const setActiveIcon = useIconStatesStore(addActiveIcon);
@@ -30,11 +28,23 @@ const WindowIcon = ({icon,name,link,iconId,active}:WindowIconProps) => {
   const [classReceived,setClassReceived] = useState<boolean>(false);
   const iconRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if(!iconsPos.has(name)) {
-      setIconsPos(name,{x:iconId,y:1});
+  const getLeftPos = () => {
+    if(!iconPosition.x) {
+      if(iconsPos.has(name)) {
+        const {x} = iconsPos.get(name);
+        return cellSize * x;
+      }
+
+      return cellSize * iconId;
     }
-  },[iconsPos]);
+
+    return iconPosition.x;
+  }
+
+  useEffect(() => {
+    setIconsPos(name,{x:iconId,y:1});
+    console.log(`place ${name} to:`,iconId);
+  },[]);
 
   useEffect(() => {
     if(!windowIcon.current) {
@@ -84,8 +94,6 @@ const WindowIcon = ({icon,name,link,iconId,active}:WindowIconProps) => {
     if(classReceived && icon) {
       const {width} = iconRef.current.getBoundingClientRect();
       setCellSize(width);
-      console.log('icon:',iconId,width);
-      originalPosition = width * iconId;
 
       windowIcon.current.changeCellSize(width);
     }
@@ -100,7 +108,7 @@ const WindowIcon = ({icon,name,link,iconId,active}:WindowIconProps) => {
   return (
     <>
       {classReceived && icon &&
-       <div ref={iconRef} style={{top:iconPosition.y ?? `${cellSize}px`,left:iconPosition.x ?? `${originalPosition}px`}} draggable={true} tabIndex={0}
+       <div ref={iconRef} style={{top:iconPosition.y ?? `${cellSize}px`,left:getLeftPos()}} draggable={true} tabIndex={0}
         onContextMenu={(event:React.MouseEvent) => {
           event.preventDefault();
           const x = event.clientX;

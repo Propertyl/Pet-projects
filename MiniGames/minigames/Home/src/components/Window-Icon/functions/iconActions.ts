@@ -2,13 +2,6 @@ import { setDispatch } from "@/types/cutTypes";
 import { _2dCoords_,IconsStatesStore } from "@/types/valueTypes";
 import { NavigateFunction } from "react-router-dom";
 
-
-export class WindowIconsActions {
-  constructor() {
-    
-  }
-}
-
 export class WindowIconActions {
   navigate;
   setActiveIcon;
