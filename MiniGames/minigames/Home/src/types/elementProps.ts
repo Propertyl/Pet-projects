@@ -1,3 +1,5 @@
+import { _2dCoords_ } from "./valueTypes";
+
 interface WindowIconProps {
   icon:string,
   name:string,
@@ -6,4 +8,9 @@ interface WindowIconProps {
   active:boolean
 }
 
-export {WindowIconProps};
+interface ContextMenuProps {
+  pos:_2dCoords_;
+  activeIcons:string[];
+}
+
+export {WindowIconProps,ContextMenuProps};

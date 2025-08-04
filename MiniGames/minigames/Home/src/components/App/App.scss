@@ -22,10 +22,12 @@ html {
 
 html * {
   box-sizing: border-box;
+  font-family: 'Default';
 } 
 
 html *::before,::after {
   box-sizing: border-box;
+  font-family: 'Default';
 }
 
 body {
@@ -128,9 +130,9 @@ p {
 
 @keyframes infinity-slide {
   0% {
-    transform: skew(-20deg);
+    left:-25%;
   } 100% {
-    transform: skew(-20deg) translateX(150px);
+    left:105%;
   }
 }
 

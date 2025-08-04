@@ -63,7 +63,6 @@ export class ScreenEntity {
 
     this.setEntityText('');
     const symbolsGen = this.phraseGen(phrase);
-    console.log("setup with phrase:",phrase);
     const __DELAY__ = 75;
     this.interval = setInterval(() => {
       const {value,done} = symbolsGen.next();

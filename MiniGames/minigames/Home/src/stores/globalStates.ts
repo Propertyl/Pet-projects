@@ -1,13 +1,14 @@
-import { GlobalStatesStore, SelectionRect } from "@/types/valueTypes";
+import { _2dCoords_, GlobalStatesStore, SelectionRect } from "@/types/valueTypes";
 import { create, StoreApi, UseBoundStore } from "zustand";
 
 const useGlobalStatesStore:UseBoundStore<StoreApi<GlobalStatesStore>> = create((set) => ({
   userActive:{clicked:false,manySelect:false},
-  activeIcons:[] as string[],
   somethingIsDrag:false,
+  isContextMenuSpawned:false,
+  contextMenuPos:{x:0,y:0},
   activatedSelection:null as SelectionRect,
 
-  changeUserActivity:(key:keyof GlobalStatesStore['userActive']) => set((state:GlobalStatesStore) => {
+  changeUserActivity:(key) => set((state:GlobalStatesStore) => {
       return ({
         userActive:{
           ...state.userActive,
@@ -16,37 +17,16 @@ const useGlobalStatesStore:UseBoundStore<StoreApi<GlobalStatesStore>> = create((
       });
   }),
 
-  addActiveIcon:(icon:string) => set((state:GlobalStatesStore) => {
-    const newActiveIcons = [...state.activeIcons];
-    
-    if(!newActiveIcons.includes(icon)) {
-      newActiveIcons.push(icon);
-    }
-
-    return ({
-      activeIcons:newActiveIcons
-    });
-  }),
-
-  removeActiveIcon:(icon:string) => set((state:GlobalStatesStore) => {
-    const newActiveIcons = [...state.activeIcons];
-    const iconIndex = newActiveIcons.findIndex(currentIcon => currentIcon === icon);
-    
-    if(iconIndex >= 0) { 
-      newActiveIcons.splice(iconIndex,1);
-    }
-    
-    return ({
-      activeIcons:newActiveIcons
-    });
-  }),
-
-  clearActiveIcons:() => set(() => ({
-    activeIcons:[]
-  })),
-
   setElementIsDrag:() => set((state:GlobalStatesStore) => ({
     somethingIsDrag:!state.somethingIsDrag
+  })),
+
+  setContextMenuSpawn:(value) => set(() => ({
+    isContextMenuSpawned:value
+  })),
+
+  changeContextMenuPos:(pos:_2dCoords_) => set(() => ({
+    contextMenuPos:pos
   })),
 
   activateSelection:(selectionRect:DOMRect) => set(() => ({

@@ -5,7 +5,8 @@ import { SpyRoutes } from './routes/SpyRoute';
 const allGames = [
   {
     icon:spyIcon,name:'Spy-Game.exe',link:SpyRoutes.main
-  },{
+  },
+  {
     icon:gardenIcon,name:'Garden-Game.exe',link:'/garden'
   }
 ];

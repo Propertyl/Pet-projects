@@ -4,7 +4,4 @@
   @include mixins.container();
   position: absolute;
   display: grid;
-  grid-template-columns:repeat(auto-fill,7rem);
-  grid-template-rows:repeat(auto-fill,7rem);
-  align-content: center;
 }
